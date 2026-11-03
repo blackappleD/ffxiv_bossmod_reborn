@@ -5,7 +5,7 @@
     <!-- Fork versioning: upstream's first three segments, then a four-digit fork revision starting at 2001
          (upstream 7.5.7.3 -> 7.5.7.2001). Bump LocalRevision for each new local build; publish.yml still overrides with the tag. -->
     <UpstreamVersion>7.5.7</UpstreamVersion>
-    <LocalRevision>2002</LocalRevision>
+    <LocalRevision>2003</LocalRevision>
     <Version>$(UpstreamVersion).$(LocalRevision)</Version>
     <Description>Boss mod.</Description>
     <Copyright></Copyright>

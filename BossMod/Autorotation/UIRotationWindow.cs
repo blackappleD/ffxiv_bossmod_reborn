@@ -144,20 +144,31 @@ public sealed class UIRotationWindow : UIWindow
             }
         }
 
-        foreach (var p in mgr.Database.Presets.PresetsForClass(mgr.Player.Class))
+        // show every preset, but dim the ones that have no module for the current class (they would do nothing)
+        var classPresets = mgr.Database.Presets.PresetsForClass(mgr.Player.Class);
+        foreach (var p in mgr.Database.Presets.AllPresets)
         {
             if (p.HiddenByDefault)
             {
                 continue;
             }
+            var applicable = classPresets.Contains(p);
             ImGui.SameLine();
             using var col = ImRaii.PushColor(ImGuiCol.Button, Colors.ButtonPushColor2, mgr.Preset == p);
             using var colHovered = ImRaii.PushColor(ImGuiCol.ButtonHovered, Colors.ButtonPushColor5, mgr.Preset == p);
             using var colActive = ImRaii.PushColor(ImGuiCol.ButtonActive, Colors.ButtonPushColor6, mgr.Preset == p);
-            if (ImGui.Button(p.Name))
+            using (ImRaii.PushColor(ImGuiCol.Text, ImGui.GetColorU32(ImGuiCol.TextDisabled), !applicable))
             {
-                mgr.Preset = mgr.Preset == p ? null : p;
-                modified |= true;
+                if (ImGui.Button(p.Name))
+                {
+                    mgr.Preset = mgr.Preset == p ? null : p;
+                    modified |= true;
+                }
+            }
+            if (!applicable && ImGui.IsItemHovered())
+            {
+                using var tooltip = ImRaii.Tooltip();
+                ImGui.TextUnformatted(Loc.Tr("This preset has no modules for the current class."));
             }
         }
 
