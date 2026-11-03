@@ -143,7 +143,7 @@ public sealed class ColumnPlayerGaugeGNB : ColumnPlayerGauge
         if (to > from)
         {
             var color = (gauge == 3) ? _colors.PlannerWindow[2] : (gauge == 2) ? new(0xFF90E0FF) : (gauge == 1) ? new(0xFFD6F5FF) : new(0x80808080);
-            _gauge.AddHistoryEntryRange(Encounter.Time.Start, from, to, $"{gauge} Cartridge{(gauge == 1 ? "" : "s")}", color.ABGR, gauge * 0.31f);
+            _gauge.AddHistoryEntryRange(Encounter.Time.Start, from, to, Loc.Format(gauge == 1 ? "{0} Cartridge" : "{0} Cartridges", gauge), color.ABGR, gauge * 0.31f);
         }
     }
 }
@@ -263,7 +263,7 @@ public sealed class ColumnPlayerGaugeMNK : ColumnPlayerGauge
                 1 => new(0xFFB0E0E6),
                 _ => new(0x80808080)
             };
-            col.AddHistoryEntryRange(Encounter.Time.Start, from, to, $"{label}: {gauge}", color.ABGR, gauge * 0.2f);
+            col.AddHistoryEntryRange(Encounter.Time.Start, from, to, $"{Loc.Tr(label)}: {gauge}", color.ABGR, gauge * 0.2f);
         }
     }
     private void AddBeastChakraRange(ColumnGenericHistory col, DateTime from, DateTime to, BeastChakraType count, string label)
@@ -271,7 +271,7 @@ public sealed class ColumnPlayerGaugeMNK : ColumnPlayerGauge
         if (count != BeastChakraType.None && to > from)
         {
             var color = count == BeastChakraType.None ? _colors.PlannerWindow[2] : new(0xFF0066FF);
-            col.AddHistoryEntryRange(Encounter.Time.Start, from, to, $"{label}: {count}", color.ABGR);
+            col.AddHistoryEntryRange(Encounter.Time.Start, from, to, $"{Loc.Tr(label)}: {count}", color.ABGR);
         }
     }
     private void AddNadiRange(ColumnGenericHistory col, DateTime from, DateTime to, NadiFlags nadi, string label)
@@ -285,7 +285,7 @@ public sealed class ColumnPlayerGaugeMNK : ColumnPlayerGauge
                 0 => new(0x80808080),
                 _ => _colors.PlannerWindow[2]
             };
-            col.AddHistoryEntryRange(Encounter.Time.Start, from, to, $"{label}: {nadi}", color.ABGR, 100);
+            col.AddHistoryEntryRange(Encounter.Time.Start, from, to, $"{Loc.Tr(label)}: {nadi}", color.ABGR, 100);
         }
     }
 }
@@ -369,7 +369,7 @@ public sealed class ColumnPlayerGaugeSAM : ColumnPlayerGauge
         if (Kenki != 0 && to > from)
         {
             var color = Kenki == 100 ? _colors.PlannerWindow[2] : new(0xFF90E0FF);
-            _kenki.AddHistoryEntryRange(Encounter.Time.Start, from, to, $"{Kenki} Kenki", color.ABGR, Kenki < 10 ? Kenki * 0.02f : Kenki * 0.01f);
+            _kenki.AddHistoryEntryRange(Encounter.Time.Start, from, to, Loc.Format("{0} Kenki", Kenki), color.ABGR, Kenki < 10 ? Kenki * 0.02f : Kenki * 0.01f);
         }
     }
     private int GetSenCount(SenFlags sen)
@@ -405,7 +405,7 @@ public sealed class ColumnPlayerGaugeSAM : ColumnPlayerGauge
         if (mediStacks != 0 && to > from)
         {
             var color = mediStacks == 3 ? _colors.PlannerWindow[2] : new(0xFF8080FF);
-            _meditation.AddHistoryEntryRange(Encounter.Time.Start, from, to, $"{mediStacks} Meditation stack{(mediStacks == 1 ? "" : "s")}", color.ABGR, mediStacks * 0.31f);
+            _meditation.AddHistoryEntryRange(Encounter.Time.Start, from, to, Loc.Format(mediStacks == 1 ? "{0} Meditation stack" : "{0} Meditation stacks", mediStacks), color.ABGR, mediStacks * 0.31f);
         }
     }
 }
@@ -474,13 +474,13 @@ public sealed class ColumnPlayerGaugeBRD : ColumnPlayerGauge
                 SongFlags.WanderersMinuet => (_colors.PlannerWindow[2], 0.25f),
                 _ => (new(0x80808080), 1),
             };
-            var e = _songs.AddHistoryEntryRange(Encounter.Time.Start, from, to, $"{song}, {repertoire} rep, {timer:f3} at start", color.ABGR, (1 + repertoire) * scale);
+            var e = _songs.AddHistoryEntryRange(Encounter.Time.Start, from, to, Loc.Format("{0}, {1} rep, {2:f3} at start", song, repertoire, timer), color.ABGR, (1 + repertoire) * scale);
             e.TooltipExtra = (res, t) =>
             {
                 var delta = t - (from - Encounter.Time.Start).TotalSeconds;
                 var remaining = timer - delta;
-                res.Add($"- time since start: {45 - remaining:f3}");
-                res.Add($"- remaining: {remaining:f3}");
+                res.Add(Loc.Format("- time since start: {0:f3}", 45 - remaining));
+                res.Add(Loc.Format("- remaining: {0:f3}", remaining));
             };
         }
     }
@@ -489,7 +489,7 @@ public sealed class ColumnPlayerGaugeBRD : ColumnPlayerGauge
     {
         if (soulVoice != 0 && to > from)
         {
-            _soul.AddHistoryEntryRange(Encounter.Time.Start, from, to, $"{soulVoice} voice", 0x80808080, soulVoice * 0.01f);
+            _soul.AddHistoryEntryRange(Encounter.Time.Start, from, to, Loc.Format("{0} voice", soulVoice), 0x80808080, soulVoice * 0.01f);
         }
     }
 }
@@ -555,7 +555,7 @@ public sealed class ColumnPlayerGaugeMCH : ColumnPlayerGauge
                 _ => new(0x08080808)
             };
             var width = gauge < 10 ? gauge * 0.02f : gauge * 0.01f; //if Heat = 5, it will not show on Visualizer, instead showing as 0.. so here's a small hack-around to make it visible
-            col.AddHistoryEntryRange(Encounter.Time.Start, from, to, $"{label}: {gauge}", color.ABGR, width);
+            col.AddHistoryEntryRange(Encounter.Time.Start, from, to, $"{Loc.Tr(label)}: {gauge}", color.ABGR, width);
         }
     }
 }

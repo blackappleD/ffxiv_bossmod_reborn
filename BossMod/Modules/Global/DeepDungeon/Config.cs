@@ -67,10 +67,10 @@ public sealed class AutoDDConfig : ConfigNode
 
     public override void DrawCustom(UITree tree, WorldState ws)
     {
-        foreach (var _ in tree.Node("Automatic pomander usage"))
+        foreach (var _ in tree.Node(Loc.Id("Automatic pomander usage")))
         {
-            ImGui.TextWrapped("Highlighted pomanders will be used when a gold chest contains one that you can't carry.");
-            ImGui.TextWrapped("This feature is disabled in parties.");
+            ImGui.TextWrapped(Loc.Tr("Highlighted pomanders will be used when a gold chest contains one that you can't carry."));
+            ImGui.TextWrapped(Loc.Tr("This feature is disabled in parties."));
 
             for (var i = 1; i < (int)PomanderID.Count; ++i)
                 using (ImRaii.PushId($"pom{i}"))

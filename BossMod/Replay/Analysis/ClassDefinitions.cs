@@ -227,29 +227,29 @@ sealed class ClassDefinitions
 
     public void Draw(UITree tree)
     {
-        tree.LeafNode("Shared data generator", contextMenu: CtxMenuShared);
-        foreach (var nr in tree.Node("Classes"))
+        tree.LeafNode(Loc.Id("Shared data generator"), contextMenu: CtxMenuShared);
+        foreach (var nr in tree.Node(Loc.Id("Classes")))
         {
             foreach (var nc in tree.Nodes(_classData, kv => new(kv.Key.ToString()), kv => CtxMenuClass(kv.Value)))
             {
-                foreach (var na in tree.Node("All actions"))
+                foreach (var na in tree.Node(Loc.Id("All actions")))
                 {
                     DrawActions(tree, nc.Value.Actions);
                 }
-                foreach (var ng in tree.Node("Actions by CD group"))
+                foreach (var ng in tree.Node(Loc.Id("Actions by CD group")))
                 {
-                    foreach (var ncd in tree.Nodes(nc.Value.ByCDGroup, kv => new($"{kv.Key} ({kv.Value.Count} actions)")))
+                    foreach (var ncd in tree.Nodes(nc.Value.ByCDGroup, kv => new(Loc.Format("{0} ({1} actions)", kv.Key, kv.Value.Count))))
                     {
                         DrawActions(tree, ncd.Value);
                     }
                 }
-                foreach (var nt in tree.Node("Traits"))
+                foreach (var nt in tree.Node(Loc.Id("Traits")))
                 {
                     tree.LeafNodes(nc.Value.Traits, t => $"{t.RowId} '{t.Name}': {UnlockString(t.Level, t.Quest.RowId)}");
                 }
             }
         }
-        foreach (var nr in tree.Node("Actions by anim lock"))
+        foreach (var nr in tree.Node(Loc.Id("Actions by anim lock")))
         {
             foreach (var nl in tree.Nodes(_byLock, kv => new(kv.Key.ToString())))
             {
@@ -259,16 +259,16 @@ sealed class ClassDefinitions
                 }
             }
         }
-        foreach (var nr in tree.Node("Actions by category"))
+        foreach (var nr in tree.Node(Loc.Id("Actions by category")))
         {
-            foreach (var nc in tree.Nodes(_byCategory, kv => new(kv.Key)))
+            foreach (var nc in tree.Nodes(_byCategory, kv => new(Loc.Tr(kv.Key))))
             {
                 DrawActions(tree, nc.Value);
             }
         }
-        foreach (var nr in tree.Node("Actions by CD group"))
+        foreach (var nr in tree.Node(Loc.Id("Actions by CD group")))
         {
-            foreach (var nc in tree.Nodes(_byCDGroup, kv => new($"{kv.Key} ({kv.Value.Count} actions)")))
+            foreach (var nc in tree.Nodes(_byCDGroup, kv => new(Loc.Format("{0} ({1} actions)", kv.Key, kv.Value.Count))))
             {
                 DrawActions(tree, nc.Value);
             }
@@ -319,33 +319,33 @@ sealed class ClassDefinitions
     {
         static string suffix(BitMask m) => m.NumSetBits() switch
         {
-            0 => " [no owning classes]",
+            0 => Loc.Tr(" [no owning classes]"),
             1 => "",
-            _ => " [shared]"
+            _ => Loc.Tr(" [shared]")
         };
         foreach (var na in tree.Nodes(actions, kv => new($"L{kv.Row?.ClassJobLevel} {kv.ID}{suffix(kv.OwningClasses)}", false, kv.Error ? Colors.TextColor3 : kv.Warning ? Colors.TextColor2 : Colors.TextColor1)))
         {
-            tree.LeafNode($"Definition: {na.Definition}");
-            tree.LeafNode($"Row: {na.Row}, raw range: {na.Row?.Range}, class: {na.Row?.ClassJob.ValueNullable?.Abbreviation}, category: {na.Row?.ClassJobCategory.ValueNullable?.Name}");
-            tree.LeafNode($"Unlock: {UnlockString(na.Row?.ClassJobLevel ?? 0, na.Row?.UnlockLink.RowId ?? 0)}");
-            tree.LeafNode($"Warnings: {(na.PotentiallyRemoved ? "PR " : "")}{(na.ReplayOnly ? "RO " : "")}", na.PotentiallyRemoved || na.ReplayOnly ? Colors.TextColor3 : Colors.TextColor1);
-            tree.LeafNode($"Targets: [{ActionDefinitions.Instance.ActionAllowedTargets(na.ID)}]");
-            tree.LeafNode($"Can be put on action bar: {na.CanBePutOnActionBar}");
-            tree.LeafNode($"Is role action: {na.IsRoleAction}");
-            tree.LeafNode($"Expected anim lock: {na.ExpectedInstantAnimLock} / {na.ExpectedCastAnimLock}", na.SeenDifferentInstantAnimLocks || na.SeenDifferentCastAnimLocks ? Colors.TextColor3 : Colors.TextColor1);
-            foreach (var nl in tree.Nodes(na.InstantByAnimLock, kv => new($"Observed instant anim lock: {kv.Key}")))
+            tree.LeafNode(Loc.Format("Definition: {0}", na.Definition));
+            tree.LeafNode(Loc.Format("Row: {0}, raw range: {1}, class: {2}, category: {3}", na.Row, na.Row?.Range, na.Row?.ClassJob.ValueNullable?.Abbreviation, na.Row?.ClassJobCategory.ValueNullable?.Name));
+            tree.LeafNode(Loc.Format("Unlock: {0}", UnlockString(na.Row?.ClassJobLevel ?? 0, na.Row?.UnlockLink.RowId ?? 0)));
+            tree.LeafNode($"{Loc.Tr("Warnings:")} {(na.PotentiallyRemoved ? "PR " : "")}{(na.ReplayOnly ? "RO " : "")}", na.PotentiallyRemoved || na.ReplayOnly ? Colors.TextColor3 : Colors.TextColor1);
+            tree.LeafNode(Loc.Format("Targets: [{0}]", ActionDefinitions.Instance.ActionAllowedTargets(na.ID)));
+            tree.LeafNode(Loc.Format("Can be put on action bar: {0}", na.CanBePutOnActionBar));
+            tree.LeafNode(Loc.Format("Is role action: {0}", na.IsRoleAction));
+            tree.LeafNode(Loc.Format("Expected anim lock: {0} / {1}", na.ExpectedInstantAnimLock, na.ExpectedCastAnimLock), na.SeenDifferentInstantAnimLocks || na.SeenDifferentCastAnimLocks ? Colors.TextColor3 : Colors.TextColor1);
+            foreach (var nl in tree.Nodes(na.InstantByAnimLock, kv => new(Loc.Format("Observed instant anim lock: {0}", kv.Key))))
             {
                 DrawEntries(tree, nl.Value);
             }
-            foreach (var nl in tree.Nodes(na.CastByAnimLock, kv => new($"Observed cast anim lock: {kv.Key}")))
+            foreach (var nl in tree.Nodes(na.CastByAnimLock, kv => new(Loc.Format("Observed cast anim lock: {0}", kv.Key))))
             {
                 DrawEntries(tree, nl.Value);
             }
-            foreach (var ns in tree.Node("Statuses applied to self", na.AppliedStatusesToSource.Count == 0))
+            foreach (var ns in tree.Node(Loc.Id("Statuses applied to self"), na.AppliedStatusesToSource.Count == 0))
             {
                 tree.LeafNodes(na.AppliedStatusesToSource, Utils.StatusString);
             }
-            foreach (var ns in tree.Node("Statuses applied to target", na.AppliedStatusesToTarget.Count == 0))
+            foreach (var ns in tree.Node(Loc.Id("Statuses applied to target"), na.AppliedStatusesToTarget.Count == 0))
             {
                 tree.LeafNodes(na.AppliedStatusesToTarget, Utils.StatusString);
             }
@@ -367,7 +367,7 @@ sealed class ClassDefinitions
     {
         var ns = "ClassShared";
 
-        if (ImGui.MenuItem("Generate AID enum"))
+        if (ImGui.MenuItem(Loc.Id("Generate AID enum")))
         {
             var writer = new AIDWriter(ns);
             writer.Add("None", 0);
@@ -384,7 +384,7 @@ sealed class ClassDefinitions
             ImGui.SetClipboardText(writer.Result());
         }
 
-        if (ImGui.MenuItem("Generate definitions constructor"))
+        if (ImGui.MenuItem(Loc.Id("Generate definitions constructor")))
         {
             var writer = new DefinitionWriter(ns);
             writer.Add(_actionData[ActionDefinitions.IDSprint]);
@@ -403,32 +403,32 @@ sealed class ClassDefinitions
 
     private void CtxMenuClass(ClassData cd)
     {
-        if (ImGui.MenuItem("Generate full definition"))
+        if (ImGui.MenuItem(Loc.Id("Generate full definition")))
         {
             ImGui.SetClipboardText(GenerateClassDefinition(cd, false));
         }
 
-        if (ImGui.MenuItem("Generate definition stub"))
+        if (ImGui.MenuItem(Loc.Id("Generate definition stub")))
         {
             ImGui.SetClipboardText(GenerateClassDefinition(cd, true));
         }
 
-        if (ImGui.MenuItem("Generate AID enum"))
+        if (ImGui.MenuItem(Loc.Id("Generate AID enum")))
         {
             ImGui.SetClipboardText(GenerateClassAID(cd));
         }
 
-        if (ImGui.MenuItem("Generate TraitID enum"))
+        if (ImGui.MenuItem(Loc.Id("Generate TraitID enum")))
         {
             ImGui.SetClipboardText(GenerateClassTraitID(cd));
         }
 
-        if (ImGui.MenuItem("Generate SID enum"))
+        if (ImGui.MenuItem(Loc.Id("Generate SID enum")))
         {
             ImGui.SetClipboardText(GenerateClassSID(cd));
         }
 
-        if (ImGui.MenuItem("Generate definitions constructor"))
+        if (ImGui.MenuItem(Loc.Id("Generate definitions constructor")))
         {
             ImGui.SetClipboardText(GenerateClassRegistration(cd));
         }

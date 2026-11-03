@@ -1,0 +1,122 @@
+{
+  "Standard rotation module": "标准循环模块",
+
+  "Use single-target actions": "使用单体技能",
+  "Use aoe actions if profitable, select best target that ensures primary target is hit": "有收益时使用AOE技能，并选择能命中主目标的最佳目标",
+  "Use aoe actions if profitable, select a target that ensures maximal number of targets are hit": "有收益时使用AOE技能，并选择能命中最多敌人的目标",
+  "Use aoe actions on primary target if profitable": "有收益时对主目标使用AOE技能",
+  "Use aoe rotation on primary target even if it's less total damage than single-target": "对主目标使用AOE循环，即使总伤害低于单体",
+
+  "Songs": "歌曲",
+  "Automatic (3-6-9)": "自动（3-6-9）",
+  "Extend until last tick": "延长到最后一跳",
+  "Extend until last possible moment": "延长到最后一刻",
+  "Force switch to Wanderer's Minuet": "强制切换为放浪神的小步舞曲",
+  "Force switch to Mage's Ballad": "强制切换为贤者的叙事谣",
+  "Force switch to Army's Paeon": "强制切换为军神的赞美歌",
+  "Force Pitch Perfect (assuming WM is up)": "强制使用完美音调（前提是小步舞曲生效中）",
+  "Do not use any songs; stay songless if needed": "不使用任何歌曲；必要时保持无歌状态",
+
+  "Use normally": "正常使用",
+  "Force use Radiant Finale ASAP": "强制尽快使用光明神的最终乐章",
+  "Force use Battle Voice ASAP": "强制尽快使用战斗之声",
+  "Force use Raging Strikes ASAP": "强制尽快使用猛者强击",
+
+  "Do not use automatically": "不自动使用",
+  "Use right before burst": "在爆发前一刻使用",
+
+  "DOTs": "DoT",
+  "Apply dots asap (unless aoe filler is better), reapply when either dots about to expire or in buff window": "尽快上DoT（除非AOE填充收益更高），任一DoT即将结束或处于团辅窗口时重新施放",
+  "Apply dots asap (even if aoe filler is better), extend existing normally with IJ": "尽快上DoT（即使AOE填充收益更高），已有DoT正常用伶牙俐齿续",
+  "Do not apply new dots, extend existing normally with IJ": "不上新DoT，已有DoT正常用伶牙俐齿续",
+  "Do not apply new or extend existing dots": "不上新DoT，也不续已有DoT",
+  "Force extend dots via IJ ASAP": "强制尽快用伶牙俐齿续DoT",
+  "Extend dots via IJ only if they are about to fall off (but don't risk proc overwrites), don't extend early under buffs": "仅在DoT即将掉落时用伶牙俐齿续（但不冒覆盖触发的风险），团辅期间不提前续",
+  "Extend dots via IJ at last possible moment, even if it might overwrite proc": "在最后一刻用伶牙俐齿续DoT，即使可能覆盖触发",
+
+  "Apex": "绝峰箭",
+  "Use at 80+ if buffs are about to run off, use at 100 asap unless raid buffs are imminent": "增益即将结束时80以上即用；满100时尽快使用，除非团辅即将到来",
+  "Force at any gauge (even if it means no BA)": "任意量谱强制使用（即使因此打不出爆破箭）",
+  "Force at 80+ gauge": "量谱80以上时强制使用",
+  "Force at 100 gauge (don't delay until raidbuffs)": "量谱满100时强制使用（不推迟到团辅）",
+
+  "Blast": "爆破箭",
+  "Force use ASAP": "强制尽快使用",
+  "Reso": "共鸣箭",
+  "Encore": "光明神的返场余音",
+
+  "BL": "失血箭",
+  "Pool for raid buffs, otherwise use freely": "攒到团辅期间使用，其余时候随意使用",
+  "Do not use, allowing overcap": "不使用，允许溢出",
+  "Force use all charges": "强制用光所有充能",
+  "Keep 1 charge, use if 2+ charges available": "保留1层充能，有2层以上时使用",
+  "Keep 2 charges, use if overcap is imminent": "保留2层充能，即将溢出时使用",
+
+  "EA": "九天连箭",
+  "Barrage": "纷乱箭",
+
+  "Delay first GCD until pull (for better raidbuff timings)": "第一个GCD推迟到开怪后（以便更好地对齐团辅）",
+  "Use first GCD as early as possible, so that it hits boss exactly at countdown end": "尽早使用第一个GCD，使其恰好在倒计时结束时命中Boss",
+  "Do not use any GCDs": "不使用任何GCD",
+
+  "Use aoe rotation": "使用AOE循环",
+  "Use aoe rotation if 3+ targets would be hit, otherwise use single-target rotation; break combo if necessary": "能命中3个及以上目标时使用AOE循环，否则使用单体循环；必要时中断连击",
+  "Use aoe rotation if 3+ targets would be hit, otherwise use single-target rotation; finish combo route before switching": "能命中3个及以上目标时使用AOE循环，否则使用单体循环；打完当前连击再切换",
+
+  "Burst": "爆发",
+  "Spend gauge under potion/raidbuffs, otherwise conserve": "爆发药/团辅期间倾泻量谱，其余时候攒着",
+  "Spend gauge freely (as if inside burst window), ensure ST is properly maintained (useful at the end of the fight)": "随意消耗量谱（视同处于爆发窗口），同时确保战场风暴正常维持（适合战斗末尾）",
+  "Conserve gauge as much as possible (as if outside burst window)": "尽量攒量谱（视同处于爆发窗口外）",
+  "Spend gauge under raidbuffs, otherwise conserve; ignore potion (useful if potion is delayed)": "团辅期间倾泻量谱，其余时候攒着；忽略爆发药（适合爆发药推迟的情况）",
+  "Spend gauge under potion, otherwise conserve; ignore raidbuffs (useful for misaligned potions)": "爆发药期间倾泻量谱，其余时候攒着；忽略团辅（适合爆发药没对齐团辅的情况）",
+  "Force extend ST buff by the end of the window, potentially overcapping gauge and/or ST": "在窗口结束前强制延长战场风暴，可能导致量谱和/或战场风暴溢出",
+  "Aggressively spend gauge, disregarding ST buff, even if is not up/running out soon (useful before long downtimes)": "激进地消耗量谱，不管战场风暴是否生效或即将结束（适合长时间空窗前）",
+
+  "Align with 2-minute raid buffs (0/6, 2/8, etc)": "对齐两分钟团辅（0/6、2/8 等）",
+  "Align with IR, allow on odd minutes (0/5/10)": "对齐原初的解放，允许在奇数分钟使用（0/5/10）",
+  "Use ASAP, even if without ST and with IR on cd (0/4:30/9)": "尽快使用，即使没有战场风暴且原初的解放在冷却中（0/4:30/9）",
+
+  "PR": "蛮荒崩裂",
+  "Use normally: rend only when already in melee range, delay until raidbuffs if possible": "正常使用：仅在已处于近战范围时使用蛮荒崩裂，尽可能推迟到团辅",
+  "Use Rend if outside melee range as a gap-closer": "在近战范围外时把蛮荒崩裂当突进使用",
+  "Delay until last possible GCD, if potion will be ready by the time ruin expires (useful for smuggling ruin into unaligned pot window)": "若尽毁预备结束前爆发药能转好，则推迟到最后一个可用GCD（用于把尽毁塞进未对齐团辅的爆发药窗口）",
+  "Delay until last possible GCD, if potion will be ready by the time ruin expires and would overlap raidbuffs (useful for smuggling ruin into aligned pot window)": "若尽毁预备结束前爆发药能转好且与团辅重叠，则推迟到最后一个可用GCD（用于把尽毁塞进对齐团辅的爆发药窗口）",
+  "Delay until last possible GCD": "推迟到最后一个可用GCD",
+
+  "Tomahawk": "飞斧",
+  "Use as very first GCD and only if outside melee range": "仅作为第一个GCD且在近战范围外时使用",
+  "Use as very first GCD regardless of range": "作为第一个GCD使用，无视距离",
+  "Force use ASAP (even in melee range)": "强制尽快使用（即使在近战范围内）",
+  "Use if outside melee range": "在近战范围外时使用",
+
+  "IR": "原初的解放",
+  "Use normally (whenever ST is up)": "正常使用（战场风暴生效时）",
+  "Force use ASAP (even during downtime or without ST)": "强制尽快使用（即使在空窗期或没有战场风暴）",
+
+  "Infuriate": "战嚎",
+  "Try to delay uses until raidbuffs, avoiding overcap": "尽量推迟到团辅时使用，同时避免充能溢出",
+  "Delay, even if risking overcap": "推迟，即使可能溢出",
+  "Force unless NC active": "强制使用，除非原初的混沌生效中",
+  "Force use if charges are about to overcap (unless NC is already active), even if it would overcap gauge": "充能即将溢出时强制使用（除非原初的混沌已生效），即使会溢出量谱",
+
+  "Upheaval": "大怒震",
+  "Use normally (ASAP, assuming ST is up)": "正常使用（战场风暴生效时尽快使用）",
+  "Force use ASAP (even without ST)": "强制尽快使用（即使没有战场风暴）",
+  "Wrath": "原初的怒震",
+
+  "Onslaught": "猛攻",
+  "Always keep one charge reserved, use other charges inside burst or to prevent overcapping": "始终保留一层充能，其余充能在爆发期内或防溢出时使用",
+  "Forbid automatic use": "禁止自动使用",
+  "Do not reserve charges: use all charges if inside burst, otherwise use as needed to prevent overcapping": "不保留充能：爆发期内用光所有充能，其余时候按需使用以防溢出",
+  "Use all charges ASAP": "尽快用光所有充能",
+  "Use all charges except one ASAP": "尽快用掉充能，只保留一层",
+  "Reserve 2 charges, trying to prevent overcap": "保留2层充能，并尽量避免溢出",
+  "Use as gapcloser if outside melee range": "在近战范围外时当突进使用",
+
+  "Do not use any lost actions automatically": "不自动使用任何失传技能",
+  "Use generic buff lost actions together (right before) inner release": "在原初的解放前一刻一起使用通用增益类失传技能",
+  "Optimize rotation around lost blood rage usage (delay IR, use onslaught to proc blood rage)": "围绕失传血怒优化循环（推迟原初的解放，用猛攻触发失传血怒）",
+
+  "Fell Cleave": "裂石飞环",
+  "Use during burst or to prevent overcap": "在爆发期或防止溢出时使用"
+}

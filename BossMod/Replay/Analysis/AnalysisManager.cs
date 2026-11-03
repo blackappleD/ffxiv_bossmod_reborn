@@ -25,42 +25,42 @@ sealed class AnalysisManager : IDisposable
 
         public void Draw(UITree tree)
         {
-            foreach (var n in tree.Node("Unknown action effects"))
+            foreach (var n in tree.Node(Loc.Id("Unknown action effects")))
             {
                 _unkEffects.Get().Draw(tree);
             }
 
-            foreach (var n in tree.Node("Participant info", false, Colors.TextColor1, () => _participantInfo.Get().DrawContextMenu()))
+            foreach (var n in tree.Node(Loc.Id("Participant info"), false, Colors.TextColor1, () => _participantInfo.Get().DrawContextMenu()))
             {
                 _participantInfo.Get().Draw(tree);
             }
 
-            foreach (var n in tree.Node("Ability info", false, Colors.TextColor1, () => _abilityInfo.Get().DrawContextMenu()))
+            foreach (var n in tree.Node(Loc.Id("Ability info"), false, Colors.TextColor1, () => _abilityInfo.Get().DrawContextMenu()))
             {
                 _abilityInfo.Get().Draw(tree);
             }
 
-            foreach (var n in tree.Node("Player class definitions"))
+            foreach (var n in tree.Node(Loc.Id("Player class definitions")))
             {
                 _classDefinitions.Get().Draw(tree);
             }
 
-            foreach (var n in tree.Node("Client action weirdness"))
+            foreach (var n in tree.Node(Loc.Id("Client action weirdness")))
             {
                 _clientActions.Get().Draw(tree);
             }
 
-            foreach (var n in tree.Node("Effect results: missing confirmations"))
+            foreach (var n in tree.Node(Loc.Id("Effect results: missing confirmations")))
             {
                 _effectResultMissing.Get().Draw(tree);
             }
 
-            foreach (var n in tree.Node("Effect results: unexpected confirmations"))
+            foreach (var n in tree.Node(Loc.Id("Effect results: unexpected confirmations")))
             {
                 _effectResultUnexpected.Get().Draw(tree);
             }
 
-            foreach (var n in tree.Node("Effect results: reorders"))
+            foreach (var n in tree.Node(Loc.Id("Effect results: reorders")))
             {
                 _effectResultReorder.Get().Draw(tree);
             }
@@ -105,54 +105,54 @@ sealed class AnalysisManager : IDisposable
 
         public void Draw(UITree tree)
         {
-            foreach (var n in tree.Node("State transition timings"))
+            foreach (var n in tree.Node(Loc.Id("State transition timings")))
             {
                 _transitionTimings.Get().Draw(tree);
             }
 
-            foreach (var n in tree.Node("Participant info", false, Colors.TextColor1, () => _participantInfo.Get().DrawContextMenu()))
+            foreach (var n in tree.Node(Loc.Id("Participant info"), false, Colors.TextColor1, () => _participantInfo.Get().DrawContextMenu()))
             {
                 _participantInfo.Get().Draw(tree);
             }
 
-            foreach (var n in tree.Node("Ability info", false, Colors.TextColor1, () => _abilityInfo.Get().DrawContextMenu()))
+            foreach (var n in tree.Node(Loc.Id("Ability info"), false, Colors.TextColor1, () => _abilityInfo.Get().DrawContextMenu()))
             {
                 _abilityInfo.Get().Draw(tree);
             }
 
-            foreach (var n in tree.Node("Status info", false, Colors.TextColor1, () => _statusInfo.Get().DrawContextMenu()))
+            foreach (var n in tree.Node(Loc.Id("Status info"), false, Colors.TextColor1, () => _statusInfo.Get().DrawContextMenu()))
             {
                 _statusInfo.Get().Draw(tree);
             }
 
-            foreach (var n in tree.Node("Icon info", false, Colors.TextColor1, () => _iconInfo.Get().DrawContextMenu()))
+            foreach (var n in tree.Node(Loc.Id("Icon info"), false, Colors.TextColor1, () => _iconInfo.Get().DrawContextMenu()))
             {
                 _iconInfo.Get().Draw(tree);
             }
 
-            foreach (var n in tree.Node("Tether info", false, Colors.TextColor1, () => _tetherInfo.Get().DrawContextMenu()))
+            foreach (var n in tree.Node(Loc.Id("Tether info"), false, Colors.TextColor1, () => _tetherInfo.Get().DrawContextMenu()))
             {
                 _tetherInfo.Get().Draw(tree);
             }
 
-            foreach (var n in tree.Node("Map effect info", false, Colors.TextColor1))
+            foreach (var n in tree.Node(Loc.Id("Map effect info"), false, Colors.TextColor1))
             {
                 _mapEffectInfo.Get().Draw(tree);
             }
 
-            foreach (var n in tree.Node("Director update info", false, Colors.TextColor1))
+            foreach (var n in tree.Node(Loc.Id("Director update info"), false, Colors.TextColor1))
             {
                 _directorInfo.Get().Draw(tree);
             }
 
-            foreach (var n in tree.Node("Arena bounds", false, Colors.TextColor1, () => _arenaBounds.Get().DrawContextMenu()))
+            foreach (var n in tree.Node(Loc.Id("Arena bounds"), false, Colors.TextColor1, () => _arenaBounds.Get().DrawContextMenu()))
             {
                 _arenaBounds.Get().Draw(tree);
             }
 
             if (_teaSpecific != null)
             {
-                foreach (var n in tree.Node("TEA-specific analysis"))
+                foreach (var n in tree.Node(Loc.Id("TEA-specific analysis")))
                 {
                     _teaSpecific.Get().Draw(tree);
                 }
@@ -160,7 +160,7 @@ sealed class AnalysisManager : IDisposable
 
             if (_topSpecific != null)
             {
-                foreach (var n in tree.Node("TOP-specific analysis"))
+                foreach (var n in tree.Node(Loc.Id("TOP-specific analysis")))
                 {
                     _topSpecific.Get().Draw(tree);
                 }
@@ -186,12 +186,12 @@ sealed class AnalysisManager : IDisposable
 
     public void Draw()
     {
-        ImGui.TextUnformatted($"{_replays.Count} logs found");
-        foreach (var n in _tree.Node("Global analysis"))
+        ImGui.TextUnformatted(Loc.Format("{0} logs found", _replays.Count));
+        foreach (var n in _tree.Node(Loc.Id("Global analysis")))
         {
             _global.Draw(_tree);
         }
-        foreach (var n in _tree.Nodes(_perEncounter, kv => new($"Encounter analysis for {kv.Key:X} ({BossModuleRegistry.FindByOID(kv.Key)?.ModuleType.Name})")))
+        foreach (var n in _tree.Nodes(_perEncounter, kv => new(Loc.Format("Encounter analysis for {0:X} ({1})", kv.Key, BossModuleRegistry.FindByOID(kv.Key)?.ModuleType.Name))))
         {
             n.Value.Draw(_tree);
         }

@@ -51,19 +51,19 @@ sealed class StatusInfo : CommonEnumInfo
         }
         foreach (var (sid, data) in tree.Nodes(_data, map))
         {
-            tree.LeafNode($"Source IDs: {OIDListString(data.SourceOIDs)}");
-            tree.LeafNode($"Target IDs: {OIDListString(data.TargetOIDs)}");
-            tree.LeafNode($"Extras: {string.Join(", ", data.Extras.Select(extra => $"{extra:X}"))}");
-            foreach (var n in tree.Node($"Instances ({data.Instances.Count})###instances"))
+            tree.LeafNode(Loc.Format("Source IDs: {0}", OIDListString(data.SourceOIDs)));
+            tree.LeafNode(Loc.Format("Target IDs: {0}", OIDListString(data.TargetOIDs)));
+            tree.LeafNode(Loc.Format("Extras: {0}", string.Join(", ", data.Extras.Select(extra => $"{extra:X}"))));
+            foreach (var n in tree.Node(Loc.Format("Instances ({0})", data.Instances.Count) + "###instances"))
             {
-                tree.LeafNodes(data.Instances, i => $"{i.Replay.Path} @ {i.Status.Time.Start}: at {ReplayUtils.ParticipantString(i.Status.Target, i.Status.Time.Start)}");
+                tree.LeafNodes(data.Instances, i => Loc.Format("{0} @ {1}: at {2}", i.Replay.Path, i.Status.Time.Start, ReplayUtils.ParticipantString(i.Status.Target, i.Status.Time.Start)));
             }
         }
     }
 
     public void DrawContextMenu()
     {
-        if (ImGui.MenuItem("Generate enum for boss module"))
+        if (ImGui.MenuItem(Loc.Id("Generate enum for boss module")))
         {
             var sb = new StringBuilder("public enum SID : uint\n{\n");
             foreach (var (sid, data) in _data)
@@ -75,7 +75,7 @@ sealed class StatusInfo : CommonEnumInfo
             ImGui.SetClipboardText(sb.ToString());
         }
 
-        if (ImGui.MenuItem("Generate missing enum values for boss module"))
+        if (ImGui.MenuItem(Loc.Id("Generate missing enum values for boss module")))
         {
             var sb = new StringBuilder();
             foreach (var (sid, data) in _data.Where(kv => _sidType?.GeneratedEnumName(kv.Key) == null))

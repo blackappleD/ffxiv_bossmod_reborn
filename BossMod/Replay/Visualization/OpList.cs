@@ -26,6 +26,7 @@ sealed class OpList(Replay replay, Replay.Encounter? enc, BossModuleRegistry.Inf
     private readonly HashSet<uint> _filteredStatuses = [];
     private readonly HashSet<uint> _filteredDirectorUpdateTypes = [];
     private bool _nodesUpToDate;
+    private int _locVersion = Loc.Version;
 
     public bool ShowActorSizeEvents
     {
@@ -77,10 +78,16 @@ sealed class OpList(Replay replay, Replay.Encounter? enc, BossModuleRegistry.Inf
         //    DrawSettings();
         //}
 
+        if (_locVersion != Loc.Version)
+        {
+            _locVersion = Loc.Version;
+            _nodesUpToDate = false;
+        }
+
         if (!_nodesUpToDate)
         {
             RebuildNodes();
-            ImGui.Text($"Filtering...");
+            ImGui.Text(Loc.Tr("Filtering..."));
             return;
         }
 
@@ -231,45 +238,45 @@ sealed class OpList(Replay replay, Replay.Encounter? enc, BossModuleRegistry.Inf
 
     private string OpName(WorldState.Operation o) => o switch
     {
-        ActorState.OpCreate op => $"Actor create: {ActorString(op.InstanceID, op.Timestamp)} #{op.SpawnIndex}",
-        ActorState.OpDestroy op => $"Actor destroy: {ActorString(op.InstanceID, op.Timestamp)}",
-        ActorState.OpRename op => $"Actor rename: {ActorString(op.InstanceID, op.Timestamp)} -> {op.Name}",
-        ActorState.OpClassChange op => $"Actor class change: {ActorString(op.InstanceID, op.Timestamp)} -> {op.Class} L{op.Level}",
-        ActorState.OpTargetable op => $"{(op.Value ? "Targetable" : "Untargetable")}: {ActorString(op.InstanceID, op.Timestamp)}",
-        ActorState.OpDead op => $"{(op.Value ? "Die" : "Resurrect")}: {ActorString(op.InstanceID, op.Timestamp)}",
-        ActorState.OpAggroPlayer op => $"Aggro player: {ActorString(op.InstanceID, op.Timestamp)} = {op.Has}",
-        ActorState.OpEventState op => $"Event state: {ActorString(op.InstanceID, op.Timestamp)} -> {op.Value}",
-        ActorState.OpTarget op => $"Target: {ActorString(op.InstanceID, op.Timestamp)} -> {ActorString(op.Value, op.Timestamp)}",
-        ActorState.OpMount op => $"Mount: {ActorString(op.InstanceID, op.Timestamp)} = {Service.LuminaRow<Lumina.Excel.Sheets.Mount>(op.Value)?.Singular ?? "<unknown>"}",
-        ActorState.OpTether op => $"Tether: {ActorString(op.InstanceID, op.Timestamp)} {op.Value.ID} ({ModuleInfo?.TetherIDType?.GeneratedEnumName(op.Value.ID)}) @ {ActorString(op.Value.Target, op.Timestamp)}",
-        ActorState.OpCastInfo op => $"Cast {(op.Value != null ? "started" : "ended")}: {CastString(op.InstanceID, op.Timestamp, op.Value != null)}",
-        ActorState.OpCastEvent op => $"Cast event: {ActorString(op.InstanceID, op.Timestamp)}: {op.Value.Action} ({ModuleInfo?.ActionIDType?.GeneratedEnumName(op.Value.Action.ID)}) @ {CastEventTargetString(op.Value, op.Timestamp)} ({op.Value.Targets.Count} targets affected) #{op.Value.GlobalSequence}",
-        ActorState.OpStatus op => $"Status change: {ActorString(op.InstanceID, op.Timestamp)} #{op.Index}: {StatusesString(op.InstanceID, op.Index, op.Timestamp)}",
-        ActorState.OpIcon op => $"Icon: {ActorString(op.InstanceID, op.Timestamp)} -> {ActorString(op.TargetID, op.Timestamp)}: {op.IconID} ({ModuleInfo?.IconIDType?.GeneratedEnumName(op.IconID)})",
+        ActorState.OpCreate op => Loc.Format("Actor create: {0} #{1}", ActorString(op.InstanceID, op.Timestamp), op.SpawnIndex),
+        ActorState.OpDestroy op => Loc.Format("Actor destroy: {0}", ActorString(op.InstanceID, op.Timestamp)),
+        ActorState.OpRename op => Loc.Format("Actor rename: {0} -> {1}", ActorString(op.InstanceID, op.Timestamp), op.Name),
+        ActorState.OpClassChange op => Loc.Format("Actor class change: {0} -> {1} L{2}", ActorString(op.InstanceID, op.Timestamp), op.Class, op.Level),
+        ActorState.OpTargetable op => $"{Loc.Tr(op.Value ? "Targetable" : "Untargetable")}: {ActorString(op.InstanceID, op.Timestamp)}",
+        ActorState.OpDead op => $"{Loc.Tr(op.Value ? "Die" : "Resurrect")}: {ActorString(op.InstanceID, op.Timestamp)}",
+        ActorState.OpAggroPlayer op => Loc.Format("Aggro player: {0} = {1}", ActorString(op.InstanceID, op.Timestamp), op.Has),
+        ActorState.OpEventState op => Loc.Format("Event state: {0} -> {1}", ActorString(op.InstanceID, op.Timestamp), op.Value),
+        ActorState.OpTarget op => Loc.Format("Target: {0} -> {1}", ActorString(op.InstanceID, op.Timestamp), ActorString(op.Value, op.Timestamp)),
+        ActorState.OpMount op => Loc.Format("Mount: {0} = {1}", ActorString(op.InstanceID, op.Timestamp), Service.LuminaRow<Lumina.Excel.Sheets.Mount>(op.Value)?.Singular.ToString() ?? "<unknown>"),
+        ActorState.OpTether op => Loc.Format("Tether: {0} {1} ({2}) @ {3}", ActorString(op.InstanceID, op.Timestamp), op.Value.ID, ModuleInfo?.TetherIDType?.GeneratedEnumName(op.Value.ID), ActorString(op.Value.Target, op.Timestamp)),
+        ActorState.OpCastInfo op => Loc.Format(op.Value != null ? "Cast started: {0}" : "Cast ended: {0}", CastString(op.InstanceID, op.Timestamp, op.Value != null)),
+        ActorState.OpCastEvent op => Loc.Format("Cast event: {0}: {1} ({2}) @ {3} ({4} targets affected) #{5}", ActorString(op.InstanceID, op.Timestamp), op.Value.Action, ModuleInfo?.ActionIDType?.GeneratedEnumName(op.Value.Action.ID), CastEventTargetString(op.Value, op.Timestamp), op.Value.Targets.Count, op.Value.GlobalSequence),
+        ActorState.OpStatus op => Loc.Format("Status change: {0} #{1}: {2}", ActorString(op.InstanceID, op.Timestamp), op.Index, StatusesString(op.InstanceID, op.Index, op.Timestamp)),
+        ActorState.OpIcon op => Loc.Format("Icon: {0} -> {1}: {2} ({3})", ActorString(op.InstanceID, op.Timestamp), ActorString(op.TargetID, op.Timestamp), op.IconID, ModuleInfo?.IconIDType?.GeneratedEnumName(op.IconID)),
         ActorState.OpVFX op => $"VFX: {ActorString(op.InstanceID, op.Timestamp)} -> {ActorString(op.TargetID, op.Timestamp)}: {op.VfxID}",
         ActorState.OpEventObjectStateChange op => $"EObjState: {ActorString(op.InstanceID, op.Timestamp)} = {op.State:X4}",
         ActorState.OpEventObjectAnimation op => $"EObjAnim: {ActorString(op.InstanceID, op.Timestamp)} = {((uint)op.Param1 << 16) | op.Param2:X8}",
-        ActorState.OpPlayActionTimelineEvent op => $"Play action timeline: {ActorString(op.InstanceID, op.Timestamp)} = {op.ActionTimelineID:X4}",
-        ActorState.OpPlayActionTimelineSync op => $"Play action timeline multi: {ActorString(op.InstanceID, op.Timestamp)}",
-        ActorState.OpEventNpcYell op => $"Yell: {ActorString(op.InstanceID, op.Timestamp)} = {op.Message} '{Service.LuminaRow<Lumina.Excel.Sheets.NpcYell>(op.Message)?.Text}'",
-        ActorState.OpRenderflags op => $"Renderflag: {ActorString(op.InstanceID, op.Timestamp)} -> {op.Value}",
-        ActorState.OpModelState op => $"Model state: {ActorString(op.InstanceID, op.Timestamp)} -> {op.Value}",
-        ClientState.OpDutyActionsChange op => $"Player duty actions change: {string.Join(", ", op.Slots)}",
-        ClientState.OpBozjaHolsterChange op => $"Player bozja holster change: {GetOpBozjaHolsterChangeString(op.Contents)}",
-        ClientState.OpPlayerStatsChange op => $"Player stats: sks={op.Value.SkillSpeed}, sps={op.Value.SpellSpeed}, haste={op.Value.Haste}",
-        ClientState.OpBlueMageSpellsChange op => $"Player BLU spellbook: {GetOpBlueMageSpellsChangeString(op.Values)}",
-        ClientState.OpBeastmasterBeastsChanged op => $"Player BST horns: {GetOpBeastmasterBeastsChangedString(op.Values)}",
-        ClientState.OpClassJobLevelsChange op => $"Player levels: {string.Join(", ", op.Values)}",
+        ActorState.OpPlayActionTimelineEvent op => Loc.Format("Play action timeline: {0} = {1:X4}", ActorString(op.InstanceID, op.Timestamp), op.ActionTimelineID),
+        ActorState.OpPlayActionTimelineSync op => Loc.Format("Play action timeline multi: {0}", ActorString(op.InstanceID, op.Timestamp)),
+        ActorState.OpEventNpcYell op => Loc.Format("Yell: {0} = {1} '{2}'", ActorString(op.InstanceID, op.Timestamp), op.Message, Service.LuminaRow<Lumina.Excel.Sheets.NpcYell>(op.Message)?.Text),
+        ActorState.OpRenderflags op => Loc.Format("Renderflag: {0} -> {1}", ActorString(op.InstanceID, op.Timestamp), op.Value),
+        ActorState.OpModelState op => Loc.Format("Model state: {0} -> {1}", ActorString(op.InstanceID, op.Timestamp), op.Value),
+        ClientState.OpDutyActionsChange op => Loc.Format("Player duty actions change: {0}", string.Join(", ", op.Slots)),
+        ClientState.OpBozjaHolsterChange op => Loc.Format("Player bozja holster change: {0}", GetOpBozjaHolsterChangeString(op.Contents)),
+        ClientState.OpPlayerStatsChange op => Loc.Format("Player stats: sks={0}, sps={1}, haste={2}", op.Value.SkillSpeed, op.Value.SpellSpeed, op.Value.Haste),
+        ClientState.OpBlueMageSpellsChange op => Loc.Format("Player BLU spellbook: {0}", GetOpBlueMageSpellsChangeString(op.Values)),
+        ClientState.OpBeastmasterBeastsChanged op => Loc.Format("Player BST horns: {0}", GetOpBeastmasterBeastsChangedString(op.Values)),
+        ClientState.OpClassJobLevelsChange op => Loc.Format("Player levels: {0}", string.Join(", ", op.Values)),
         ClientState.OpActiveFateChange op => $"FATE: {op.Value.ID} '{Service.LuminaRow<Lumina.Excel.Sheets.Fate>(op.Value.ID)?.Name}' {op.Value.Progress}%",
-        ClientState.OpActivePetChange op => $"Player pet: {ActorString(op.Value.InstanceID, op.Timestamp)}",
+        ClientState.OpActivePetChange op => Loc.Format("Player pet: {0}", ActorString(op.Value.InstanceID, op.Timestamp)),
         ClientState.OpInventoryChange op => ItemString(op),
-        PartyState.OpModify op => $"Party slot {op.Slot}: {ActorString(op.Member.InstanceId, op.Timestamp)}",
+        PartyState.OpModify op => Loc.Format("Party slot {0}: {1}", op.Slot, ActorString(op.Member.InstanceId, op.Timestamp)),
         WorldState.OpDirectorUpdate op => $"DirectorUpdate: DirectorID: {op.DirectorID:X8}, UpdateID: {op.UpdateID:X8}, Params: {op.Param1:X8}|{op.Param2:X8}|{op.Param3:X8}|{op.Param4:X8}",
         WorldState.OpMapEffect op => $"MapEffect: {op.Index:X2} {op.State:X8}",
         WorldState.OpLegacyMapEffect op => $"MapEffect (legacy): seq={op.Sequence} param={op.Param} data={GetOpLegacyMapEffectString(op.Data)}",
         WorldState.OpSystemLogMessage op => $"LogMessage {op.MessageID}: '{Service.LuminaRow<Lumina.Excel.Sheets.LogMessage>(op.MessageID)?.Text}' [{string.Join(", ", op.Args)}]",
-        WorldState.OpZoneChange op => $"Zone change: {op.Zone} ({Service.LuminaRow<Lumina.Excel.Sheets.TerritoryType>(op.Zone)?.PlaceName.Value.Name}) / {op.CFCID} ({(op.CFCID > 0 ? Service.LuminaRow<Lumina.Excel.Sheets.ContentFinderCondition>(op.CFCID)?.Name : "n/a")})",
-        WaymarkState.OpSignChange op => op.Target == 0 ? $"Sign: {op.ID} cleared" : $"Sign: {op.ID} on {ActorString(op.Target, op.Timestamp)}",
+        WorldState.OpZoneChange op => Loc.Format("Zone change: {0} ({1}) / {2} ({3})", op.Zone, Service.LuminaRow<Lumina.Excel.Sheets.TerritoryType>(op.Zone)?.PlaceName.Value.Name, op.CFCID, op.CFCID > 0 ? Service.LuminaRow<Lumina.Excel.Sheets.ContentFinderCondition>(op.CFCID)?.Name.ToString() : "n/a"),
+        WaymarkState.OpSignChange op => op.Target == 0 ? Loc.Format("Sign: {0} cleared", op.ID) : Loc.Format("Sign: {0} on {1}", op.ID, ActorString(op.Target, op.Timestamp)),
         _ => DumpOp(o)
     };
 
@@ -371,14 +378,14 @@ sealed class OpList(Replay replay, Replay.Encounter? enc, BossModuleRegistry.Inf
                 ImGui.Separator();
             }
 
-            if (ImGui.MenuItem("Jump to timestamp", "double click"))
+            if (ImGui.MenuItem(Loc.Id("Jump to timestamp"), Loc.Tr("double click")))
                 scrollTo(o.Timestamp);
         };
     }
 
     private void ContextMenuDirectorUpdate(WorldState.OpDirectorUpdate op)
     {
-        if (ImGui.MenuItem($"Filter out type {op.UpdateID:X8}"))
+        if (ImGui.MenuItem(Loc.Format("Filter out type {0:X8}", op.UpdateID)))
         {
             _filteredDirectorUpdateTypes.Add(op.UpdateID);
             _nodesUpToDate = false;
@@ -388,7 +395,7 @@ sealed class OpList(Replay replay, Replay.Encounter? enc, BossModuleRegistry.Inf
     private void ContextMenuActor(ActorState.Operation op)
     {
         var oid = replay.FindParticipant(op.InstanceID, op.Timestamp)!.OID;
-        if (ImGui.MenuItem($"Filter out OID {oid:X}"))
+        if (ImGui.MenuItem(Loc.Format("Filter out OID {0:X}", oid)))
         {
             _filteredOIDs.Add(oid);
             _nodesUpToDate = false;
@@ -400,7 +407,7 @@ sealed class OpList(Replay replay, Replay.Encounter? enc, BossModuleRegistry.Inf
         ContextMenuActor(op);
         foreach (var s in FindStatuses(op.InstanceID, op.Index, op.Timestamp))
         {
-            if (ImGui.MenuItem($"Filter out {Utils.StatusString(s.ID)}"))
+            if (ImGui.MenuItem(Loc.Format("Filter out {0}", Utils.StatusString(s.ID))))
             {
                 _filteredStatuses.Add(s.ID);
                 _nodesUpToDate = false;
@@ -412,7 +419,7 @@ sealed class OpList(Replay replay, Replay.Encounter? enc, BossModuleRegistry.Inf
     {
         ContextMenuActor(op);
         var cast = FindCast(replay.FindParticipant(op.InstanceID, op.Timestamp), op.Timestamp, op.Value != null);
-        if (cast != null && ImGui.MenuItem($"Filter out {cast.ID}"))
+        if (cast != null && ImGui.MenuItem(Loc.Format("Filter out {0}", cast.ID)))
         {
             _filteredActions.Add(cast.ID);
             _nodesUpToDate = false;
@@ -422,7 +429,7 @@ sealed class OpList(Replay replay, Replay.Encounter? enc, BossModuleRegistry.Inf
     private void ContextMenuEventCast(ActorState.OpCastEvent op)
     {
         ContextMenuActor(op);
-        if (ImGui.MenuItem($"Filter out {op.Value.Action}"))
+        if (ImGui.MenuItem(Loc.Format("Filter out {0}", op.Value.Action)))
         {
             _filteredActions.Add(op.Value.Action);
             _nodesUpToDate = false;
@@ -460,10 +467,10 @@ sealed class OpList(Replay replay, Replay.Encounter? enc, BossModuleRegistry.Inf
         var c = FindCast(p, timestamp, start);
         if (c == null)
         {
-            return $"{ActorString(p, timestamp)}: <unknown cast>";
+            return Loc.Format("{0}: <unknown cast>", ActorString(p, timestamp));
         }
 
-        return $"{ActorString(p, timestamp)}: {c.ID} ({ModuleInfo?.ActionIDType?.GeneratedEnumName(c.ID.ID)}), {c.ExpectedCastTime:f2}s ({c.Time} actual){(c.Interruptible ? " (interruptible)" : "")} @ {ReplayUtils.ParticipantPosRotString(c.Target, timestamp)} / {Utils.Vec3String(c.Location)} / {c.Rotation}";
+        return Loc.Format("{0}: {1} ({2}), {3:f2}s ({4} actual){5} @ {6} / {7} / {8}", ActorString(p, timestamp), c.ID, ModuleInfo?.ActionIDType?.GeneratedEnumName(c.ID.ID), c.ExpectedCastTime, c.Time, c.Interruptible ? Loc.Tr(" (interruptible)") : "", ReplayUtils.ParticipantPosRotString(c.Target, timestamp), Utils.Vec3String(c.Location), c.Rotation);
     }
 
     private string StatusesString(ulong instanceID, int index, DateTime timestamp)
@@ -473,12 +480,12 @@ sealed class OpList(Replay replay, Replay.Encounter? enc, BossModuleRegistry.Inf
             var parts = new List<string>(2);
             if (s.Time.Start == timestamp)
             {
-                parts.Add("gain");
+                parts.Add(Loc.Tr("gain"));
             }
 
             if (s.Time.End == timestamp)
             {
-                parts.Add("lose");
+                parts.Add(Loc.Tr("lose"));
             }
 
             return string.Join("/", parts);
@@ -493,7 +500,7 @@ sealed class OpList(Replay replay, Replay.Encounter? enc, BossModuleRegistry.Inf
             }
 
             first = false;
-            sb.Append($"{Classify(s)} {Utils.StatusString(s.ID)} ({ModuleInfo?.StatusIDType?.GeneratedEnumName(s.ID)}) ({s.StartingExtra:X}), {s.InitialDuration:f2}s / {s.Time}, from {ActorString(s.Source, timestamp)}");
+            sb.Append(Loc.Format("{0} {1} ({2}) ({3:X}), {4:f2}s / {5}, from {6}", Classify(s), Utils.StatusString(s.ID), ModuleInfo?.StatusIDType?.GeneratedEnumName(s.ID), s.StartingExtra, s.InitialDuration, s.Time, ActorString(s.Source, timestamp)));
         }
         return sb.ToString();
     }
@@ -502,9 +509,9 @@ sealed class OpList(Replay replay, Replay.Encounter? enc, BossModuleRegistry.Inf
     {
         if (op.ItemId > 2000000)
         {
-            return $"Item quantity: {op.ItemId} '{Service.LuminaRow<Lumina.Excel.Sheets.EventItem>(op.ItemId)?.Name}' x{op.Quantity}";
+            return Loc.Format("Item quantity: {0} '{1}' x{2}", op.ItemId, Service.LuminaRow<Lumina.Excel.Sheets.EventItem>(op.ItemId)?.Name, op.Quantity);
         }
 
-        return $"Item quantity: {op.ItemId % 500000} '{Service.LuminaRow<Lumina.Excel.Sheets.Item>(op.ItemId % 500000)?.Name}' (hq={op.ItemId > 1000000}) x{op.Quantity}";
+        return Loc.Format("Item quantity: {0} '{1}' (hq={2}) x{3}", op.ItemId % 500000, Service.LuminaRow<Lumina.Excel.Sheets.Item>(op.ItemId % 500000)?.Name, op.ItemId > 1000000, op.Quantity);
     }
 }

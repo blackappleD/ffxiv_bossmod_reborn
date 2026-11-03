@@ -24,7 +24,7 @@ public sealed class BossModuleMainWindow : UIWindow
         var showZoneModule = ShowZoneModule();
         IsOpen = BossModuleManager.Config.EnableRadar && (_mgr.LoadedModules.Count > 0 || showZoneModule);
         ShowCloseButton = _mgr.ActiveModule != null && !showZoneModule;
-        WindowName = (showZoneModule ? $"Zone module ({_zmm.ActiveModule?.GetType().Name})" : _mgr.ActiveModule != null ? $"Boss module ({_mgr.ActiveModule.GetType().Name})" : "Loaded boss modules") + _windowID;
+        WindowName = (showZoneModule ? Loc.Format("Zone module ({0})", _zmm.ActiveModule?.GetType().Name) : _mgr.ActiveModule != null ? Loc.Format("Boss module ({0})", _mgr.ActiveModule.GetType().Name) : Loc.Tr("Loaded boss modules")) + _windowID;
         Flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse;
         if (BossModuleManager.Config.TrishaMode)
         {

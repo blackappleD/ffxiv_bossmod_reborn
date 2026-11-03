@@ -113,7 +113,7 @@ public sealed class ColumnPlayerActions : Timeline.ColumnGroup
                                 var duration = (float)((status?.Time.End ?? a.Timestamp) - a.Timestamp).TotalSeconds;
                                 var delay = ((status?.Time.Start ?? a.Timestamp) - a.Timestamp).TotalSeconds;
                                 effectDuration = Math.Max(effectDuration, duration);
-                                effectTooltip.Add($"- effect: {Utils.StatusString(eff.Value)}, duration={(status != null ? status.Time : "???")}s, start-delay={delay:f3}s");
+                                effectTooltip.Add(Loc.Format("- effect: {0}, duration={1}s, start-delay={2:f3}s", Utils.StatusString(eff.Value), status != null ? status.Time : "???", delay));
                             }
                         }
                     }
@@ -155,7 +155,7 @@ public sealed class ColumnPlayerActions : Timeline.ColumnGroup
                         }
                     }
                 }
-                data.Column?.AddHistoryEntryDot(enc.Time.Start, a.Timestamp, $"CD reduced by {actualReduction:f1}/{cdr.cd:f1}s: {actionName}", actualReduction < cdr.cd ? Colors.TextColor2 : Colors.TextColor11).AddActionTooltip(a);
+                data.Column?.AddHistoryEntryDot(enc.Time.Start, a.Timestamp, Loc.Format("CD reduced by {0:f1}/{1:f1}s: {2}", actualReduction, cdr.cd, actionName), actualReduction < cdr.cd ? Colors.TextColor2 : Colors.TextColor11).AddActionTooltip(a);
             }
         }
 
@@ -177,7 +177,7 @@ public sealed class ColumnPlayerActions : Timeline.ColumnGroup
 
     public void DrawConfig(UITree tree)
     {
-        if (ImGui.Button("Show all"))
+        if (ImGui.Button(Loc.Id("Show all")))
         {
             foreach (var col in Columns)
             {
@@ -186,7 +186,7 @@ public sealed class ColumnPlayerActions : Timeline.ColumnGroup
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Hide all"))
+        if (ImGui.Button(Loc.Id("Hide all")))
         {
             foreach (var col in Columns)
             {
@@ -197,7 +197,7 @@ public sealed class ColumnPlayerActions : Timeline.ColumnGroup
         foreach (var col in Columns)
         {
             var visible = col.Width > 0;
-            if (ImGui.Checkbox(col.Name, ref visible))
+            if (ImGui.Checkbox(Loc.Id(col.Name), ref visible))
             {
                 col.Width = visible ? ColumnGenericHistory.DefaultWidth : 0;
             }
@@ -230,7 +230,7 @@ public sealed class ColumnPlayerActions : Timeline.ColumnGroup
 
     private void AddUnfinishedCast(Replay.Cast cast, DateTime encStart)
     {
-        var name = $"[unfinished] {cast.ID} -> {ReplayUtils.ParticipantString(cast.Target, cast.Time.Start)}";
+        var name = Loc.Format("[unfinished] {0} -> {1}", cast.ID, ReplayUtils.ParticipantString(cast.Target, cast.Time.Start));
         _animLocks.AddHistoryEntryRange(encStart, cast.Time, name, Colors.TextColor12).AddCastTooltip(cast);
 
         var castActionDef = ActionDefinitions.Instance[cast.ID];
@@ -250,7 +250,7 @@ public sealed class ColumnPlayerActions : Timeline.ColumnGroup
             e.TooltipExtra = (res, t) =>
             {
                 var elapsed = t - (lockStart - encStart).TotalSeconds;
-                res.Add($"- anim lock: {action.AnimationLock - elapsed:f3} / {action.AnimationLock:f3}");
+                res.Add(Loc.Format("- anim lock: {0:f3} / {1:f3}", action.AnimationLock - elapsed, action.AnimationLock));
             };
         }
     }
@@ -276,9 +276,9 @@ public sealed class ColumnPlayerActions : Timeline.ColumnGroup
         var e = data.Column.AddHistoryEntryRange(encStart, data.Cursor, rangeEnd, data.CooldownAction.ToString(), Colors.TextColor7, width);
         e.TooltipExtra = (res, t) =>
         {
-            res.Add($"- remaining: {(chargeCooldownEnd - encStart).TotalSeconds - t:f3}s / {chargeCooldown:f3}s ({maxCharges - chargesOnCooldown}/{maxCharges} charges)");
-            res.Add($"- start CD: {startCD:f3}s / {chargeCooldown:f3}s");
-            res.Add($"- end CD: {endCD:f3}s / {chargeCooldown:f3}s");
+            res.Add(Loc.Format("- remaining: {0:f3}s / {1:f3}s ({2}/{3} charges)", (chargeCooldownEnd - encStart).TotalSeconds - t, chargeCooldown, maxCharges - chargesOnCooldown, maxCharges));
+            res.Add(Loc.Format("- start CD: {0:f3}s / {1:f3}s", startCD, chargeCooldown));
+            res.Add(Loc.Format("- end CD: {0:f3}s / {1:f3}s", endCD, chargeCooldown));
         };
     }
 
@@ -336,7 +336,7 @@ public sealed class ColumnPlayerActions : Timeline.ColumnGroup
             // already at max charges, assume previous cooldown is slightly smaller than expected
             var deficit = (data.ChargeCooldownEnd - data.Cursor).TotalSeconds;
             var e = data.Column!.AddHistoryEntryLine(encStart, timestamp, aid.ToString(), Colors.TextColor1);
-            e.TooltipExtra = (res, _) => res.Add($"- cooldown {deficit:f1}s smaller than expected");
+            e.TooltipExtra = (res, _) => res.Add(Loc.Format("- cooldown {0:f1}s smaller than expected", deficit));
             data.ChargeCooldownEnd = data.Cursor.AddSeconds(actionDef.Cooldown);
         }
         data.ChargeCooldown = actionDef.Cooldown;

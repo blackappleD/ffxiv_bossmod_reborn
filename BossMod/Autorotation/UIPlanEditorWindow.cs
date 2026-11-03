@@ -11,7 +11,7 @@ public class UIPlanEditorWindow : UIWindow
     private readonly CooldownPlannerColumns _planner;
     private int _selectedPhase;
 
-    public UIPlanEditorWindow(PlanDatabase db, Plan plan, StateMachine sm) : base($"Cooldown planner: {plan.Guid}", true, new(1200, 900))
+    public UIPlanEditorWindow(PlanDatabase db, Plan plan, StateMachine sm) : base(Loc.Id($"Cooldown planner: {plan.Guid}"), true, new(1200, 900))
     {
         _db = db;
         _original = plan;
@@ -29,10 +29,10 @@ public class UIPlanEditorWindow : UIWindow
 
     public override void Draw()
     {
-        if (UIMisc.Button("Save", !_planner.Modified, "No changes"))
+        if (UIMisc.Button(Loc.Id("Save"), !_planner.Modified, Loc.Tr("No changes")))
             Save();
         ImGui.SameLine();
-        if (UIMisc.Button("Delete", !ImGui.GetIO().KeyShift, "Hold shift to delete"))
+        if (UIMisc.Button(Loc.Id("Delete"), !ImGui.GetIO().KeyShift, Loc.Tr("Hold shift to delete")))
             Delete();
         ImGui.SameLine();
         _planner.DrawCommonControls();

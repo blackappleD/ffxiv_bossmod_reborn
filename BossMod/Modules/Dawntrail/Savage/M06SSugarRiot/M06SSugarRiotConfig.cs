@@ -27,7 +27,7 @@ public sealed class M06SSugarRiotConfig() : ConfigNode
             if (indices == null || indices.Length != values.Length)
                 continue;
 
-            ImGui.TextUnformatted(labelAttr.Label + ":");
+            ImGui.TextUnformatted(Loc.Tr(labelAttr.Label) + ":");
             var lenI = indices.Length;
             for (var i = 0; i < lenI; ++i)
             {
@@ -47,7 +47,7 @@ public sealed class M06SSugarRiotConfig() : ConfigNode
                     Modified.Fire();
                 }
                 ImGui.SameLine();
-                ImGui.TextUnformatted(str);
+                ImGui.TextUnformatted(Loc.Tr(str));
                 ImGui.PopID();
             }
         }

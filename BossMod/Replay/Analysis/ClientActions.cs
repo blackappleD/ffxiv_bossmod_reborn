@@ -34,7 +34,7 @@ sealed class ClientActions
                         }
                         if (pendingRequests.Count > 0)
                         {
-                            _warnings.Add((r, op.Timestamp, $"New action request {o.Request} while {pendingRequests.Count} are pending (first = {pendingRequests[0].Request}, {(op.Timestamp - pendingRequests[0].Timestamp).TotalSeconds:f3}s ago)"));
+                            _warnings.Add((r, op.Timestamp, Loc.Format("New action request {0} while {1} are pending (first = {2}, {3:f3}s ago)", o.Request, pendingRequests.Count, pendingRequests[0].Request, (op.Timestamp - pendingRequests[0].Timestamp).TotalSeconds)));
                         }
                         pendingRequests.Add(o);
                         break;
@@ -45,22 +45,22 @@ sealed class ClientActions
                             : pendingRequests.FindIndex(a => a.Request.Action == o.Value.Action);
                         if (rejIndex < 0)
                         {
-                            _warnings.Add((r, op.Timestamp, $"Reject {o.Value}: unexpected (not found); currently {pendingRequests.Count} are pending"));
+                            _warnings.Add((r, op.Timestamp, Loc.Format("Reject {0}: unexpected (not found); currently {1} are pending", o.Value, pendingRequests.Count)));
                             pendingRequests.Clear();
                         }
                         else if (rejIndex > 0)
                         {
-                            _warnings.Add((r, op.Timestamp, $"Reject {o.Value}: unexpected (index {rejIndex}); currently {pendingRequests.Count} are pending, first={pendingRequests[0].Request}"));
+                            _warnings.Add((r, op.Timestamp, Loc.Format("Reject {0}: unexpected (index {1}); currently {2} are pending, first={3}", o.Value, rejIndex, pendingRequests.Count, pendingRequests[0].Request)));
                             pendingRequests.RemoveRange(0, rejIndex + 1);
                         }
                         else if (pendingRequests[0].Request.SourceSequence != o.Value.SourceSequence || pendingRequests[0].Request.Action != o.Value.Action)
                         {
-                            _warnings.Add((r, op.Timestamp, $"Reject {o.Value}: mismatched, expected {pendingRequests[0].Request}"));
+                            _warnings.Add((r, op.Timestamp, Loc.Format("Reject {0}: mismatched, expected {1}", o.Value, pendingRequests[0].Request)));
                             pendingRequests.RemoveAt(0);
                         }
                         else
                         {
-                            _warnings.Add((r, op.Timestamp, $"Reject {o.Value}: all good, but still"));
+                            _warnings.Add((r, op.Timestamp, Loc.Format("Reject {0}: all good, but still", o.Value)));
                             pendingRequests.RemoveAt(0);
                         }
                         pendingCast = null; // TODO: right?
@@ -72,20 +72,20 @@ sealed class ClientActions
                             var rqIndex = pendingRequests.FindIndex(r => r.Request.SourceSequence == o.Value.SourceSequence);
                             if (rqIndex < 0)
                             {
-                                _warnings.Add((r, op.Timestamp, $"Unexpected action-effect {StrEvt(o.Value)}: currently {pendingRequests.Count} are pending"));
+                                _warnings.Add((r, op.Timestamp, Loc.Format("Unexpected action-effect {0}: currently {1} are pending", StrEvt(o.Value), pendingRequests.Count)));
                                 pendingRequests.Clear();
                             }
                             else if (rqIndex > 0)
                             {
-                                _warnings.Add((r, op.Timestamp, $"Unexpected action-effect {StrEvt(o.Value)}: index={rqIndex}, first={pendingRequests[0].Request}, count={pendingRequests.Count}"));
+                                _warnings.Add((r, op.Timestamp, Loc.Format("Unexpected action-effect {0}: index={1}, first={2}, count={3}", StrEvt(o.Value), rqIndex, pendingRequests[0].Request, pendingRequests.Count)));
                             }
                             else if (pendingRequests[0].Request.Action != o.Value.Action)
                             {
-                                _warnings.Add((r, op.Timestamp, $"Request/response action mismatch: requested {pendingRequests[0].Request}, got {StrEvt(o.Value)}"));
+                                _warnings.Add((r, op.Timestamp, Loc.Format("Request/response action mismatch: requested {0}, got {1}", pendingRequests[0].Request, StrEvt(o.Value))));
                             }
                             else if ((op.Timestamp - pendingRequests[0].Timestamp).TotalSeconds >= pendingRequests[0].Request.InitialAnimationLock + pendingRequests[0].Request.InitialCastTimeTotal)
                             {
-                                _warnings.Add((r, op.Timestamp, $"Response {StrEvt(o.Value)} arrived too late: {(op.Timestamp - pendingRequests[0].Timestamp).TotalSeconds:f3}s ago, initial anim lock was {pendingRequests[0].Request.InitialAnimationLock:f3}s"));
+                                _warnings.Add((r, op.Timestamp, Loc.Format("Response {0} arrived too late: {1:f3}s ago, initial anim lock was {2:f3}s", StrEvt(o.Value), (op.Timestamp - pendingRequests[0].Timestamp).TotalSeconds, pendingRequests[0].Request.InitialAnimationLock)));
                             }
                             pendingRequests.RemoveRange(0, rqIndex + 1);
                             pendingCast = null;
@@ -100,15 +100,15 @@ sealed class ClientActions
                                 // start new cast
                                 if (pendingRequests.Count == 0)
                                 {
-                                    _warnings.Add((r, op.Timestamp, $"Player cast {StrCast(o.Value)} started without request"));
+                                    _warnings.Add((r, op.Timestamp, Loc.Format("Player cast {0} started without request", StrCast(o.Value))));
                                 }
                                 else if (pendingRequests[0].Request.Action != o.Value.Action)
                                 {
-                                    _warnings.Add((r, op.Timestamp, $"Player cast {StrCast(o.Value)} started with different request ({pendingRequests[0].Request}, count={pendingRequests.Count}"));
+                                    _warnings.Add((r, op.Timestamp, Loc.Format("Player cast {0} started with different request ({1}, count={2}", StrCast(o.Value), pendingRequests[0].Request, pendingRequests.Count)));
                                 }
                                 if (pendingCast != null)
                                 {
-                                    _warnings.Add((r, op.Timestamp, $"Player cast {StrCast(o.Value)} started when another cast {StrCast(pendingCast)} is already in progress"));
+                                    _warnings.Add((r, op.Timestamp, Loc.Format("Player cast {0} started when another cast {1} is already in progress", StrCast(o.Value), StrCast(pendingCast))));
                                 }
                                 pendingCast = o.Value;
                             }
@@ -117,12 +117,12 @@ sealed class ClientActions
                                 var index = pendingRequests.FindIndex(r => r.Request.Action == pendingCast.Action);
                                 if (index < 0)
                                 {
-                                    _warnings.Add((r, op.Timestamp, $"Player cast {StrCast(pendingCast)} ended without request ({pendingRequests.Count} pending)"));
+                                    _warnings.Add((r, op.Timestamp, Loc.Format("Player cast {0} ended without request ({1} pending)", StrCast(pendingCast), pendingRequests.Count)));
                                     pendingRequests.Clear();
                                 }
                                 else if (index > 0)
                                 {
-                                    _warnings.Add((r, op.Timestamp, $"Player cast {StrCast(pendingCast)} ended with index={index} request; first={pendingRequests[0].Request}, count={pendingRequests.Count}"));
+                                    _warnings.Add((r, op.Timestamp, Loc.Format("Player cast {0} ended with index={1} request; first={2}, count={3}", StrCast(pendingCast), index, pendingRequests[0].Request, pendingRequests.Count)));
                                     pendingRequests.RemoveRange(0, index + 1);
                                 }
                                 else

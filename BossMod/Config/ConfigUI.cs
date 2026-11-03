@@ -116,7 +116,7 @@ public sealed class ConfigUI : IDisposable
     private void DrawSettings()
     {
         ImGui.SetNextItemWidth(300f);
-        if (ImGui.InputTextEx("##ConfigSearch", "Search for a setting...", ref _searchText))
+        if (ImGui.InputTextEx("##ConfigSearch", Loc.Tr("Search for a setting..."), ref _searchText))
         {
             FilterNodes();
         }
@@ -124,7 +124,7 @@ public sealed class ConfigUI : IDisposable
         ImGui.SameLine();
         using (ImRaii.Disabled(_searchText.Length == 0))
         {
-            if (ImGui.Button("Clear"))
+            if (ImGui.Button(Loc.Id("Clear")))
             {
                 _searchText = "";
                 FilterNodes();
@@ -193,30 +193,30 @@ public sealed class ConfigUI : IDisposable
 
     private static void DrawAvailableCommands()
     {
-        ImGui.Text("Available Commands:");
+        ImGui.Text(Loc.Tr("Available Commands:"));
         ImGui.Separator();
-        ImGui.Text("AI:");
+        ImGui.Text(Loc.Tr("AI:"));
         ImGui.Separator();
         for (var i = 0; i < 30; ++i)
         {
             ref var text = ref _availableAICommands[i];
-            ImGui.Text($"/bmrai {text.Item1}: {text.Item2}");
+            ImGui.Text($"/bmrai {text.Item1}: {Loc.Tr(text.Item2)}");
         }
         ImGui.Separator();
-        ImGui.Text("Autorotation commands:");
+        ImGui.Text(Loc.Tr("Autorotation commands:"));
         ImGui.Separator();
         for (var i = 0; i < 6; ++i)
         {
             ref var text = ref _autorotationCommands[i];
-            ImGui.Text($"/bmr {text.Item1}: {text.Item2}");
+            ImGui.Text($"/bmr {text.Item1}: {Loc.Tr(text.Item2)}");
         }
         ImGui.Separator();
-        ImGui.Text("Other commands:");
+        ImGui.Text(Loc.Tr("Other commands:"));
         ImGui.Separator();
         for (var i = 0; i < 9; ++i)
         {
             ref var text = ref _availableOtherCommands[i];
-            ImGui.Text($"/bmr {text.Item1}: {text.Item2}");
+            ImGui.Text($"/bmr {text.Item1}: {Loc.Tr(text.Item2)}");
         }
     }
 
@@ -250,7 +250,7 @@ public sealed class ConfigUI : IDisposable
 
     private void WalkNodesInternal(UINode node, List<string> path, List<List<string>> results)
     {
-        if (Utils.TextMatch(node.Name, _searchText) || TagsMatch(node.Tags))
+        if (TextMatch(node.Name) || TagsMatch(node.Tags))
         {
             var matchPath = new List<string>(path) { node.Name, "*" };
             results.Add(matchPath);
@@ -265,7 +265,7 @@ public sealed class ConfigUI : IDisposable
             {
                 var field = fields[i];
                 var props = field.Display!;
-                if (Utils.TextMatch(props.Label, _searchText) || TagsMatch(props.Tags) || field.SectionStart is { Label.Length: > 0 } section && Utils.TextMatch(section.Label, _searchText))
+                if (TextMatch(props.Label) || TagsMatch(props.Tags) || field.SectionStart is { Label.Length: > 0 } section && TextMatch(section.Label))
                 {
                     var matchPath = new List<string>(path) { node.Name, props.Label };
                     results.Add(matchPath);
@@ -277,7 +277,7 @@ public sealed class ConfigUI : IDisposable
         for (var i = 0; i < hintCount; ++i)
         {
             var label = PrePullHintSettingLabel(node.PrePullHintModules[i], hintCount > 1);
-            if (Utils.TextMatch(label, _searchText))
+            if (TextMatch(label))
             {
                 results.Add([with(path), node.Name, label]);
             }
@@ -298,13 +298,16 @@ public sealed class ConfigUI : IDisposable
         var len = tags.Length;
         for (var i = 0; i < len; ++i)
         {
-            if (Utils.TextMatch(tags[i], _searchText))
+            if (TextMatch(tags[i]))
             {
                 return true;
             }
         }
         return false;
     }
+
+    // matches both the english text and its translation
+    private bool TextMatch(string text) => Utils.TextMatch(text, _searchText) || Loc.IsChinese && Utils.TextMatch(Loc.Tr(text), _searchText);
 
     public static void DrawNode(ConfigNode node, ConfigRoot root, UITree tree, WorldState ws, Func<PropertyDisplayAttribute, bool>? filter = null)
     {
@@ -330,7 +333,7 @@ public sealed class ConfigUI : IDisposable
                 }
                 if (section.Label.Length > 0)
                 {
-                    ImGui.TextUnformatted(section.Label);
+                    ImGui.TextUnformatted(Loc.Tr(section.Label));
                 }
             }
 
@@ -361,7 +364,7 @@ public sealed class ConfigUI : IDisposable
     private static string TransientTooltip(string tooltip)
     {
         const string note = "Temporarily changed by another plugin (e.g. AutoDuty). Your own value is kept in the config file and restored when that plugin is done; changing it here keeps your new value.";
-        return tooltip.Length > 0 ? $"{tooltip}\n\n{note}" : note;
+        return tooltip.Length > 0 ? $"{Loc.Tr(tooltip)}\n\n{Loc.Tr(note)}" : Loc.Tr(note);
     }
 
     private static bool IsPropertyEnabled(ConfigNode node, ConfigTypeMetadata metadata, ConfigFieldMetadata field)
@@ -409,7 +412,7 @@ public sealed class ConfigUI : IDisposable
     internal static void DrawPrePullHintSetting(BossModuleRegistry.Info info, string label = "Show pre-fight hint popup for this encounter")
     {
         var show = BossModuleManager.Config.ShowPrePullHintsFor(info.PrimaryActorOID);
-        if (ImGui.Checkbox($"{label}##PrePullHints{info.PrimaryActorOID:X8}", ref show))
+        if (ImGui.Checkbox($"{Loc.Tr(label)}##PrePullHints{info.PrimaryActorOID:X8}", ref show))
         {
             BossModuleManager.Config.SetShowPrePullHintsFor(info.PrimaryActorOID, show);
         }
@@ -417,7 +420,7 @@ public sealed class ConfigUI : IDisposable
         if (!BossModuleManager.Config.ShowPrePullHints)
         {
             ImGui.SameLine();
-            ImGui.TextDisabled("(globally disabled)");
+            ImGui.TextDisabled(Loc.Tr("(globally disabled)"));
         }
     }
 
@@ -478,7 +481,7 @@ public sealed class ConfigUI : IDisposable
             }
         }
 
-        foreach (var n in _tree.Nodes(filteredNodes, n => new(n.Name)))
+        foreach (var n in _tree.Nodes(filteredNodes, n => new(Loc.Id(n.Name))))
         {
             var hintCount = n.PrePullHintModules.Count;
             for (var i = 0; i < hintCount; ++i)
@@ -600,7 +603,7 @@ public sealed class ConfigUI : IDisposable
         }
         else
         {
-            if (ImGui.Checkbox(label, ref v))
+            if (ImGui.Checkbox(Loc.Id(label), ref v))
             {
                 member.Setter(node, v);
                 return true;
@@ -633,7 +636,7 @@ public sealed class ConfigUI : IDisposable
             }
 
             ImGui.SetNextItemWidth(Math.Min(ImGui.GetWindowWidth() * 0.30f, 175));
-            if (ImGui.DragFloat(label, ref v, slider.Speed, slider.Min, slider.Max, "%.3f", flags))
+            if (ImGui.DragFloat(Loc.Id(label), ref v, slider.Speed, slider.Min, slider.Max, "%.3f", flags))
             {
                 member.Setter(node, v);
                 return true;
@@ -641,7 +644,7 @@ public sealed class ConfigUI : IDisposable
         }
         else
         {
-            if (ImGui.InputFloat(label, ref v))
+            if (ImGui.InputFloat(Loc.Id(label), ref v))
             {
                 member.Setter(node, v);
                 return true;
@@ -663,7 +666,7 @@ public sealed class ConfigUI : IDisposable
             }
 
             ImGui.SetNextItemWidth(Math.Min(ImGui.GetWindowWidth() * 0.30f, 175));
-            if (ImGui.DragInt(label, ref v, slider.Speed, (int)slider.Min, (int)slider.Max, "%d", flags))
+            if (ImGui.DragInt(Loc.Id(label), ref v, slider.Speed, (int)slider.Min, (int)slider.Max, "%d", flags))
             {
                 member.Setter(node, v);
                 return true;
@@ -671,7 +674,7 @@ public sealed class ConfigUI : IDisposable
         }
         else
         {
-            if (ImGui.InputInt(label, ref v))
+            if (ImGui.InputInt(Loc.Id(label), ref v))
             {
                 member.Setter(node, v);
                 return true;
@@ -683,7 +686,7 @@ public sealed class ConfigUI : IDisposable
     private static bool DrawProperty(string label, string tooltip, ConfigNode node, ConfigFieldMetadata member, string v)
     {
         DrawHelp(tooltip);
-        if (ImGui.InputText(label, ref v, 256))
+        if (ImGui.InputText(Loc.Id(label), ref v, 256))
         {
             member.Setter(node, v);
             return true;
@@ -695,7 +698,7 @@ public sealed class ConfigUI : IDisposable
     {
         DrawHelp(tooltip);
         var col = v.ToFloat4();
-        if (ImGui.ColorEdit4(label, ref col, ImGuiColorEditFlags.PickerHueWheel))
+        if (ImGui.ColorEdit4(Loc.Id(label), ref col, ImGuiColorEditFlags.PickerHueWheel))
         {
             member.Setter(node, Color.FromFloat4(col));
             return true;
@@ -711,7 +714,7 @@ public sealed class ConfigUI : IDisposable
         {
             DrawHelp(tooltip);
             var col = v[i].ToFloat4();
-            if (ImGui.ColorEdit4($"{label} {i}", ref col, ImGuiColorEditFlags.PickerHueWheel))
+            if (ImGui.ColorEdit4(Loc.Id($"{label} {i}"), ref col, ImGuiColorEditFlags.PickerHueWheel))
             {
                 v[i] = Color.FromFloat4(col);
                 member.Setter(node, v);
@@ -736,7 +739,7 @@ public sealed class ConfigUI : IDisposable
         }
         if (ImGui.IsItemHovered())
         {
-            ImGui.SetTooltip("Select a preset");
+            ImGui.SetTooltip(Loc.Tr("Select a preset"));
         }
 
         ImGui.SameLine();
@@ -776,7 +779,7 @@ public sealed class ConfigUI : IDisposable
         }
 
         var modified = false;
-        foreach (var tn in tree.Node(label, false, v.Validate() ? Colors.TextColor1 : Colors.TextColor2))
+        foreach (var tn in tree.Node(Loc.Id(label), false, v.Validate() ? Colors.TextColor1 : Colors.TextColor2))
         {
             using var indent = ImRaii.PushIndent();
             var names = group.Names;
@@ -789,11 +792,11 @@ public sealed class ConfigUI : IDisposable
 
             for (var i = 0; i < len; ++i)
             {
-                ImGui.TableSetupColumn(names[i]);
+                ImGui.TableSetupColumn(Loc.Tr(names[i]));
             }
 
             ImGui.TableSetupColumn("----");
-            ImGui.TableSetupColumn("Name");
+            ImGui.TableSetupColumn(Loc.Tr("Name"));
             ImGui.TableHeadersRow();
 
             var assignments = root.Get<PartyRolesConfig>().SlotsPerAssignment(ws.Party);
@@ -837,7 +840,7 @@ public sealed class ConfigUI : IDisposable
         for (var i = 0; i < len; ++i)
         {
             var preset = presets[i];
-            if (ImGui.MenuItem(preset.Name))
+            if (ImGui.MenuItem(Loc.Id(preset.Name)))
             {
                 var lenPP = preset.Preset.Length;
                 for (var j = 0; j < lenPP; ++j)

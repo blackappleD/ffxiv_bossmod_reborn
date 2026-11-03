@@ -20,6 +20,9 @@ public abstract class RebornFoldWindow : RebornWindow
     private readonly Vector2 _defaultSize;
     private readonly WindowSizeConstraints? _defaultConstraints;
     private int _shownActions = int.MaxValue;
+    private M3WindowAction[]? _localizedActions;
+    private M3WindowAction[]? _localizedSource;
+    private int _localizedVersion = -1;
 
     protected RebornFoldWindow(string name, string brandLabel, Vector2 initialSize, WindowSizeConstraints? constraints = null) : base(name, false, initialSize, FoldFlags)
     {
@@ -56,7 +59,7 @@ public abstract class RebornFoldWindow : RebornWindow
         M3Draw.IconCentered(drawList, FontAwesomeIcon.Dragon, min, max, s.OnPrimaryContainer);
     }
 
-    protected M3WindowBrand Brand => new(LogoTexture, _brandLabel, FontAwesomeIcon.Dragon);
+    protected M3WindowBrand Brand => new(LogoTexture, Loc.Tr(_brandLabel), FontAwesomeIcon.Dragon);
 
     protected virtual M3WindowAction[] WindowActions => [];
 
@@ -111,9 +114,9 @@ public abstract class RebornFoldWindow : RebornWindow
             }
         }
 
-        var actions = WindowActions;
+        var actions = LocalizedActions();
         var first = actions.Length - ShownActions;
-        var pressed = _fold.DrawBar("##fold_actions", actions.AsSpan(first), Brand, out var closed, M3.Scheme.SurfaceContainerHigh);
+        var pressed = _fold.DrawBar("##fold_actions", actions.AsSpan(first), Brand, out var closed, M3.Scheme.SurfaceContainerHigh, Loc.Tr("Close"));
         if (pressed >= 0)
         {
             OnWindowAction(first + pressed);
@@ -127,12 +130,25 @@ public abstract class RebornFoldWindow : RebornWindow
 
     protected virtual void OnCloseRequested() => IsOpen = false;
 
+    // action tooltips are stored in english and translated for display
+    private M3WindowAction[] LocalizedActions()
+    {
+        var source = WindowActions;
+        if (_localizedActions == null || !ReferenceEquals(source, _localizedSource) || _localizedVersion != Loc.Version)
+        {
+            _localizedSource = source;
+            _localizedVersion = Loc.Version;
+            _localizedActions = Array.ConvertAll(source, a => a with { Tooltip = Loc.Tr(a.Tooltip) });
+        }
+        return _localizedActions;
+    }
+
     protected virtual void DrawBackdrop(float rounding) { }
 
     protected virtual void DrawOpen()
     {
         var (status, statusColor) = Status;
-        DrawHeader(_brandLabel, status, statusColor);
+        DrawHeader(Loc.Tr(_brandLabel), status, statusColor);
         ImGui.Dummy(new(0f, M3.Space1));
 
         using var body = ImRaii.Child("##fold_body", -Vector2.One, false, BodyFlags);

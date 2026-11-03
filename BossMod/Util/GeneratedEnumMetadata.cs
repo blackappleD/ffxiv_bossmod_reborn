@@ -83,7 +83,7 @@ internal static partial class GeneratedEnumMetadata
     {
         var metadata = Get<T>();
         var index = IndexOf(metadata, value);
-        return index >= 0 ? metadata.DisplayNames[index] : value.ToString();
+        return Loc.Tr(index >= 0 ? metadata.DisplayNames[index] : value.ToString());
     }
 
     public static EnumValue<T> For<T>(T value) where T : struct, Enum => new(value);
@@ -129,7 +129,7 @@ internal static partial class GeneratedEnumMetadata
     private static string DisplayName<T>(EnumMetadata metadata, ulong raw, T value) where T : Enum
     {
         var index = metadata.IndexOf(raw);
-        return index >= 0 ? metadata.DisplayNames[index] : value.ToString();
+        return Loc.Tr(index >= 0 ? metadata.DisplayNames[index] : value.ToString());
     }
 
     private static TAttribute? Attribute<TAttribute>(EnumMetadata metadata, ulong raw) where TAttribute : Attribute

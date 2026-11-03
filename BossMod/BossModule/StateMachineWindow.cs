@@ -7,7 +7,7 @@ public sealed class StateMachineWindow : UIWindow
     private readonly Timeline _timeline = new();
     private readonly ColumnStateMachineTree _col;
 
-    public StateMachineWindow(BossModule module) : base($"{module.GetType().Name} timeline", true, new(600f, 600f))
+    public StateMachineWindow(BossModule module) : base(Loc.Id($"{module.GetType().Name} timeline"), true, new(600f, 600f))
     {
         _col = _timeline.Columns.Add(new ColumnStateMachineTree(_timeline, new(module.StateMachine), module.StateMachine));
         _timeline.MaxTime = _col.Tree.TotalMaxTime;
@@ -15,11 +15,11 @@ public sealed class StateMachineWindow : UIWindow
 
     public override void Draw()
     {
-        if (ImGui.CollapsingHeader("Settings"))
+        if (ImGui.CollapsingHeader(Loc.Id("Settings")))
         {
-            ImGui.Checkbox("Draw unnamed nodes", ref _col.DrawUnnamedNodes);
-            ImGui.Checkbox("Draw tankbuster nodes only", ref _col.DrawTankbusterNodesOnly);
-            ImGui.Checkbox("Draw raidwide nodes only", ref _col.DrawRaidwideNodesOnly);
+            ImGui.Checkbox(Loc.Id("Draw unnamed nodes"), ref _col.DrawUnnamedNodes);
+            ImGui.Checkbox(Loc.Id("Draw tankbuster nodes only"), ref _col.DrawTankbusterNodesOnly);
+            ImGui.Checkbox(Loc.Id("Draw raidwide nodes only"), ref _col.DrawRaidwideNodesOnly);
         }
 
         _timeline.CurrentTime = null;

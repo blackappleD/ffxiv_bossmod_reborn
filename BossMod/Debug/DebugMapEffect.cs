@@ -25,7 +25,7 @@ sealed unsafe class DebugMapEffect : IDisposable
 
     public void Draw()
     {
-        if (ImGui.Button("Load effect list for current zone"))
+        if (ImGui.Button(Loc.Id("Load effect list for current zone")))
         {
             var inst = EventFramework.Instance()->GetContentDirector();
             if (inst == null)
@@ -45,18 +45,18 @@ sealed unsafe class DebugMapEffect : IDisposable
         ImGui.SetNextItemWidth(100 * ImGuiHelpers.GlobalScale);
         ImGui.InputText("ii.ssssssss", ref _current, 12);
         ImGui.SameLine();
-        if (ImGui.Button("Execute"))
+        if (ImGui.Button(Loc.Id("Execute")))
         {
             ApplyMapEffect();
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Clear history"))
+        if (ImGui.Button(Loc.Id("Clear history")))
         {
             _history.Clear();
         }
 
-        using var hist = ImRaii.ListBox("History");
+        using var hist = ImRaii.ListBox(Loc.Id("History"));
         if (hist)
         {
             foreach (var h in _history)

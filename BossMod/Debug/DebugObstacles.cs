@@ -16,30 +16,30 @@ sealed class DebugObstacles(ObstacleMapManager obstacles, IDalamudPluginInterfac
         {
             base.DrawSidebar();
 
-            if (ImGui.InputFloat3("Min bounds", ref e.MinBounds))
+            if (ImGui.InputFloat3(Loc.Id("Min bounds"), ref e.MinBounds))
             {
                 owner.MarkModified();
             }
 
-            if (ImGui.InputFloat3("Max bounds", ref e.MaxBounds))
+            if (ImGui.InputFloat3(Loc.Id("Max bounds"), ref e.MaxBounds))
             {
                 owner.MarkModified();
             }
 
-            ImGui.TextUnformatted($"Map area: {e.Origin} + {Bitmap.Width}x{Bitmap.Height} * {Bitmap.PixelSize}");
-            if (ImGui.InputInt("Half-width in cells", ref e.ViewWidth))
+            ImGui.TextUnformatted(Loc.Format("Map area: {0} + {1}x{2} * {3}", e.Origin, Bitmap.Width, Bitmap.Height, Bitmap.PixelSize));
+            if (ImGui.InputInt(Loc.Id("Half-width in cells"), ref e.ViewWidth))
             {
                 owner.MarkModified();
             }
 
-            if (ImGui.InputInt("Half-height in cells", ref e.ViewHeight))
+            if (ImGui.InputInt(Loc.Id("Half-height in cells"), ref e.ViewHeight))
             {
                 owner.MarkModified();
             }
 
-            ImGui.TextUnformatted($"Change resolution:");
+            ImGui.TextUnformatted(Loc.Tr("Change resolution:"));
             ImGui.SameLine();
-            if (ImGui.Button("increase"))
+            if (ImGui.Button(Loc.Id("increase")))
             {
                 var newBitmap = new Bitmap(Bitmap.Width * 2, Bitmap.Height * 2, Bitmap.Color0, Bitmap.Color1, Bitmap.Resolution * 2);
                 Bitmap.FullRegion.UpsampleTo(newBitmap, 0, 0);
@@ -47,7 +47,7 @@ sealed class DebugObstacles(ObstacleMapManager obstacles, IDalamudPluginInterfac
                 --ZoomLevel;
             }
             ImGui.SameLine();
-            if (ImGui.Button("decrease"))
+            if (ImGui.Button(Loc.Id("decrease")))
             {
                 var newBitmap = new Bitmap(Bitmap.Width / 2, Bitmap.Height / 2, Bitmap.Color0, Bitmap.Color1, Bitmap.Resolution / 2);
                 Bitmap.FullRegion.DownsampleTo(newBitmap, 0, 0, true);
@@ -55,12 +55,12 @@ sealed class DebugObstacles(ObstacleMapManager obstacles, IDalamudPluginInterfac
                 ++ZoomLevel;
             }
 
-            if (ImGui.Button("Save"))
+            if (ImGui.Button(Loc.Id("Save")))
             {
                 Bitmap.Save(owner.Obstacles.RootPath + e.Filename);
             }
             ImGui.SameLine();
-            if (ImGui.Button("Reload"))
+            if (ImGui.Button(Loc.Id("Reload")))
             {
                 using var stream = File.OpenRead(owner.Obstacles.RootPath + e.Filename);
                 CheckpointNoClone(new(stream));
@@ -71,28 +71,28 @@ sealed class DebugObstacles(ObstacleMapManager obstacles, IDalamudPluginInterfac
             using (ImRaii.Disabled(_deltaCells == 0))
             {
                 ImGui.SameLine();
-                if (ImGui.Button("left"))
+                if (ImGui.Button(Loc.Id("left")))
                 {
                     var newBitmap = new Bitmap(Bitmap.Width + _deltaCells, Bitmap.Height, Bitmap.Color0, Bitmap.Color1, Bitmap.Resolution);
                     Bitmap.FullRegion.CopyTo(newBitmap, _deltaCells, 0);
                     CheckpointNoClone(newBitmap);
                 }
                 ImGui.SameLine();
-                if (ImGui.Button("top"))
+                if (ImGui.Button(Loc.Id("top")))
                 {
                     var newBitmap = new Bitmap(Bitmap.Width, Bitmap.Height + _deltaCells, Bitmap.Color0, Bitmap.Color1, Bitmap.Resolution);
                     Bitmap.FullRegion.CopyTo(newBitmap, 0, _deltaCells);
                     CheckpointNoClone(newBitmap);
                 }
                 ImGui.SameLine();
-                if (ImGui.Button("right"))
+                if (ImGui.Button(Loc.Id("right")))
                 {
                     var newBitmap = new Bitmap(Bitmap.Width + _deltaCells, Bitmap.Height, Bitmap.Color0, Bitmap.Color1, Bitmap.Resolution);
                     Bitmap.FullRegion.CopyTo(newBitmap, 0, 0);
                     CheckpointNoClone(newBitmap);
                 }
                 ImGui.SameLine();
-                if (ImGui.Button("bottom"))
+                if (ImGui.Button(Loc.Id("bottom")))
                 {
                     var newBitmap = new Bitmap(Bitmap.Width, Bitmap.Height + _deltaCells, Bitmap.Color0, Bitmap.Color1, Bitmap.Resolution);
                     Bitmap.FullRegion.CopyTo(newBitmap, 0, 0);
@@ -109,11 +109,11 @@ sealed class DebugObstacles(ObstacleMapManager obstacles, IDalamudPluginInterfac
                 var playerDeepInObstacle = px >= 0 && py >= 0 && px < Bitmap.Width && py < Bitmap.Height && Bitmap[px, py]
                     && (px == 0 || Bitmap[px - 1, py]) && (py == 0 || Bitmap[px, py - 1]) && (px == (Bitmap.Width - 1) || Bitmap[px + 1, py]) && (py == (Bitmap.Height - 1) || Bitmap[px, py + 1]);
                 using var color = ImRaii.PushColor(ImGuiCol.Text, Colors.TextColor3, playerDeepInObstacle);
-                ImGui.TextUnformatted($"Player cell: {px}x{py}");
+                ImGui.TextUnformatted(Loc.Format("Player cell: {0}x{1}", px, py));
                 if (playerDeepInObstacle)
                 {
                     ImGui.SameLine();
-                    UIMisc.HelpMarker("Warning: player is deep in the obstacle, pathfinding won't find a good way out...");
+                    UIMisc.HelpMarker(Loc.Tr("Warning: player is deep in the obstacle, pathfinding won't find a good way out..."));
                 }
             }
 
@@ -155,21 +155,21 @@ sealed class DebugObstacles(ObstacleMapManager obstacles, IDalamudPluginInterfac
         protected override void DrawSidebar()
         {
             var player = _owner.Obstacles.World.Party.Player();
-            ImGui.TextUnformatted("IPC temp map");
-            ImGui.TextUnformatted($"Generation task: {_owner.Obstacles.GenerationStatus}");
-            ImGui.TextUnformatted($"Key: {_e.Filename}");
-            ImGui.TextUnformatted($"Bounds min {_e.MinBounds}  max {_e.MaxBounds}");
-            ImGui.TextUnformatted($"Origin {_e.Origin}  grid {Bitmap.Width}x{Bitmap.Height}  cell {Bitmap.PixelSize:F3} yalms");
+            ImGui.TextUnformatted(Loc.Tr("IPC temp map"));
+            ImGui.TextUnformatted(Loc.Format("Generation task: {0}", _owner.Obstacles.GenerationStatus));
+            ImGui.TextUnformatted(Loc.Format("Key: {0}", _e.Filename));
+            ImGui.TextUnformatted(Loc.Format("Bounds min {0}  max {1}", _e.MinBounds, _e.MaxBounds));
+            ImGui.TextUnformatted(Loc.Format("Origin {0}  grid {1}x{2}  cell {3:F3} yalms", _e.Origin, Bitmap.Width, Bitmap.Height, Bitmap.PixelSize));
 
             if (player != null)
             {
                 var playerOffset = ((player.Position - _e.Origin) / Bitmap.PixelSize).Floor();
-                ImGui.TextUnformatted($"Player cell: {playerOffset.X}x/{playerOffset.Z}z");
+                ImGui.TextUnformatted(Loc.Format("Player cell: {0}x/{1}z", playerOffset.X, playerOffset.Z));
             }
 
             if (HoveredPixel.x >= 0 && HoveredPixel.y >= 0)
             {
-                ImGui.TextUnformatted($"Hovered cell: {HoveredPixel.x}x{HoveredPixel.y}");
+                ImGui.TextUnformatted(Loc.Format("Hovered cell: {0}x{1}", HoveredPixel.x, HoveredPixel.y));
                 var y = player?.PosRot.Y ?? 0;
                 var tl = _e.Origin + new WDir(HoveredPixel.x, HoveredPixel.y) * Bitmap.PixelSize;
                 var br = tl + new WDir(Bitmap.PixelSize, Bitmap.PixelSize);
@@ -203,33 +203,33 @@ sealed class DebugObstacles(ObstacleMapManager obstacles, IDalamudPluginInterfac
 
     public void Draw()
     {
-        ImGui.TextUnformatted($"Database root: {Obstacles.RootPath}");
+        ImGui.TextUnformatted(Loc.Format("Database root: {0}", Obstacles.RootPath));
 
         ImGui.Separator();
-        ImGui.TextUnformatted("Temp map (IPC / memory)");
+        ImGui.TextUnformatted(Loc.Tr("Temp map (IPC / memory)"));
         var gen = Obstacles.GenerationStatus;
         if (gen is not TaskStatus.RanToCompletion)
         {
-            ImGui.TextUnformatted($"Build task: {gen}");
+            ImGui.TextUnformatted(Loc.Format("Build task: {0}", gen));
         }
 
         if (Obstacles.TempMapMeta is not { } meta)
         {
-            ImGui.TextDisabled("No temp map loaded.");
+            ImGui.TextDisabled(Loc.Tr("No temp map loaded."));
         }
         else
         {
-            ImGui.TextUnformatted($"{meta.Filename}  {meta.Width}x{meta.Height} cells");
-            if (ImGui.Button("Open viewer##tempObstacle") && Obstacles.TryCloneTempMap(out var ent, out var bmp))
+            ImGui.TextUnformatted(Loc.Format("{0}  {1}x{2} cells", meta.Filename, meta.Width, meta.Height));
+            if (ImGui.Button(Loc.Tr("Open viewer##tempObstacle")) && Obstacles.TryCloneTempMap(out var ent, out var bmp))
             {
-                _ = new UISimpleWindow($"Temp obstacle map: {ent.Filename}", new TempMapViewer(this, bmp, ent).Draw, true, new(1000, 1000));
+                _ = new UISimpleWindow(Loc.Format("Temp obstacle map: {0}", ent.Filename), new TempMapViewer(this, bmp, ent).Draw, true, new(1000, 1000));
             }
         }
 
         var curZoneEntries = Obstacles.Database.Entries.GetValueOrDefault(Obstacles.CurrentKey());
         using (ImRaii.Disabled(!Obstacles.CanEditDatabase()))
         {
-            if (ImGui.Button("Create new region"))
+            if (ImGui.Button(Loc.Id("Create new region")))
             {
                 CreateRegion();
             }
@@ -237,38 +237,38 @@ sealed class DebugObstacles(ObstacleMapManager obstacles, IDalamudPluginInterfac
             ImGui.SameLine();
             using (ImRaii.Disabled(!_dbModified))
             {
-                if (ImGui.Button("Save"))
+                if (ImGui.Button(Loc.Id("Save")))
                 {
                     SaveDatabase();
                 }
             }
 
             ImGui.SameLine();
-            if (ImGui.Button(_dbModified ? "Revert" : "Reload"))
+            if (ImGui.Button(Loc.Id(_dbModified ? "Revert" : "Reload")))
             {
                 ReloadDatabase();
             }
         }
 
-        ImGui.DragFloat3("Map min bounds", ref _minBounds, 1, -1024, 1024);
-        ImGui.DragFloat3("Map max bounds", ref _maxBounds, 1, -1024, 1024);
+        ImGui.DragFloat3(Loc.Id("Map min bounds"), ref _minBounds, 1, -1024, 1024);
+        ImGui.DragFloat3(Loc.Id("Map max bounds"), ref _maxBounds, 1, -1024, 1024);
 
-        if (ImGui.Button("Add current location as extra seed point") && Obstacles.World.Party.Player() is { } player)
+        if (ImGui.Button(Loc.Id("Add current location as extra seed point")) && Obstacles.World.Party.Player() is { } player)
             _extraPoints.Add(player.PosRot.XYZ());
 
         ImGui.SameLine();
-        if (ImGui.Button("Clear points"))
+        if (ImGui.Button(Loc.Id("Clear points")))
             _extraPoints.Clear();
 
-        foreach (var _ in _tree.Node("Extra points", _extraPoints.Count == 0))
+        foreach (var _ in _tree.Node(Loc.Id("Extra points"), _extraPoints.Count == 0))
             _tree.LeafNodes(_extraPoints, Utils.Vec3String);
 
-        foreach (var n in _tree.Node($"Current zone: {Obstacles.World.CurrentZone}.{Obstacles.World.CurrentCFCID}###curr", curZoneEntries == null || curZoneEntries.Count == 0))
+        foreach (var n in _tree.Node(Loc.Format("Current zone: {0}.{1}###curr", Obstacles.World.CurrentZone, Obstacles.World.CurrentCFCID), curZoneEntries == null || curZoneEntries.Count == 0))
         {
             DrawEntries(curZoneEntries ?? []);
         }
 
-        foreach (var n in _tree.Nodes(Obstacles.Database.Entries, kv => new($"Zone {kv.Key >> 16}.{kv.Key & 0xFFFF}", kv.Value.Count == 0)))
+        foreach (var n in _tree.Nodes(Obstacles.Database.Entries, kv => new(Loc.Format("Zone {0}.{1}", kv.Key >> 16, kv.Key & 0xFFFF), kv.Value.Count == 0)))
         {
             DrawEntries(n.Value);
         }
@@ -288,7 +288,7 @@ sealed class DebugObstacles(ObstacleMapManager obstacles, IDalamudPluginInterfac
             var index = i;
             using (ImRaii.Disabled(i == 0))
             {
-                if (ImGui.Button("Move up"))
+                if (ImGui.Button(Loc.Id("Move up")))
                 {
                     modifications += () => (entries[index], entries[index - 1]) = (entries[index - 1], entries[index]);
                 }
@@ -297,20 +297,20 @@ sealed class DebugObstacles(ObstacleMapManager obstacles, IDalamudPluginInterfac
             ImGui.SameLine();
             using (ImRaii.Disabled(i == entries.Count - 1))
             {
-                if (ImGui.Button("Move down"))
+                if (ImGui.Button(Loc.Id("Move down")))
                 {
                     modifications += () => (entries[index], entries[index + 1]) = (entries[index + 1], entries[index]);
                 }
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("Delete"))
+            if (ImGui.Button(Loc.Id("Delete")))
             {
                 modifications += () => DeleteMap(entries, index);
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("Edit"))
+            if (ImGui.Button(Loc.Id("Edit")))
             {
                 OpenEditor(entries[index]);
             }
@@ -370,6 +370,6 @@ sealed class DebugObstacles(ObstacleMapManager obstacles, IDalamudPluginInterfac
     {
         using var stream = File.OpenRead(Obstacles.RootPath + entry.Filename);
         var editor = new Editor(this, new(stream), entry);
-        _ = new UISimpleWindow($"Obstacle map {entry.Filename}", editor.Draw, true, new(1000, 1000));
+        _ = new UISimpleWindow(Loc.Format("Obstacle map {0}", entry.Filename), editor.Draw, true, new(1000, 1000));
     }
 }

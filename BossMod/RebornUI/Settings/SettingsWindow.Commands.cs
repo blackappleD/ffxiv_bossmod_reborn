@@ -75,18 +75,18 @@ internal sealed partial class SettingsWindow
 
     private static void DrawCommandCard(string id, string title, FontAwesomeIcon icon, string prefix, (string, string)[] commands, int index)
     {
-        using var card = M3Card.Begin(id, title, icon, M3.AccentFor(index), subtitle: $"Start with {prefix}");
+        using var card = M3Card.Begin(id, Loc.Tr(title), icon, M3.AccentFor(index), subtitle: Loc.Format("Start with {0}", prefix));
         using var scope = ImRaii.PushId(id);
         var button = M3Widgets.IconButtonSize;
         foreach (var (args, description) in commands)
         {
             var command = args.Length > 0 ? $"{prefix} {args}" : prefix;
-            var row = M3SettingRow.Begin(command, description, new(button, button), M3.Scheme.Primary);
+            var row = M3SettingRow.Begin(command, Loc.Tr(description), new(button, button), M3.Scheme.Primary);
             ImGui.SetCursorScreenPos(row.ControlPosition);
-            if (M3Widgets.IconButton($"##{command}", FontAwesomeIcon.Copy, "Copy to clipboard"))
+            if (M3Widgets.IconButton($"##{command}", FontAwesomeIcon.Copy, Loc.Tr("Copy to clipboard")))
             {
                 ImGui.SetClipboardText(command);
-                M3Snackbar.Show($"Copied {command}");
+                M3Snackbar.Show(Loc.Format("Copied {0}", command));
             }
             M3SettingRow.End(row);
         }

@@ -22,7 +22,7 @@ public static class UIMisc
             }
         }
         using var disable = ImRaii.Disabled(isDisabled);
-        var res = ImGui.Button(label, new(width, default));
+        var res = ImGui.Button(Loc.Id(label), new(width, default));
         if (isDisabled && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
         {
             using var tooltip = ImRaii.Tooltip();
@@ -31,7 +31,7 @@ public static class UIMisc
                 ref readonly var d = ref disabled[i];
                 if (d.disabled)
                 {
-                    ImGui.TextUnformatted(d.reason);
+                    ImGui.TextUnformatted(Loc.Tr(d.reason));
                 }
             }
         }
@@ -110,7 +110,7 @@ public static class UIMisc
         using (ImRaii.PushFont(Service.IconFont))
             iconSize = ImGui.CalcTextSize(icon.ToIconString());
 
-        var textStr = text;
+        var textStr = Loc.Tr(text);
         if (textStr.Contains('#', StringComparison.Ordinal))
             textStr = textStr[..textStr.IndexOf('#', StringComparison.Ordinal)];
 
@@ -155,7 +155,7 @@ public static class UIMisc
         {
             using var tooltip = ImRaii.Tooltip();
             using var wrap = ImRaii.TextWrapPos(ImGui.GetFontSize() * 35f);
-            ImGui.TextUnformatted(helpText());
+            ImGui.TextUnformatted(Loc.Tr(helpText()));
         }
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

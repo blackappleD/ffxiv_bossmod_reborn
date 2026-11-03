@@ -76,6 +76,7 @@ public sealed class StateMachine(List<StateMachine.Phase> phases)
     private string _drawFutureLine = "";
     private long _drawCountdownKey;
     private bool _drawCacheValid;
+    private int _drawCacheLocVersion;
 
     public void Start(DateTime now)
     {
@@ -120,20 +121,21 @@ public sealed class StateMachine(List<StateMachine.Phase> phases)
     {
         var active = ActiveState;
         var countdownKey = active != null ? DrawCountdownKey(active, TimeSinceTransition) : long.MinValue;
-        if (!_drawCacheValid || !ReferenceEquals(_drawCachedState, active))
+        if (!_drawCacheValid || !ReferenceEquals(_drawCachedState, active) || _drawCacheLocVersion != Loc.Version)
         {
-            (var activeName, var next) = active != null ? BuildComplexStateNameAndDuration(active, TimeSinceTransition, true) : ("Inactive", null);
-            _drawCurrentLine = $"Cur: {activeName}";
-            var future = BuildStateChain(next, " ---> ");
-            _drawFutureLine = future.Length == 0 ? "" : $"Then: {future}";
+            (var activeName, var next) = active != null ? BuildComplexStateNameAndDuration(active, TimeSinceTransition, true, true) : (Loc.Tr("Inactive"), null);
+            _drawCurrentLine = Loc.Format("Cur: {0}", activeName);
+            var future = BuildStateChain(next, " ---> ", translate: true);
+            _drawFutureLine = future.Length == 0 ? "" : Loc.Format("Then: {0}", future);
+            _drawCacheLocVersion = Loc.Version;
             _drawCachedState = active;
             _drawCountdownKey = countdownKey;
             _drawCacheValid = true;
         }
         else if (_drawCountdownKey != countdownKey)
         {
-            var activeName = BuildComplexStateNameAndDuration(active!, TimeSinceTransition, true).Item1;
-            _drawCurrentLine = $"Cur: {activeName}";
+            var activeName = BuildComplexStateNameAndDuration(active!, TimeSinceTransition, true, true).Item1;
+            _drawCurrentLine = Loc.Format("Cur: {0}", activeName);
             _drawCountdownKey = countdownKey;
         }
 
@@ -170,13 +172,13 @@ public sealed class StateMachine(List<StateMachine.Phase> phases)
         static long Key(int owner, float value) => ((long)owner << 32) | (uint)BitConverter.SingleToInt32Bits(MathF.Round(value, 1, MidpointRounding.ToEven));
     }
 
-    public string BuildStateChain(State? start, string sep, int maxCount = 5)
+    public string BuildStateChain(State? start, string sep, int maxCount = 5, bool translate = false)
     {
         var count = 0;
         var res = new StringBuilder();
         while (start != null && count < maxCount)
         {
-            (var name, var next) = BuildComplexStateNameAndDuration(start, 0, false);
+            (var name, var next) = BuildComplexStateNameAndDuration(start, 0, false, translate);
             if (name.Length > 0)
             {
                 if (res.Length > 0)
@@ -209,13 +211,14 @@ public sealed class StateMachine(List<StateMachine.Phase> phases)
         return DateTime.MaxValue;
     }
 
-    private (string, State?) BuildComplexStateNameAndDuration(State start, float timeActive, bool writeTime)
+    private (string, State?) BuildComplexStateNameAndDuration(State start, float timeActive, bool writeTime, bool translate = false)
     {
-        var res = new StringBuilder(start.Name);
+        var res = new StringBuilder(translate ? Loc.Tr(start.Name) : start.Name);
         var timeLeft = Math.Max(0f, start.Duration - timeActive);
+        var inFormat = translate ? Loc.Tr(" in {0:f1}s") : " in {0:f1}s";
         if (writeTime && res.Length > 0)
         {
-            res.Append($" in {timeLeft:f1}s");
+            res.AppendFormat(inFormat, timeLeft);
             timeLeft = 0;
         }
 
@@ -230,11 +233,11 @@ public sealed class StateMachine(List<StateMachine.Phase> phases)
                     res.Append(" + ");
                 }
 
-                res.Append(start.Name);
+                res.Append(translate ? Loc.Tr(start.Name) : start.Name);
 
                 if (writeTime && timeLeft > 0)
                 {
-                    res.Append($" in {timeLeft:f1}s");
+                    res.AppendFormat(inFormat, timeLeft);
                     timeLeft = 0;
                 }
             }
@@ -247,7 +250,7 @@ public sealed class StateMachine(List<StateMachine.Phase> phases)
                 res.Append("???");
             }
 
-            res.Append($" in {timeLeft:f1}s");
+            res.AppendFormat(inFormat, timeLeft);
         }
 
         return (res.ToString(), start.NextStates?.Length == 1 ? start.NextStates[0] : null);

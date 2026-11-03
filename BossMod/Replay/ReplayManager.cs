@@ -65,7 +65,7 @@ public sealed class ReplayManager(RotationDatabase rotationDB, string logDirecto
         public void Show()
         {
             Analysis ??= new([.. Replays.Where(r => r.Replay.IsCompletedSuccessfully && r.Replay.Result.Ops.Count > 0).Select(r => r.Replay.Result)]);
-            Window ??= new($"Multiple logs: {Identifier}", Analysis.Draw, false, new(1200f, 800f));
+            Window ??= new(Loc.Id($"Multiple logs: {Identifier}"), Analysis.Draw, false, new(1200f, 800f));
             Window.IsOpen = true;
         }
     }
@@ -164,11 +164,11 @@ public sealed class ReplayManager(RotationDatabase rotationDB, string logDirecto
             }
             else if (e.Replay.IsFaulted || e.Replay.Result.Ops.Count == 0)
             {
-                ImGui.TextUnformatted("(failed)");
+                ImGui.TextUnformatted(Loc.Tr("(failed)"));
             }
             else
             {
-                if (ImGui.Button("Actions...", new(100f, default)))
+                if (ImGui.Button(Loc.Id("Actions..."), new(100f, default)))
                 {
                     ImGui.OpenPopup("ctx");
                 }
@@ -176,32 +176,32 @@ public sealed class ReplayManager(RotationDatabase rotationDB, string logDirecto
                 using var popup = ImRaii.Popup("ctx");
                 if (popup)
                 {
-                    if (ImGui.MenuItem("Show"))
+                    if (ImGui.MenuItem(Loc.Id("Show")))
                     {
                         e.Show(_rotationDB);
                     }
-                    if (ImGui.MenuItem("Convert to verbose"))
+                    if (ImGui.MenuItem(Loc.Id("Convert to verbose")))
                     {
                         ConvertLog(e.Replay.Result, ReplayLogFormat.TextVerbose, _convertAnonymize);
                     }
 
-                    if (ImGui.MenuItem("Convert to short text"))
+                    if (ImGui.MenuItem(Loc.Id("Convert to short text")))
                     {
                         ConvertLog(e.Replay.Result, ReplayLogFormat.TextCondensed, _convertAnonymize);
                     }
 
-                    if (ImGui.MenuItem("Convert to uncompressed binary"))
+                    if (ImGui.MenuItem(Loc.Id("Convert to uncompressed binary")))
                     {
                         ConvertLog(e.Replay.Result, ReplayLogFormat.BinaryUncompressed, _convertAnonymize);
                     }
 
-                    if (ImGui.MenuItem("Convert to compressed binary"))
+                    if (ImGui.MenuItem(Loc.Id("Convert to compressed binary")))
                     {
                         ConvertLog(e.Replay.Result, ReplayLogFormat.BinaryCompressed, _convertAnonymize);
                     }
                     ImGui.Separator();
                     ImGuiP.PushItemFlag(ImGuiItemFlags.SelectableDontClosePopup, true);
-                    if (ImGui.MenuItem("Anonymize replay during conversion", _convertAnonymize))
+                    if (ImGui.MenuItem(Loc.Id("Anonymize replay during conversion"), _convertAnonymize))
                     {
                         _convertAnonymize = !_convertAnonymize;
                     }
@@ -210,7 +210,7 @@ public sealed class ReplayManager(RotationDatabase rotationDB, string logDirecto
             }
 
             ImGui.TableNextColumn();
-            if (ImGui.Button(e.Replay.IsCompleted ? "Unload" : "Cancel"))
+            if (ImGui.Button(Loc.Id(e.Replay.IsCompleted ? "Unload" : "Cancel")))
             {
                 e.Dispose();
                 foreach (var a in _analysisEntries.Where(a => !a.Disposed && a.Replays.Contains(e)))
@@ -239,7 +239,7 @@ public sealed class ReplayManager(RotationDatabase rotationDB, string logDirecto
         var dispose = false;
         var numSelected = _replayEntries.Count(e => e.Selected);
         var shouldSelectAll = _replayEntries.Count == 0 || numSelected < _replayEntries.Count;
-        if (ImGui.Button(shouldSelectAll ? "Select all" : "Unselect all"))
+        if (ImGui.Button(Loc.Id(shouldSelectAll ? "Select all" : "Unselect all")))
         {
             foreach (var e in _replayEntries)
             {
@@ -249,12 +249,12 @@ public sealed class ReplayManager(RotationDatabase rotationDB, string logDirecto
         using (ImRaii.Disabled(numSelected == 0))
         {
             ImGui.SameLine();
-            if (ImGui.Button("Analyze selected"))
+            if (ImGui.Button(Loc.Id("Analyze selected")))
             {
                 _analysisEntries.Add(new((++_nextAnalysisId).ToString(), [.. _replayEntries.Where(e => e.Selected)]));
             }
             ImGui.SameLine();
-            if (ImGui.Button("Unload selected"))
+            if (ImGui.Button(Loc.Id("Unload selected")))
             {
                 foreach (var e in _replayEntries.Where(e => e.Selected))
                 {
@@ -268,7 +268,7 @@ public sealed class ReplayManager(RotationDatabase rotationDB, string logDirecto
             }
         }
         ImGui.SameLine();
-        if (ImGui.Button("Unload all"))
+        if (ImGui.Button(Loc.Id("Unload all")))
         {
             foreach (var e in _replayEntries)
             {
@@ -294,7 +294,7 @@ public sealed class ReplayManager(RotationDatabase rotationDB, string logDirecto
         ImGui.SameLine();
         if (ImGui.Button("..."))
         {
-            _fileDialog ??= new FileDialog("select_log", "Select file or directory", "Log files{.log},All files{.*}", _logDirectory, "", ".log", 1, false, ImGuiFileDialogFlags.SelectOnly);
+            _fileDialog ??= new FileDialog("select_log", Loc.Tr("Select file or directory"), "Log files{.log},All files{.*}", _logDirectory, "", ".log", 1, false, ImGuiFileDialogFlags.SelectOnly);
             // work around an oversight(?) in dalamud
             // TODO: we should use FileDialogManager instead
             _fileDialog.SelectionChanged += (e, s) => { };
@@ -303,7 +303,7 @@ public sealed class ReplayManager(RotationDatabase rotationDB, string logDirecto
         ImGui.SameLine();
         using (ImRaii.Disabled(_path.Length == 0 || _replayEntries.Any(e => e.Path == _path)))
         {
-            if (ImGui.Button("Open"))
+            if (ImGui.Button(Loc.Id("Open")))
             {
                 CleanPath();
                 _replayEntries.Add(new(_path, true));
@@ -312,7 +312,7 @@ public sealed class ReplayManager(RotationDatabase rotationDB, string logDirecto
         ImGui.SameLine();
         using (ImRaii.Disabled(_path.Length == 0 || _analysisEntries.Any(e => e.Identifier == _path)))
         {
-            if (ImGui.Button("Analyze all"))
+            if (ImGui.Button(Loc.Id("Analyze all")))
             {
                 CleanPath();
                 var replays = LoadAll(_path);
@@ -325,7 +325,7 @@ public sealed class ReplayManager(RotationDatabase rotationDB, string logDirecto
         ImGui.SameLine();
         using (ImRaii.Disabled(_path.Length == 0))
         {
-            if (ImGui.Button("Load all"))
+            if (ImGui.Button(Loc.Id("Load all")))
             {
                 CleanPath();
                 LoadAll(_path);

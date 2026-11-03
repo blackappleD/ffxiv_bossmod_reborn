@@ -113,7 +113,7 @@ sealed class TEASpecific
 
     public void Draw(UITree tree)
     {
-        foreach (var _ in tree.Node("Hand of Prayer/Parting: bait range"))
+        foreach (var _ in tree.Node(Loc.Id("Hand of Prayer/Parting: bait range")))
         {
             _plotHandBaits.Begin();
             foreach (var i in _handBaits)
@@ -123,7 +123,7 @@ sealed class TEASpecific
 
             _plotHandBaits.End();
         }
-        foreach (var _ in tree.Node("Hand of Parting: resolves damage"))
+        foreach (var _ in tree.Node(Loc.Id("Hand of Parting: resolves damage")))
         {
             _plotHandResolvesParting.Begin();
             foreach (var i in _handResolvesParting)
@@ -133,7 +133,7 @@ sealed class TEASpecific
 
             _plotHandResolvesParting.End();
         }
-        foreach (var _ in tree.Node("Hand of Prayer: resolves damage"))
+        foreach (var _ in tree.Node(Loc.Id("Hand of Prayer: resolves damage")))
         {
             _plotHandResolvesPrayer.Begin();
             foreach (var i in _handResolvesPrayer)
@@ -143,7 +143,7 @@ sealed class TEASpecific
 
             _plotHandResolvesPrayer.End();
         }
-        foreach (var _ in tree.Node("Plaint of Surety: damage on close"))
+        foreach (var _ in tree.Node(Loc.Id("Plaint of Surety: damage on close")))
         {
             _plotSuretyResolvesClose.Begin();
             foreach (var i in _suretyResolvesClose)
@@ -153,7 +153,7 @@ sealed class TEASpecific
 
             _plotSuretyResolvesClose.End();
         }
-        foreach (var _ in tree.Node("Plaint of Surety: damage on far"))
+        foreach (var _ in tree.Node(Loc.Id("Plaint of Surety: damage on far")))
         {
             _plotSuretyResolvesFar.Begin();
             foreach (var i in _suretyResolvesFar)

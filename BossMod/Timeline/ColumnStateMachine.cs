@@ -92,7 +92,7 @@ public abstract class ColumnStateMachine(Timeline timeline, StateMachineTree tre
             var nodeText = TextDisplay switch
             {
                 NodeTextDisplay.ID => $"{node.State.ID:X8}",
-                NodeTextDisplay.IDName => $"{node.State.ID:X8} '{node.State.Name}'",
+                NodeTextDisplay.IDName => $"{node.State.ID:X8} '{Loc.Tr(node.State.Name)}'",
                 _ => ""
             };
             if (nodeText.Length > 0)
@@ -123,11 +123,11 @@ public abstract class ColumnStateMachine(Timeline timeline, StateMachineTree tre
     {
         List<string> res =
         [
-            $"State: {n.State.ID:X8} '{n.State.Name}'",
-            $"Comment: {n.State.Comment}",
-            $"Phase: {n.PhaseID} '{Tree.Phases[n.PhaseID].Name}'",
-            $"Time: {n.Time:f1} ({n.State.Duration:f1} from prev)",
-            $"Flags: {n.State.EndHint}",
+            Loc.Format("State: {0:X8} '{1}'", n.State.ID, Loc.Tr(n.State.Name)),
+            Loc.Format("Comment: {0}", Loc.Tr(n.State.Comment)),
+            Loc.Format("Phase: {0} '{1}'", n.PhaseID, Loc.Tr(Tree.Phases[n.PhaseID].Name)),
+            Loc.Format("Time: {0:f1} ({1:f1} from prev)", n.Time, n.State.Duration),
+            Loc.Format("Flags: {0}", n.State.EndHint),
         ];
         return res;
     }

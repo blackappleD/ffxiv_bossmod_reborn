@@ -1,0 +1,12 @@
+{
+  "Class: {0}": "职业：{0}",
+  "Shockwave": "冲击波",
+  "Move to specific point": "移动到指定位置",
+  "Do nothing": "什么都不做",
+  "Bozja": "博兹雅",
+  "Water in S tower": "水分摊进南塔",
+  "Water in N tower": "水分摊进北塔",
+  "Eater HP: {0}": "食罪灵血量：{0}",
+  "Replay timeline: {0} @ {1:O}": "回放时间轴：{0} @ {1:O}",
+  "Automatically pick best target; if player has a target, hit it": "自动选择最佳目标；如果玩家已有目标，就打当前目标"
+}

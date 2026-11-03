@@ -38,9 +38,10 @@ internal static class SettingsLayout
         [typeof(InterfaceConfig)] = new()
         {
             Icon = FontAwesomeIcon.PaintBrush,
-            Description = "Accent color and sizing of the BossMod Reborn windows",
+            Description = "Language, accent color and sizing of the BossMod Reborn windows",
             Sections =
             [
+                new("Language", FontAwesomeIcon.Language, [nameof(InterfaceConfig.Language)]),
                 new("Theme", FontAwesomeIcon.Palette, [nameof(InterfaceConfig.AccentColor)]),
                 new("Sizing", FontAwesomeIcon.TextHeight, [nameof(InterfaceConfig.TextScale), nameof(InterfaceConfig.ElementScale), nameof(InterfaceConfig.PaddingScale), nameof(InterfaceConfig.CompactSettings)]),
             ],
@@ -321,8 +322,9 @@ internal static class SettingsLayout
 
     private static void ButtonRow(string id, string label, string supporting, string button, FontAwesomeIcon icon, Action click)
     {
+        button = Loc.Tr(button);
         var width = M3Widgets.ButtonWidth(icon, button);
-        var row = M3SettingRow.Begin(label, supporting, new(width, M3Widgets.ButtonHeight));
+        var row = M3SettingRow.Begin(Loc.Tr(label), Loc.Tr(supporting), new(width, M3Widgets.ButtonHeight));
         ImGui.SetCursorScreenPos(row.ControlPosition);
         if (M3Widgets.Button(id, button, M3ButtonStyle.Tonal, icon))
         {
@@ -335,7 +337,7 @@ internal static class SettingsLayout
     {
         var rsrEnabled = ActionTweaksConfig.IsRSREnabled();
         const string supporting = "If the usual (mouseover/primary) target is not valid for an action, select the next best target automatically (e.g. co-tank for Shirk).";
-        var row = M3SettingRow.Begin("Smart ability targeting", rsrEnabled ? $"{supporting}\nDo not use with Rotation Solver Reborn, which is currently loaded." : $"{supporting}\nDo not use with Rotation Solver Reborn.",
+        var row = M3SettingRow.Begin(Loc.Tr("Smart ability targeting"), $"{Loc.Tr(supporting)}\n{Loc.Tr(rsrEnabled ? "Do not use with Rotation Solver Reborn, which is currently loaded." : "Do not use with Rotation Solver Reborn.")}",
             M3Widgets.SwitchSize(), rsrEnabled ? M3.Scheme.Error : null);
         ImGui.SetCursorScreenPos(row.ControlPosition);
         if (M3Widgets.Switch("##SmartTargeting", ref config.SmartTargeting))

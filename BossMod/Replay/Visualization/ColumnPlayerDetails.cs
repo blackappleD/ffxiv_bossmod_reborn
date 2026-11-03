@@ -67,17 +67,17 @@ public sealed class ColumnPlayerDetails : Timeline.ColumnGroup
     public void DrawConfig(UITree tree)
     {
         DrawConfigPlanner(tree);
-        foreach (var _1 in tree.Node("Actions"))
+        foreach (var _1 in tree.Node(Loc.Id("Actions")))
         {
             _actions.DrawConfig(tree);
         }
 
-        foreach (var _1 in tree.Node("Statuses"))
+        foreach (var _1 in tree.Node(Loc.Id("Statuses")))
         {
             _statuses.DrawConfig(tree);
         }
 
-        foreach (var _1 in tree.Node("Resources"))
+        foreach (var _1 in tree.Node(Loc.Id("Resources")))
         {
             DrawResourceColumnToggle(_hp, "HP");
             if (_gauge != null)
@@ -101,11 +101,11 @@ public sealed class ColumnPlayerDetails : Timeline.ColumnGroup
     {
         if (_moduleInfo == null || _moduleInfo.PlanLevel <= 0)
         {
-            tree.LeafNode("Planner: not supported for this encounter");
+            tree.LeafNode(Loc.Id("Planner: not supported for this encounter"));
             return;
         }
 
-        foreach (var _1 in tree.Node("Planner"))
+        foreach (var _1 in tree.Node(Loc.Id("Planner")))
         {
             var plans = _planDatabase.GetPlans(_moduleInfo.ModuleType, _playerClass);
             UpdateSelectedPlan(plans, DrawPlanSelector(_moduleInfo.ModuleType, plans, _selectedPlan));
@@ -117,13 +117,13 @@ public sealed class ColumnPlayerDetails : Timeline.ColumnGroup
                 var haveDifferentPhaseTimes = false;
                 for (var i = 0; i < _tree.Phases.Count; ++i)
                 {
-                    _planner.Modified |= ImGui.SliderFloat($"{_tree.Phases[i].Name}###phase-duration-{i}", ref _planner.Plan.PhaseDurations.Ref(i), 0, _tree.Phases[i].MaxTime, $"%.1f (replay: {_tree.Phases[i].Duration:f1} / {_tree.Phases[i].MaxTime:f1})");
+                    _planner.Modified |= ImGui.SliderFloat($"{Loc.Tr(_tree.Phases[i].Name)}###phase-duration-{i}", ref _planner.Plan.PhaseDurations.Ref(i), 0, _tree.Phases[i].MaxTime, Loc.Format("%.1f (replay: {0:f1} / {1:f1})", _tree.Phases[i].Duration, _tree.Phases[i].MaxTime));
                     haveDifferentPhaseTimes |= _planner.Plan.PhaseDurations[i] != _tree.Phases[i].Duration;
                 }
 
                 using (ImRaii.Disabled(!haveDifferentPhaseTimes))
                 {
-                    if (ImGui.Button("Sync phase durations to replay"))
+                    if (ImGui.Button(Loc.Id("Sync phase durations to replay")))
                     {
                         for (var i = 0; i < _tree.Phases.Count; ++i)
                         {
@@ -146,19 +146,19 @@ public sealed class ColumnPlayerDetails : Timeline.ColumnGroup
 
         var isDefault = selection == list.SelectedIndex;
         ImGui.SameLine();
-        if (ImGui.Checkbox("Default", ref isDefault))
+        if (ImGui.Checkbox(Loc.Id("Default"), ref isDefault))
         {
             list.SelectedIndex = isDefault ? selection : -1;
             _planDatabase.ModifyManifest(moduleType, _playerClass);
         }
         ImGui.SameLine();
-        if (UIMisc.Button("Save", _planner == null || !_planner.Modified, "Current plan was not modified"))
+        if (UIMisc.Button(Loc.Id("Save"), _planner == null || !_planner.Modified, Loc.Tr("Current plan was not modified")))
         {
             SaveChanges();
         }
 
         ImGui.SameLine();
-        if (UIMisc.Button("Copy", _planner == null, "No plan selected") && _planner != null && _moduleInfo != null)
+        if (UIMisc.Button(Loc.Id("Copy"), _planner == null, Loc.Tr("No plan selected")) && _planner != null && _moduleInfo != null)
         {
             _planner.Plan.Guid = Guid.NewGuid().ToString();
             _planner.Plan.Name += " Copy";
@@ -168,7 +168,7 @@ public sealed class ColumnPlayerDetails : Timeline.ColumnGroup
             _planner.Modified = false;
         }
         ImGui.SameLine();
-        if (UIMisc.Button("Revert", _planner == null || !_planner.Modified, "Current plan was not modified") && _planner != null && _moduleInfo != null)
+        if (UIMisc.Button(Loc.Id("Revert"), _planner == null || !_planner.Modified, Loc.Tr("Current plan was not modified")) && _planner != null && _moduleInfo != null)
         {
             var plans = _planDatabase.GetPlans(_moduleInfo.ModuleType, _playerClass);
             _planner.Plan = plans.Plans[_selectedPlan].MakeClone();
@@ -176,7 +176,7 @@ public sealed class ColumnPlayerDetails : Timeline.ColumnGroup
             _planner.Modified = false;
         }
         ImGui.SameLine();
-        if (UIMisc.Button("New", _planner != null && _planner.Modified, "Current preset is modified, save or discard changes") && _moduleInfo != null)
+        if (UIMisc.Button(Loc.Id("New"), _planner != null && _planner.Modified, Loc.Tr("Current preset is modified, save or discard changes")) && _moduleInfo != null)
         {
             var plans = _planDatabase.GetPlans(_moduleInfo.ModuleType, _playerClass);
             var plan = new Plan($"New {plans.Plans.Count + 1}", _moduleInfo.ModuleType) { Guid = Guid.NewGuid().ToString(), Class = _playerClass, Level = _moduleInfo.PlanLevel };
@@ -184,7 +184,7 @@ public sealed class ColumnPlayerDetails : Timeline.ColumnGroup
             selection = plans.Plans.Count - 1;
         }
         ImGui.SameLine();
-        if (UIMisc.Button("Delete", 0, (!ImGui.GetIO().KeyShift, "Hold shift to delete"), (_planner == null, "No preset is selected")) && _moduleInfo != null && _selectedPlan >= 0)
+        if (UIMisc.Button(Loc.Id("Delete"), 0, (!ImGui.GetIO().KeyShift, Loc.Tr("Hold shift to delete")), (_planner == null, Loc.Tr("No preset is selected"))) && _moduleInfo != null && _selectedPlan >= 0)
         {
             var plans = _planDatabase.GetPlans(_moduleInfo.ModuleType, _playerClass);
             _planDatabase.ModifyPlan(plans.Plans[_selectedPlan], null);
@@ -216,7 +216,7 @@ public sealed class ColumnPlayerDetails : Timeline.ColumnGroup
     private void DrawResourceColumnToggle(IToggleableColumn col, string name)
     {
         var visible = col.Visible;
-        if (ImGui.Checkbox(name, ref visible))
+        if (ImGui.Checkbox(Loc.Id(name), ref visible))
         {
             col.Visible = visible;
             _resourceSep.Width = _hp.Visible || (_gauge?.Visible ?? false) ? 1 : 0;

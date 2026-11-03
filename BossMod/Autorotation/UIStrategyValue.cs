@@ -22,10 +22,10 @@ public static class UIStrategyValue
             case StrategyValueTrack t:
                 var opt = cfg.Options[t.Option];
                 return [
-                    $"Option: {opt.UIName}",
-                    $"Comment: {value.Comment}",
-                    $"Priority: {(float.IsNaN(t.PriorityOverride) ? $"default ({opt.DefaultPriority:f})" : t.PriorityOverride.ToString("f"))}",
-                    $"Target: {PreviewTarget(t, moduleInfo)}"
+                    Loc.Format("Option: {0}", opt.UIName),
+                    Loc.Format("Comment: {0}", value.Comment),
+                    Loc.Format("Priority: {0}", float.IsNaN(t.PriorityOverride) ? Loc.Format("default ({0:f})", opt.DefaultPriority) : t.PriorityOverride.ToString("f")),
+                    Loc.Format("Target: {0}", PreviewTarget(t, moduleInfo))
                 ];
             default:
                 return [];
@@ -36,15 +36,15 @@ public static class UIStrategyValue
     {
         var targetDetails = value.Target switch
         {
-            StrategyTarget.PartyByAssignment => ((PartyRolesConfig.Assignment)value.TargetParam).ToString(),
+            StrategyTarget.PartyByAssignment => UICombo.EnumString((PartyRolesConfig.Assignment)value.TargetParam),
             StrategyTarget.PartyWithLowestHP or StrategyTarget.PartyByFilter => PreviewParam((StrategyPartyFiltering)value.TargetParam),
-            StrategyTarget.EnemyWithHighestPriority => $"{(StrategyEnemySelection)value.TargetParam}",
+            StrategyTarget.EnemyWithHighestPriority => UICombo.EnumString((StrategyEnemySelection)value.TargetParam),
             StrategyTarget.EnemyByOID => $"{(moduleInfo?.ObjectIDType != null ? GeneratedEnumMetadata.ValueByRaw(moduleInfo.ObjectIDType, (uint)value.TargetParam).ToString() : "???")} (0x{value.TargetParam:X})",
-            StrategyTarget.PointWaymark => $"{(Waymark)value.TargetParam}",
+            StrategyTarget.PointWaymark => UICombo.EnumString((Waymark)value.TargetParam),
             _ => ""
         };
         var offsetDetails = value.Target == StrategyTarget.PointAbsolute ? $" {value.Offset1}x{value.Offset2}" : value.Offset1 != 0 ? $" + R{value.Offset1}, dir={value.Offset2}" : "";
-        return (targetDetails.Length > 0 ? $"{value.Target} ({targetDetails})" : $"{value.Target}") + offsetDetails;
+        return (targetDetails.Length > 0 ? $"{Loc.Tr(value.Target.ToString())} ({targetDetails})" : Loc.Tr(value.Target.ToString())) + offsetDetails;
     }
 
     public static bool DrawEditor(StrategyValue value, StrategyConfigTrack cfg, BossModuleRegistry.Info? moduleInfo, int? level)
@@ -53,7 +53,7 @@ public static class UIStrategyValue
         if (value is StrategyValueTrack tr)
         {
             modified |= DrawEditorTrackOption(tr, cfg, level);
-            modified |= ImGui.InputText("Comment", ref value.Comment, 512);
+            modified |= ImGui.InputText(Loc.Id("Comment"), ref value.Comment, 512);
             modified |= DrawEditorPriority(tr);
             modified |= DrawEditorTarget(tr, cfg.Options[tr.Option].SupportedTargets, moduleInfo);
         }
@@ -63,7 +63,7 @@ public static class UIStrategyValue
     public static bool DrawEditorTrackOption(StrategyValueTrack value, StrategyConfigTrack cfg, int? level, string label = "Option")
     {
         var modified = false;
-        using (var combo = ImRaii.Combo(label, cfg.Options[value.Option].UIName))
+        using (var combo = ImRaii.Combo(Loc.Id(label), cfg.Options[value.Option].UIName))
         {
             if (combo)
             {
@@ -88,13 +88,13 @@ public static class UIStrategyValue
     {
         var modified = false;
         var overridePriority = !float.IsNaN(value.PriorityOverride);
-        if (ImGui.Checkbox("Override priority", ref overridePriority))
+        if (ImGui.Checkbox(Loc.Id("Override priority"), ref overridePriority))
         {
             modified = true;
             value.PriorityOverride = overridePriority ? ActionQueue.Priority.Low : float.NaN;
         }
         ImGui.SameLine();
-        UIMisc.HelpMarker("""
+        UIMisc.HelpMarker(Loc.Tr("""
             Define custom priority for the corresponding action.
             Priority is compared against other candidate actions; it is suggested to use a predefined base and add a small offset to disambiguate multiple actions.
             Base priorities are the following:
@@ -103,7 +103,7 @@ public static class UIStrategyValue
             * Medium (3000) - action will be used in next possible ogcd slot, but it won't delay gcd or any extremely important ogcds; you can expect to have at least 1 slot for medium actions per gcd.
             * High (4000) - action will be used in the next possible ogcd slot; it won't delay gcd, but might break the rotation in some cases if not used carefully.
             * Very High (5000) - action will be used asap; will delay gcd if needed.
-            """);
+            """));
 
         if (overridePriority)
         {
@@ -119,13 +119,13 @@ public static class UIStrategyValue
 
             using var indent = ImRaii.PushIndent();
             ImGui.SetNextItemWidth(100);
-            using (var combo = ImRaii.Combo("###baseline", PriorityBaselines[baselineIndex].Name))
+            using (var combo = ImRaii.Combo("###baseline", Loc.Tr(PriorityBaselines[baselineIndex].Name)))
             {
                 if (combo)
                 {
                     for (var i = 0; i < PriorityBaselines.Length; ++i)
                     {
-                        if (ImGui.Selectable(PriorityBaselines[i].Name, i == baselineIndex))
+                        if (ImGui.Selectable(Loc.Id(PriorityBaselines[i].Name), i == baselineIndex))
                         {
                             modified = true;
                             value.PriorityOverride = PriorityBaselines[i].Value + priorityDelta;
@@ -149,13 +149,13 @@ public static class UIStrategyValue
     public static bool DrawEditorTarget(StrategyValueTrack value, ActionTargets supportedTargets, BossModuleRegistry.Info? moduleInfo)
     {
         var modified = false;
-        using (var combo = ImRaii.Combo("Target", value.Target.ToString()))
+        using (var combo = ImRaii.Combo(Loc.Id("Target"), Loc.Tr(value.Target.ToString())))
         {
             if (combo)
             {
                 for (var i = StrategyTarget.Automatic; i < StrategyTarget.Count; ++i)
                 {
-                    if (AllowTarget(i, supportedTargets, moduleInfo) && ImGui.Selectable(i.ToString(), i == value.Target))
+                    if (AllowTarget(i, supportedTargets, moduleInfo) && ImGui.Selectable(Loc.Id(i.ToString()), i == value.Target))
                     {
                         value.Target = i;
                         value.TargetParam = 0;
@@ -199,7 +199,7 @@ public static class UIStrategyValue
                 break;
             case StrategyTarget.PointWaymark:
                 var wm = (Waymark)value.TargetParam;
-                if (UICombo.Enum("Waymark", ref wm))
+                if (UICombo.Enum(Loc.Tr("Waymark"), ref wm))
                 {
                     value.TargetParam = (int)wm;
                     modified = true;
@@ -216,10 +216,10 @@ public static class UIStrategyValue
             }
             else
             {
-                modified |= ImGui.DragFloat("Offset", ref value.Offset1, 0.1f, 0, 30);
-                modified |= ImGui.DragFloat("Direction", ref value.Offset2, 1, -180, 180);
+                modified |= ImGui.DragFloat(Loc.Id("Offset"), ref value.Offset1, 0.1f, 0, 30);
+                modified |= ImGui.DragFloat(Loc.Id("Direction"), ref value.Offset2, 1, -180, 180);
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip($"In degrees; 0 is south, increases CCW (so 90 is E, 180 is N, -90 is W)");
+                    ImGui.SetTooltip(Loc.Tr("In degrees; 0 is south, increases CCW (so 90 is E, 180 is N, -90 is W)"));
             }
         }
 
@@ -239,8 +239,8 @@ public static class UIStrategyValue
 
     private static string PreviewParam(StrategyPartyFiltering pf)
     {
-        string excludeIfSet(StrategyPartyFiltering flag, string value) => (pf & flag) != 0 ? $", exclude {value}" : "";
-        return $"{((pf & StrategyPartyFiltering.IncludeSelf) != 0 ? "include" : "exclude")} self"
+        string excludeIfSet(StrategyPartyFiltering flag, string value) => (pf & flag) != 0 ? Loc.Format(", exclude {0}", Loc.Tr(value)) : "";
+        return Loc.Tr((pf & StrategyPartyFiltering.IncludeSelf) != 0 ? "include self" : "exclude self")
             + excludeIfSet(StrategyPartyFiltering.ExcludeTanks, "tanks")
             + excludeIfSet(StrategyPartyFiltering.ExcludeHealers, "healers")
             + excludeIfSet(StrategyPartyFiltering.ExcludeMelee, "melee")
@@ -251,7 +251,7 @@ public static class UIStrategyValue
     private static bool DrawEditorTargetParamCombo<E>(ref int current, string text) where E : struct, Enum
     {
         var value = (E)(object)current;
-        if (!UICombo.Enum(text, ref value))
+        if (!UICombo.Enum(Loc.Tr(text), ref value))
             return false;
         current = (int)(object)value;
         return true;
@@ -260,7 +260,7 @@ public static class UIStrategyValue
     private static bool DrawEditorTargetParamFlags(ref int current, StrategyPartyFiltering flag, string text, bool inverted)
     {
         var isChecked = (((StrategyPartyFiltering)current) & flag) != 0 != inverted;
-        if (!ImGui.Checkbox(text, ref isChecked))
+        if (!ImGui.Checkbox(Loc.Id(text), ref isChecked))
             return false;
         current ^= (int)flag;
         return true;
@@ -317,7 +317,7 @@ public class TrackRenderer : IStrategyRenderer
     public virtual bool DrawValue(StrategyContext context, StrategyConfigTrack config, ref StrategyValueTrack value)
     {
         string print(int ix) => config.Options[ix].DisplayName.Length > 0
-            ? config.Options[ix].DisplayName
+            ? Loc.Tr(config.Options[ix].DisplayName)
             : UICombo.EnumString(config.OptionEnum, (Enum)GeneratedEnumMetadata.Values(config.OptionEnum).GetValue(ix)!);
         bool filter(int ix) => (config.Options[ix].Context & context) != StrategyContext.None;
 
@@ -404,7 +404,7 @@ public sealed class FakeFloatRenderer : TrackRenderer
                 modified = true;
             }
         }
-        if (ImGui.Checkbox("Stay on edge of hitbox", ref isOnHitbox))
+        if (ImGui.Checkbox(Loc.Id("Stay on edge of hitbox"), ref isOnHitbox))
         {
             value.Option = isOnHitbox ? 0 : 1;
             modified = true;

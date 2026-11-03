@@ -64,7 +64,7 @@ public abstract class DuelFarm<Duel> : ZoneModule where Duel : struct, Enum
 
     public override bool WantDrawExtra() => globalConfig.ShowAutoFarmWindow;
 
-    public override string WindowName() => $"{Zone}###Bozja module";
+    public override string WindowName() => $"{Loc.Tr(Zone)}###Bozja module";
 
     protected virtual void AddAIHints(int playerSlot, Actor player, AIHints hints) { }
 
@@ -113,7 +113,7 @@ public abstract class DuelFarm<Duel> : ZoneModule where Duel : struct, Enum
     public override void DrawExtra()
     {
         var tar = FarmTarget;
-        if (UICombo.Enum("Prep", ref tar, t => GetAttr(t)?.Label ?? t.ToString()))
+        if (UICombo.Enum("Prep", ref tar, t => GetAttr(t)?.Label ?? Loc.Tr(t.ToString())))
             FarmTarget = tar;
 
         ImGui.Spacing();
@@ -121,10 +121,10 @@ public abstract class DuelFarm<Duel> : ZoneModule where Duel : struct, Enum
         var modified = false;
 
         ImGui.SetNextItemWidth(200);
-        modified |= ImGui.DragFloat("Max distance to look for new mobs", ref globalConfig.MaxPullDistance, 1, 20, 120);
+        modified |= ImGui.DragFloat(Loc.Id("Max distance to look for new mobs"), ref globalConfig.MaxPullDistance, 1, 20, 120);
         ImGui.SetNextItemWidth(200);
-        modified |= ImGui.DragInt("Max mobs to pull (set to 0 for no limit)", ref globalConfig.MaxPullCount, 1, 0, 30);
-        modified |= ImGui.Checkbox("Assist mode (only attack mobs that are already in combat)", ref globalConfig.AssistMode);
+        modified |= ImGui.DragInt(Loc.Id("Max mobs to pull (set to 0 for no limit)"), ref globalConfig.MaxPullCount, 1, 0, 30);
+        modified |= ImGui.Checkbox(Loc.Id("Assist mode (only attack mobs that are already in combat)"), ref globalConfig.AssistMode);
 
         if (modified)
             globalConfig.Modified.Fire();

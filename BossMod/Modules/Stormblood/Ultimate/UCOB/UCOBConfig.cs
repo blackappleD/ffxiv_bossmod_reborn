@@ -35,7 +35,7 @@ public sealed class RolesRenderer : PropertyRenderer
 
         var modified = false;
 
-        foreach (var _ in tree.Node(attrs.Label, false))
+        foreach (var _ in tree.Node(Loc.Id(attrs.Label), false))
         {
             using (ImRaii.PushIndent())
             {

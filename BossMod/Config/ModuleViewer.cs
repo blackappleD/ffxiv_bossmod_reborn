@@ -267,7 +267,7 @@ public sealed partial class ModuleViewer(PlanDatabase? planDB, WorldState ws) : 
     private void DrawFilters()
     {
         ImGui.AlignTextToFramePadding();
-        ImGui.TextUnformatted("Search:");
+        ImGui.TextUnformatted(Loc.Tr("Search:"));
         ImGui.SameLine();
         ImGui.SetNextItemWidth(-1f);
         DrawSearchBar();
@@ -281,12 +281,12 @@ public sealed partial class ModuleViewer(PlanDatabase? planDB, WorldState ws) : 
 
     private void DrawSearchBar()
     {
-        ImGui.InputTextWithHint("##search", "e.g. \"Ultimate\"", ref _searchText, 100, ImGuiInputTextFlags.CallbackCompletion);
+        ImGui.InputTextWithHint("##search", Loc.Tr("e.g. \"Ultimate\""), ref _searchText, 100, ImGuiInputTextFlags.CallbackCompletion);
 
         if (ImGui.IsItemHovered() && !ImGui.IsItemFocused())
         {
             ImGui.BeginTooltip();
-            ImGui.Text("Type here to search for any specific instance by its respective title.");
+            ImGui.Text(Loc.Tr("Type here to search for any specific instance by its respective title."));
             ImGui.EndTooltip();
         }
     }
@@ -294,7 +294,7 @@ public sealed partial class ModuleViewer(PlanDatabase? planDB, WorldState ws) : 
     private static float EnabledColumnWidth()
     {
         var style = ImGui.GetStyle();
-        return ImGui.CalcTextSize("Enabled").X + style.CellPadding.X * 2f + style.FramePadding.X * 2f;
+        return ImGui.CalcTextSize(Loc.Tr("Enabled")).X + style.CellPadding.X * 2f + style.FramePadding.X * 2f;
     }
 
     private static void CenterEnableCheckbox()
@@ -315,7 +315,7 @@ public sealed partial class ModuleViewer(PlanDatabase? planDB, WorldState ws) : 
             return;
         }
 
-        ImGui.TableSetupColumn("Enabled", ImGuiTableColumnFlags.WidthFixed, EnabledColumnWidth());
+        ImGui.TableSetupColumn(Loc.Tr("Enabled"), ImGuiTableColumnFlags.WidthFixed, EnabledColumnWidth());
         ImGui.TableSetupColumn("##showExpac", ImGuiTableColumnFlags.WidthStretch);
         ImGui.TableHeadersRow();
 
@@ -343,12 +343,12 @@ public sealed partial class ModuleViewer(PlanDatabase? planDB, WorldState ws) : 
             }
             if (ImGui.IsItemHovered())
             {
-                ImGui.SetTooltip(anyEnabled != allEnabled ? "Some modules in this expansion are disabled. Click to enable all." : enabled ? "Disable all modules in this expansion." : "Enable all modules in this expansion.");
+                ImGui.SetTooltip(Loc.Tr(anyEnabled != allEnabled ? "Some modules in this expansion are disabled. Click to enable all." : enabled ? "Disable all modules in this expansion." : "Enable all modules in this expansion."));
             }
 
             ImGui.TableNextColumn();
             ref var expansion = ref Expansions[(int)e];
-            UIMisc.ImageToggleButton(Service.Texture?.GetFromGameIcon(expansion.icon), _iconSize, !_filterExpansions[(int)e], expansion.name);
+            UIMisc.ImageToggleButton(Service.Texture?.GetFromGameIcon(expansion.icon), _iconSize, !_filterExpansions[(int)e], Loc.Tr(expansion.name));
             if (ImGui.IsItemClicked())
             {
                 _filterExpansions.Toggle((int)e);
@@ -369,7 +369,7 @@ public sealed partial class ModuleViewer(PlanDatabase? planDB, WorldState ws) : 
             return;
         }
 
-        ImGui.TableSetupColumn("Enabled", ImGuiTableColumnFlags.WidthFixed, EnabledColumnWidth());
+        ImGui.TableSetupColumn(Loc.Tr("Enabled"), ImGuiTableColumnFlags.WidthFixed, EnabledColumnWidth());
         ImGui.TableSetupColumn("##showType", ImGuiTableColumnFlags.WidthStretch);
         ImGui.TableHeadersRow();
 
@@ -397,12 +397,12 @@ public sealed partial class ModuleViewer(PlanDatabase? planDB, WorldState ws) : 
             }
             if (ImGui.IsItemHovered())
             {
-                ImGui.SetTooltip(anyEnabled != allEnabled ? "Some modules in this category are disabled. Click to enable all." : enabled ? "Disable all modules in this category." : "Enable all modules in this category.");
+                ImGui.SetTooltip(Loc.Tr(anyEnabled != allEnabled ? "Some modules in this category are disabled. Click to enable all." : enabled ? "Disable all modules in this category." : "Enable all modules in this category."));
             }
 
             ImGui.TableNextColumn();
             ref var category = ref Categories[(int)c];
-            UIMisc.ImageToggleButton(Service.Texture?.GetFromGameIcon(category.icon), _iconSize, !_filterCategories[(int)c], category.name);
+            UIMisc.ImageToggleButton(Service.Texture?.GetFromGameIcon(category.icon), _iconSize, !_filterCategories[(int)c], Loc.Tr(category.name));
             if (ImGui.IsItemClicked())
             {
                 _filterCategories.Toggle((int)c);
@@ -424,7 +424,7 @@ public sealed partial class ModuleViewer(PlanDatabase? planDB, WorldState ws) : 
         }
 
         ImGui.TableSetupColumn("##type", ImGuiTableColumnFlags.WidthFixed, 80f);
-        ImGui.TableSetupColumn("Enabled", ImGuiTableColumnFlags.WidthFixed, EnabledColumnWidth());
+        ImGui.TableSetupColumn(Loc.Tr("Enabled"), ImGuiTableColumnFlags.WidthFixed, EnabledColumnWidth());
         ImGui.TableSetupColumn("##fight", ImGuiTableColumnFlags.WidthStretch);
         ImGui.TableHeadersRow();
 
@@ -459,7 +459,7 @@ public sealed partial class ModuleViewer(PlanDatabase? planDB, WorldState ws) : 
                         continue;
                     }
 
-                    if (!_searchText.IsNullOrEmpty() && !group.Info.Name.Contains(_searchText, StringComparison.OrdinalIgnoreCase))
+                    if (!_searchText.IsNullOrEmpty() && !group.Info.Name.Contains(_searchText, StringComparison.OrdinalIgnoreCase) && !Loc.Tr(group.Info.Name).Contains(_searchText, StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
                     }
@@ -491,11 +491,11 @@ public sealed partial class ModuleViewer(PlanDatabase? planDB, WorldState ws) : 
                     }
                     if (ImGui.IsItemHovered())
                     {
-                        ImGui.SetTooltip(groupAnyEnabled != groupAllEnabled ? "Some modules in this group are disabled. Click to enable all." : groupEnabled ? "Disable all modules in this group." : "Enable all modules in this group.");
+                        ImGui.SetTooltip(Loc.Tr(groupAnyEnabled != groupAllEnabled ? "Some modules in this group are disabled. Click to enable all." : groupEnabled ? "Disable all modules in this group." : "Enable all modules in this group."));
                     }
 
                     ImGui.TableNextColumn();
-                    foreach (var ng in tree.Node(group.NodeLabel))
+                    foreach (var ng in tree.Node(Loc.Tr(group.NodeLabel)))
                     {
                         var modules = CollectionsMarshal.AsSpan(EnsureModules(group));
                         var len = modules.Length;
@@ -520,7 +520,7 @@ public sealed partial class ModuleViewer(PlanDatabase? planDB, WorldState ws) : 
                             }
                             if (ImGui.IsItemHovered())
                             {
-                                ImGui.SetTooltip(moduleEnabled ? "Disable this module." : "Enable this module.");
+                                ImGui.SetTooltip(Loc.Tr(moduleEnabled ? "Disable this module." : "Enable this module."));
                             }
 
                             ImGui.TableNextColumn();
@@ -542,7 +542,7 @@ public sealed partial class ModuleViewer(PlanDatabase? planDB, WorldState ws) : 
                             }
 
                             ImGui.SameLine();
-                            DrawModuleHelpMarker(mod.Info, mod.HelpText);
+                            DrawModuleHelpMarker(mod.Info);
                             ImGui.SameLine();
                             var textColor = MaturityColor(mod.Info.Maturity);
                             using (ImRaii.PushColor(ImGuiCol.Text, textColor))
@@ -765,7 +765,7 @@ public sealed partial class ModuleViewer(PlanDatabase? planDB, WorldState ws) : 
         _ => Colors.TextColor1
     };
 
-    private static void DrawModuleHelpMarker(BossModuleRegistry.Info info, string helpText)
+    private static void DrawModuleHelpMarker(BossModuleRegistry.Info info)
     {
         UIMisc.IconText(FontAwesomeIcon.InfoCircle);
         if (!ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
@@ -775,22 +775,22 @@ public sealed partial class ModuleViewer(PlanDatabase? planDB, WorldState ws) : 
 
         using var tooltip = ImRaii.Tooltip();
         using var wrap = ImRaii.TextWrapPos(ImGui.GetFontSize() * 35f);
-        var maturityDescription = GeneratedEnumMetadata.For(info.Maturity).Attribute<PropertyDisplayAttribute>()?.Label ?? info.Maturity.ToString();
-        ImGui.TextUnformatted("Maturity: ");
+        var maturityDescription = Loc.Tr(GeneratedEnumMetadata.For(info.Maturity).Attribute<PropertyDisplayAttribute>()?.Label ?? info.Maturity.ToString());
+        ImGui.TextUnformatted(Loc.Tr("Maturity: "));
         ImGui.SameLine(0f, 0f);
         using (ImRaii.PushColor(ImGuiCol.Text, MaturityColor(info.Maturity)))
         {
             ImGui.TextUnformatted(maturityDescription);
         }
-        ImGui.TextUnformatted(helpText);
+        ImGui.TextUnformatted(BuildModuleHelpText(info)); // built when drawn, so it follows the current language
     }
 
     private static string BuildModuleHelpText(BossModuleRegistry.Info info)
     {
-        var planning = info.PlanLevel > 0 ? $"L{info.PlanLevel}" : "not supported";
+        var planning = info.PlanLevel > 0 ? $"L{info.PlanLevel}" : Loc.Tr("not supported");
         return info.Contributors.Length > 0
-            ? $"Cooldown planning: {planning}\nContributors: {info.Contributors}\n"
-            : $"Cooldown planning: {planning}\n";
+            ? Loc.Format("Cooldown planning: {0}\nContributors: {1}\n", planning, info.Contributors)
+            : Loc.Format("Cooldown planning: {0}\n", planning);
     }
 
     private void ModulePlansPopup(BossModuleRegistry.Info info)
@@ -808,7 +808,7 @@ public sealed partial class ModuleViewer(PlanDatabase? planDB, WorldState ws) : 
             for (var i = 0; i < count; ++i)
             {
                 var plan = plansL[i];
-                if (ImGui.Selectable($"Edit {cls} '{plan.Name}' ({plan.Guid})"))
+                if (ImGui.Selectable(Loc.Format("Edit {0} '{1}' ({2})", cls, plan.Name, plan.Guid)))
                 {
                     UIPlanDatabaseEditor.StartPlanEditor(_planDB, plan);
                 }
@@ -818,7 +818,7 @@ public sealed partial class ModuleViewer(PlanDatabase? planDB, WorldState ws) : 
         var player = _ws.Party.Player();
         if (player != null)
         {
-            if (ImGui.Selectable($"New plan for {player.Class}..."))
+            if (ImGui.Selectable(Loc.Format("New plan for {0}...", player.Class)))
             {
                 var plans = mplans.GetOrAdd(player.Class);
                 var plan = new Plan($"New {plans.Plans.Count + 1}", info.ModuleType) { Guid = Guid.NewGuid().ToString(), Class = player.Class, Level = info.PlanLevel };

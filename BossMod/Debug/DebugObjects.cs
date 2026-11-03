@@ -17,7 +17,7 @@ public sealed class DebugObjects
 
     public unsafe void DrawObjectTable()
     {
-        ImGui.Checkbox("Show players, minions and mounts", ref _showCrap);
+        ImGui.Checkbox(Loc.Id("Show players, minions and mounts"), ref _showCrap);
 
         Span<nint> handlers = stackalloc nint[32];
         IGameObject? selected = null;
@@ -44,19 +44,19 @@ public sealed class DebugObjects
                 var character = obj as ICharacter;
                 var internalChara = Utils.CharacterInternal(character);
 
-                _tree.LeafNode($"Unique ID: {uniqueID:X}");
-                _tree.LeafNode($"Layout ID: {Utils.GameObjectInternal(obj)->LayoutId:X}");
-                _tree.LeafNode($"Gimmick ID: {Utils.ReadField<uint>(internalObj, 0x80):X}");
-                _tree.LeafNode($"Radius: {obj.HitboxRadius:f3}");
-                _tree.LeafNode($"Owner: {Utils.ObjectString(obj.OwnerId)}");
+                _tree.LeafNode(Loc.Format("Unique ID: {0:X}", uniqueID));
+                _tree.LeafNode(Loc.Format("Layout ID: {0:X}", Utils.GameObjectInternal(obj)->LayoutId));
+                _tree.LeafNode(Loc.Format("Gimmick ID: {0:X}", Utils.ReadField<uint>(internalObj, 0x80)));
+                _tree.LeafNode(Loc.Format("Radius: {0:f3}", obj.HitboxRadius));
+                _tree.LeafNode(Loc.Format("Owner: {0}", Utils.ObjectString(obj.OwnerId)));
                 _tree.LeafNode($"BNpcBase/Name: {obj.BaseId:X}/{Utils.GameObjectInternal(obj)->GetNameId()}");
-                _tree.LeafNode($"Targetable: {obj.IsTargetable}");
-                _tree.LeafNode($"Is character: {internalObj->IsCharacter()}");
-                _tree.LeafNode($"Event state: {Utils.GameObjectInternal(obj)->EventState}");
-                _tree.LeafNode($"Renderflags: {(int)Utils.GameObjectInternal(obj)->RenderFlags}");
-                foreach (var n1 in _tree.Node("Event IDs"))
+                _tree.LeafNode(Loc.Format("Targetable: {0}", obj.IsTargetable));
+                _tree.LeafNode(Loc.Format("Is character: {0}", internalObj->IsCharacter()));
+                _tree.LeafNode(Loc.Format("Event state: {0}", Utils.GameObjectInternal(obj)->EventState));
+                _tree.LeafNode(Loc.Format("Renderflags: {0}", (int)Utils.GameObjectInternal(obj)->RenderFlags));
+                foreach (var n1 in _tree.Node(Loc.Id("Event IDs")))
                 {
-                    _tree.LeafNode($"Primary: {internalObj->EventId.Id:X}");
+                    _tree.LeafNode(Loc.Format("Primary: {0:X}", internalObj->EventId.Id));
                     if (internalObj->EventHandler != null)
                     {
                         _tree.LeafNode($"EH: {internalObj->EventHandler->Info.EventId.Id:X}");
@@ -70,15 +70,15 @@ public sealed class DebugObjects
                 }
                 if (character != null)
                 {
-                    _tree.LeafNode($"Category: {ActionManager.ClassifyTarget(internalChara)}");
-                    _tree.LeafNode($"Class: {(Class)character.ClassJob.RowId} ({character.ClassJob.RowId})");
+                    _tree.LeafNode(Loc.Format("Category: {0}", ActionManager.ClassifyTarget(internalChara)));
+                    _tree.LeafNode(Loc.Format("Class: {0} ({1})", (Class)character.ClassJob.RowId, character.ClassJob.RowId));
                     _tree.LeafNode($"HP: {character.CurrentHp}/{character.MaxHp} ({internalChara->ShieldValue})");
-                    _tree.LeafNode($"Status flags: {character.StatusFlags}");
+                    _tree.LeafNode(Loc.Format("Status flags: {0}", character.StatusFlags));
                 }
                 if (obj is IBattleChara battleChara)
                 {
-                    _tree.LeafNode($"Cast: {Utils.CastTimeString(battleChara.CurrentCastTime, battleChara.TotalCastTime)} {new ActionID((ActionType)battleChara.CastActionType, battleChara.CastActionId)}");
-                    foreach (var nn in _tree.Node("Statuses"))
+                    _tree.LeafNode(Loc.Format("Cast: {0} {1}", Utils.CastTimeString(battleChara.CurrentCastTime, battleChara.TotalCastTime), new ActionID((ActionType)battleChara.CastActionType, battleChara.CastActionId)));
+                    foreach (var nn in _tree.Node(Loc.Id("Statuses")))
                     {
                         for (var j = 0; j < battleChara.StatusList.Length; ++j)
                         {
@@ -88,14 +88,14 @@ public sealed class DebugObjects
                                 continue;
                             }
 
-                            _tree.LeafNode($"#{j}: {Utils.StatusString(s.StatusId)} ({s.Param:X}) from {Utils.ObjectString(s.SourceId)}, {s.RemainingTime:f3}s left");
+                            _tree.LeafNode(Loc.Format("#{0}: {1} ({2:X}) from {3}, {4:f3}s left", j, Utils.StatusString(s.StatusId), s.Param, Utils.ObjectString(s.SourceId), s.RemainingTime));
                         }
                     }
                     var fi = ((Character*)battleChara.Address)->GetForayInfo();
                     if (fi != null)
                     {
-                        _tree.LeafNode($"Foray level: {fi->Level}");
-                        _tree.LeafNode($"Foray ele: {fi->Element}");
+                        _tree.LeafNode(Loc.Format("Foray level: {0}", fi->Level));
+                        _tree.LeafNode(Loc.Format("Foray ele: {0}", fi->Element));
                     }
                 }
             }
@@ -134,7 +134,7 @@ public sealed class DebugObjects
     {
         var module = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->UIModule->GetUI3DModule();
         ImGui.BeginTable("uiobj", 3, ImGuiTableFlags.Resizable);
-        ImGui.TableSetupColumn("Index");
+        ImGui.TableSetupColumn(Loc.Tr("Index"));
         ImGui.TableSetupColumn("GameObj");
         ImGui.TableSetupColumn("NamePlateKind");
         ImGui.TableHeadersRow();
@@ -207,12 +207,12 @@ public sealed class DebugObjects
 
     private unsafe void ObjectContextMenu(IGameObject obj)
     {
-        if (ImGui.MenuItem("Target"))
+        if (ImGui.MenuItem(Loc.Id("Target")))
         {
             Service.TargetManager.Target = obj;
         }
 
-        if (ImGui.MenuItem("Interact"))
+        if (ImGui.MenuItem(Loc.Id("Interact")))
         {
             TargetSystem.Instance()->InteractWithObject(Utils.GameObjectInternal(obj));
         }

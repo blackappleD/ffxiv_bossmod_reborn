@@ -851,8 +851,8 @@ public sealed unsafe class DebugCollision() : IDisposable
         }
 
         var module = Framework.Instance()->BGCollisionModule;
-        ImGui.TextUnformatted($"Module: {(nint)module:X}->{(nint)module->SceneManager:X} ({module->SceneManager->NumScenes} scenes, {module->LoadInProgressCounter} loads)");
-        ImGui.TextUnformatted($"Streaming: {SphereStr(module->ForcedStreamingSphere)} / {SphereStr(module->SceneManager->StreamingSphere)}");
+        ImGui.TextUnformatted(Loc.Format("Module: {0:X}->{1:X} ({2} scenes, {3} loads)", (nint)module, (nint)module->SceneManager, module->SceneManager->NumScenes, module->LoadInProgressCounter));
+        ImGui.TextUnformatted(Loc.Format("Streaming: {0} / {1}", SphereStr(module->ForcedStreamingSphere), SphereStr(module->SceneManager->StreamingSphere)));
         _visualizeCenterXZ = new(module->ForcedStreamingSphere.X, module->ForcedStreamingSphere.Z);
 
         var localPlayer = Service.ObjectTable.LocalPlayer;
@@ -1069,22 +1069,22 @@ public sealed unsafe class DebugCollision() : IDisposable
 
     private void DrawSettings()
     {
-        using var n = _tree.Node2("Settings");
+        using var n = _tree.Node2(Loc.Id("Settings"));
         if (!n.Opened)
         {
             return;
         }
 
-        ImGui.Checkbox("Show objects with zero layer", ref _showZeroLayer);
+        ImGui.Checkbox(Loc.Id("Show objects with zero layer"), ref _showZeroLayer);
         {
             var shownLayers = _availableLayers & _shownLayers;
-            using var layers = ImRaii.Combo("Shown layers", shownLayers == _availableLayers ? "All" : shownLayers.None() ? "None" : string.Join(", ", shownLayers.SetBits()));
+            using var layers = ImRaii.Combo(Loc.Id("Shown layers"), shownLayers == _availableLayers ? Loc.Tr("All") : shownLayers.None() ? Loc.Tr("None") : string.Join(", ", shownLayers.SetBits()));
             if (layers)
             {
                 foreach (var i in _availableLayers.SetBits())
                 {
                     var shown = _shownLayers[i];
-                    if (ImGui.Checkbox($"Layer {i}", ref shown))
+                    if (ImGui.Checkbox(Loc.Format("Layer {0}", i), ref shown))
                     {
                         _shownLayers[i] = shown;
                     }
@@ -1094,13 +1094,13 @@ public sealed unsafe class DebugCollision() : IDisposable
 
         {
             var matMask = _materialMask & _availableMaterials;
-            using var materials = ImRaii.Combo("Material mask", matMask.None() ? "None" : matMask.Raw.ToString("X"));
+            using var materials = ImRaii.Combo(Loc.Id("Material mask"), matMask.None() ? Loc.Tr("None") : matMask.Raw.ToString("X"));
             if (materials)
             {
                 foreach (var i in _availableMaterials.SetBits())
                 {
                     var filter = _materialMask[i];
-                    if (ImGui.Checkbox($"Material {1u << i:X16}", ref filter))
+                    if (ImGui.Checkbox(Loc.Format("Material {0:X16}", 1u << i), ref filter))
                     {
                         _materialMask[i] = filter;
                     }
@@ -1110,13 +1110,13 @@ public sealed unsafe class DebugCollision() : IDisposable
 
         {
             var matId = _materialId & _availableMaterials;
-            using var materials = ImRaii.Combo("Material id", matId.None() ? "None" : matId.Raw.ToString("X"));
+            using var materials = ImRaii.Combo(Loc.Id("Material id"), matId.None() ? Loc.Tr("None") : matId.Raw.ToString("X"));
             if (materials)
             {
                 foreach (var i in _availableMaterials.SetBits())
                 {
                     var filter = _materialId[i];
-                    if (ImGui.Checkbox($"Material {1u << i:X16}", ref filter))
+                    if (ImGui.Checkbox(Loc.Format("Material {0:X16}", 1u << i), ref filter))
                     {
                         _materialId[i] = filter;
                     }
@@ -1125,22 +1125,22 @@ public sealed unsafe class DebugCollision() : IDisposable
         }
 
         {
-            using var flags = ImRaii.Combo("Flag filter", _showOnlyFlagRaycast ? _showOnlyFlagVisit ? "Only when both flags are set" : "Only if raycast flag is set" : _showOnlyFlagVisit ? "Only if global visit flag is set" : "Show everything");
+            using var flags = ImRaii.Combo(Loc.Id("Flag filter"), Loc.Tr(_showOnlyFlagRaycast ? _showOnlyFlagVisit ? "Only when both flags are set" : "Only if raycast flag is set" : _showOnlyFlagVisit ? "Only if global visit flag is set" : "Show everything"));
             if (flags)
             {
-                ImGui.Checkbox("Hide objects without raycast flag (0x1)", ref _showOnlyFlagRaycast);
-                ImGui.Checkbox("Hide objects without global viist flag (0x2)", ref _showOnlyFlagVisit);
+                ImGui.Checkbox(Loc.Id("Hide objects without raycast flag (0x1)"), ref _showOnlyFlagRaycast);
+                ImGui.Checkbox(Loc.Id("Hide objects without global viist flag (0x2)"), ref _showOnlyFlagVisit);
             }
         }
 
-        ImGui.SliderFloat("Max collider distance XZ (0 = off)", ref _maxColliderDistanceXZ, 0f, 1000f, "%.0f");
+        ImGui.SliderFloat(Loc.Id("Max collider distance XZ (0 = off)"), ref _maxColliderDistanceXZ, 0f, 1000f, "%.0f");
 
-        using var ex = _tree.Node2("Export / Union settings");
+        using var ex = _tree.Node2(Loc.Id("Export / Union settings"));
         if (ex.Opened)
         {
             // Material match
             var label = _exportMatchMode.ToString();
-            if (ImGui.BeginCombo("Material match", label))
+            if (ImGui.BeginCombo(Loc.Id("Material match"), label))
             {
                 for (var i = 0; i < 4; ++i)
                 {
@@ -1159,56 +1159,56 @@ public sealed unsafe class DebugCollision() : IDisposable
             }
 
             // radius & strict mode
-            ImGui.SliderFloat("Radius XZ (yalm, 0 = whole)", ref _exportRadiusXZ, 0f, 200f, "%.1f");
-            ImGui.Checkbox("Strict radius (all tri verts inside)", ref _exportStrictRadius);
+            ImGui.SliderFloat(Loc.Id("Radius XZ (yalm, 0 = whole)"), ref _exportRadiusXZ, 0f, 200f, "%.1f");
+            ImGui.Checkbox(Loc.Id("Strict radius (all tri verts inside)"), ref _exportStrictRadius);
 
             // snapping epsilon (pre-union)
-            ImGui.SliderFloat("Snap Eps XZ (yalm)", ref _exportSnapEpsXZ, 0f, 0.05f, "%.6f");
+            ImGui.SliderFloat(Loc.Id("Snap Eps XZ (yalm)"), ref _exportSnapEpsXZ, 0f, 0.05f, "%.6f");
 
             // drop tiny fragments after union
-            ImGui.SliderFloat("Min area (yalm^2)", ref _exportMinArea, 0f, 0.01f, "%.6f");
+            ImGui.SliderFloat(Loc.Id("Min area (yalm^2)"), ref _exportMinArea, 0f, 0.01f, "%.6f");
 
             ImGui.Separator();
-            ImGui.Checkbox("Selection mode (multi-pick)", ref _selectionMode);
+            ImGui.Checkbox(Loc.Id("Selection mode (multi-pick)"), ref _selectionMode);
             ImGui.SameLine();
-            ImGui.TextDisabled($"Selected: {_meshSelection.Count}");
+            ImGui.TextDisabled(Loc.Format("Selected: {0}", _meshSelection.Count));
 
             ImGui.BeginDisabled(_meshSelection.Count == 0);
-            if (ImGui.Button("Append selected → mesh-id list"))
+            if (ImGui.Button(Loc.Id("Append selected → mesh-id list")))
             {
                 AppendIdsToList(ref _exportMeshIdListHex, _meshSelection);
             }
             ImGui.SameLine();
-            if (ImGui.Button("Clear selection"))
+            if (ImGui.Button(Loc.Id("Clear selection")))
             {
                 _meshSelection.Clear();
             }
             ImGui.EndDisabled();
 
             ImGui.SameLine();
-            if (ImGui.Button("Select all visible"))
+            if (ImGui.Button(Loc.Id("Select all visible")))
             {
                 SelectAllVisibleMeshes(add: true);
             }
             ImGui.SameLine();
-            if (ImGui.Button("Deselect all visible"))
+            if (ImGui.Button(Loc.Id("Deselect all visible")))
             {
                 SelectAllVisibleMeshes(add: false);
             }
 
             ImGui.Separator();
-            ImGui.TextDisabled("Merge by mesh-id list (hex pointers, any separators: , ; space tab newline)");
-            ImGui.InputTextMultiline("MeshId list (hex)", ref _exportMeshIdListHex, 4096, new Vector2(-1, ImGui.GetTextLineHeight() * 6f));
+            ImGui.TextDisabled(Loc.Tr("Merge by mesh-id list (hex pointers, any separators: , ; space tab newline)"));
+            ImGui.InputTextMultiline(Loc.Id("MeshId list (hex)"), ref _exportMeshIdListHex, 4096, new Vector2(-1, ImGui.GetTextLineHeight() * 6f));
             var (okList, meshIds) = TryParseHexU64List(_exportMeshIdListHex);
-            ImGui.Text(okList ? $"Parsed {meshIds.Count} unique mesh ids" : "Enter hex values like 0x7FFB1234ABCD0000");
+            ImGui.Text(okList ? Loc.Format("Parsed {0} unique mesh ids", meshIds.Count) : Loc.Tr("Enter hex values like 0x7FFB1234ABCD0000"));
 
             ImGui.BeginDisabled(!okList || meshIds.Count == 0);
-            if (ImGui.Button("Copy polygons (WPos, mesh-id list)"))
+            if (ImGui.Button(Loc.Id("Copy polygons (WPos, mesh-id list)")))
             {
                 ExportPolysByMeshIdList(meshIds, CollisionOutlinesExtractor.ClipboardVectorFormat.Vector2XZ);
             }
             ImGui.SameLine();
-            if (ImGui.Button("Copy polygons (Vector3, mesh-id list)"))
+            if (ImGui.Button(Loc.Id("Copy polygons (Vector3, mesh-id list)")))
             {
                 ExportPolysByMeshIdList(meshIds, CollisionOutlinesExtractor.ClipboardVectorFormat.Vector3XYZ);
             }
@@ -1218,7 +1218,7 @@ public sealed unsafe class DebugCollision() : IDisposable
 
     private void DrawSceneColliders(Scene* s, int index)
     {
-        using var n = _tree.Node2($"Scene {index}: {s->NumColliders} colliders, {s->NumLoading} loading, streaming={SphereStr(s->StreamingSphere)}###scene_{index}");
+        using var n = _tree.Node2(Loc.Format("Scene {0}: {1} colliders, {2} loading, streaming={3}###scene_{0}", index, s->NumColliders, s->NumLoading, SphereStr(s->StreamingSphere)));
         if (n.SelectedOrHovered)
         {
             foreach (var coll in s->Colliders)
@@ -1240,7 +1240,7 @@ public sealed unsafe class DebugCollision() : IDisposable
 
     private void DrawSceneQuadtree(Quadtree* tree, int index)
     {
-        using var n = _tree.Node2($"Quadtree {index}: {tree->NumLevels} levels ([{tree->MinX}, {tree->MaxX}]x[{tree->MinZ}, {tree->MaxZ}], leaf {tree->LeafSizeX}x{tree->LeafSizeZ}), {tree->NumNodes} nodes###tree_{index}");
+        using var n = _tree.Node2(Loc.Format("Quadtree {0}: {1} levels ([{2}, {3}]x[{4}, {5}], leaf {6}x{7}), {8} nodes###tree_{0}", index, tree->NumLevels, tree->MinX, tree->MaxX, tree->MinZ, tree->MaxZ, tree->LeafSizeX, tree->LeafSizeZ, tree->NumNodes));
         if (!n.Opened)
         {
             return;
@@ -1251,7 +1251,7 @@ public sealed unsafe class DebugCollision() : IDisposable
         {
             var cellSizeX = (tree->MaxX - tree->MinX + 1) / (1 << level);
             var cellSizeZ = (tree->MaxZ - tree->MinZ + 1) / (1 << level);
-            using var ln = _tree.Node2($"Level {level}, {cellSizeX}x{cellSizeZ} cells ({Quadtree.NumNodesAtLevel(level)} nodes starting at {Quadtree.StartingNodeForLevel(level)})");
+            using var ln = _tree.Node2(Loc.Format("Level {0}, {1}x{2} cells ({3} nodes starting at {4})", level, cellSizeX, cellSizeZ, Quadtree.NumNodesAtLevel(level), Quadtree.StartingNodeForLevel(level)));
             if (!ln.Opened)
             {
                 continue;
@@ -1336,7 +1336,7 @@ public sealed unsafe class DebugCollision() : IDisposable
                     }
                 }
                 ImGui.SameLine();
-                ImGui.TextDisabled("pick");
+                ImGui.TextDisabled(Loc.Tr("pick"));
             }
         }
         if (ImGui.BeginPopupContextItem($"###{(nint)coll:X}"))
@@ -1344,14 +1344,14 @@ public sealed unsafe class DebugCollision() : IDisposable
             ContextCollider(coll);
             if (type == ColliderType.Mesh)
             {
-                ImGui.TextDisabled("Mesh Id (pointer)");
+                ImGui.TextDisabled(Loc.Tr("Mesh Id (pointer)"));
                 var cm = (ColliderMesh*)coll;
                 var ptr = (ulong)(nuint)cm;
-                if (ImGui.MenuItem("Copy mesh id (hex)"))
+                if (ImGui.MenuItem(Loc.Id("Copy mesh id (hex)")))
                 {
                     ImGui.SetClipboardText(FormatHexU64(ptr));
                 }
-                if (ImGui.MenuItem("Append mesh id to list"))
+                if (ImGui.MenuItem(Loc.Id("Append mesh id to list")))
                 {
                     AppendIdToList(ref _exportMeshIdListHex, ptr.ToString("X16"));
                 }
@@ -1367,7 +1367,7 @@ public sealed unsafe class DebugCollision() : IDisposable
             return;
         }
 
-        _tree.LeafNode2($"Raw flags: {coll->VisibilityFlags:X}");
+        _tree.LeafNode2(Loc.Format("Raw flags: {0:X}", coll->VisibilityFlags));
         switch (type)
         {
             case ColliderType.Streamed:
@@ -1375,9 +1375,9 @@ public sealed unsafe class DebugCollision() : IDisposable
                     var cast = (ColliderStreamed*)coll;
                     DrawResource(cast->Resource);
                     var path = cast->PathBaseString;
-                    _tree.LeafNode2($"Path: {path}/{Encoding.UTF8.GetString(cast->PathBase[(path.Length + 1)..])}");
-                    _tree.LeafNode2($"Streamed: [{cast->StreamedMinX:f3}x{cast->StreamedMinZ:f3}] - [{cast->StreamedMaxX:f3}x{cast->StreamedMaxZ:f3}]");
-                    _tree.LeafNode2($"Loaded: {cast->Loaded} ({cast->NumMeshesLoading} meshes load in progress)");
+                    _tree.LeafNode2(Loc.Format("Path: {0}/{1}", path, Encoding.UTF8.GetString(cast->PathBase[(path.Length + 1)..])));
+                    _tree.LeafNode2(Loc.Format("Streamed: [{0:f3}x{1:f3}] - [{2:f3}x{3:f3}]", cast->StreamedMinX, cast->StreamedMinZ, cast->StreamedMaxX, cast->StreamedMaxZ));
+                    _tree.LeafNode2(Loc.Format("Loaded: {0} ({1} meshes load in progress)", cast->Loaded, cast->NumMeshesLoading));
                     if (cast->Header != null && cast->Entries != null && cast->Elements != null)
                     {
                         var headerRaw = (float*)cast->Header;
@@ -1408,10 +1408,10 @@ public sealed unsafe class DebugCollision() : IDisposable
             case ColliderType.Box:
                 {
                     var cast = (ColliderBox*)coll;
-                    _tree.LeafNode2($"Translation: {Vec3Str(cast->Translation)}");
+                    _tree.LeafNode2(Loc.Format("Translation: {0}", Vec3Str(cast->Translation)));
                     var rotation = cast->Rotation;
-                    _tree.LeafNode2($"Rotation: {Vec3Str(rotation)} (Yaw: {HeadingDegFromWorld(ref cast->World)}°)");
-                    _tree.LeafNode2($"Scale: {Vec3Str(cast->Scale)}");
+                    _tree.LeafNode2(Loc.Format("Rotation: {0} (Yaw: {1}°)", Vec3Str(rotation), HeadingDegFromWorld(ref cast->World)));
+                    _tree.LeafNode2(Loc.Format("Scale: {0}", Vec3Str(cast->Scale)));
                     DrawMat4x3("World", ref cast->World);
                     DrawMat4x3("InvWorld", ref cast->InvWorld);
                 }
@@ -1419,11 +1419,11 @@ public sealed unsafe class DebugCollision() : IDisposable
             case ColliderType.Cylinder:
                 {
                     var cast = (ColliderCylinder*)coll;
-                    _tree.LeafNode2($"Translation: {Vec3Str(cast->Translation)}");
+                    _tree.LeafNode2(Loc.Format("Translation: {0}", Vec3Str(cast->Translation)));
                     var rotation = cast->Rotation;
-                    _tree.LeafNode2($"Rotation: {Vec3Str(rotation)} (Yaw: {HeadingDegFromWorld(ref cast->World)}°)");
-                    _tree.LeafNode2($"Scale: {Vec3Str(cast->Scale)}");
-                    _tree.LeafNode2($"Radius: {cast->Radius:f3}");
+                    _tree.LeafNode2(Loc.Format("Rotation: {0} (Yaw: {1}°)", Vec3Str(rotation), HeadingDegFromWorld(ref cast->World)));
+                    _tree.LeafNode2(Loc.Format("Scale: {0}", Vec3Str(cast->Scale)));
+                    _tree.LeafNode2(Loc.Format("Radius: {0:f3}", cast->Radius));
                     DrawMat4x3("World", ref cast->World);
                     DrawMat4x3("InvWorld", ref cast->InvWorld);
                 }
@@ -1431,10 +1431,10 @@ public sealed unsafe class DebugCollision() : IDisposable
             case ColliderType.Sphere:
                 {
                     var cast = (ColliderSphere*)coll;
-                    _tree.LeafNode2($"Translation: {Vec3Str(cast->Translation)}");
+                    _tree.LeafNode2(Loc.Format("Translation: {0}", Vec3Str(cast->Translation)));
                     var rotation = cast->Rotation;
-                    _tree.LeafNode2($"Rotation: {Vec3Str(rotation)} (Yaw: {HeadingDegFromWorld(ref cast->World)}°)");
-                    _tree.LeafNode2($"Scale: {Vec3Str(cast->Scale)}");
+                    _tree.LeafNode2(Loc.Format("Rotation: {0} (Yaw: {1}°)", Vec3Str(rotation), HeadingDegFromWorld(ref cast->World)));
+                    _tree.LeafNode2(Loc.Format("Scale: {0}", Vec3Str(cast->Scale)));
                     DrawMat4x3("World", ref cast->World);
                     DrawMat4x3("InvWorld", ref cast->InvWorld);
                 }
@@ -1443,11 +1443,11 @@ public sealed unsafe class DebugCollision() : IDisposable
             case ColliderType.PlaneTwoSided:
                 {
                     var cast = (ColliderPlane*)coll;
-                    _tree.LeafNode2($"Normal: {cast->World.Row2 / cast->Scale.Z:f3}");
-                    _tree.LeafNode2($"Translation: {Vec3Str(cast->Translation)}");
+                    _tree.LeafNode2(Loc.Format("Normal: {0:f3}", cast->World.Row2 / cast->Scale.Z));
+                    _tree.LeafNode2(Loc.Format("Translation: {0}", Vec3Str(cast->Translation)));
                     var rotation = cast->Rotation;
-                    _tree.LeafNode2($"Rotation: {Vec3Str(rotation)} (Yaw: {HeadingDegFromWorld(ref cast->World)}°)");
-                    _tree.LeafNode2($"Scale: {Vec3Str(cast->Scale)}");
+                    _tree.LeafNode2(Loc.Format("Rotation: {0} (Yaw: {1}°)", Vec3Str(rotation), HeadingDegFromWorld(ref cast->World)));
+                    _tree.LeafNode2(Loc.Format("Scale: {0}", Vec3Str(cast->Scale)));
                     DrawMat4x3("World", ref cast->World);
                     DrawMat4x3("InvWorld", ref cast->InvWorld);
                 }
@@ -1458,29 +1458,29 @@ public sealed unsafe class DebugCollision() : IDisposable
     private void DrawColliderMesh(ColliderMesh* coll)
     {
         DrawResource(coll->Resource);
-        _tree.LeafNode2($"Translation: {Vec3Str(coll->Translation)}");
+        _tree.LeafNode2(Loc.Format("Translation: {0}", Vec3Str(coll->Translation)));
         var rotation = coll->Rotation;
-        _tree.LeafNode2($"Rotation: {Vec3Str(rotation)} (Yaw: {HeadingDegFromWorld(ref coll->World)}°)");
-        _tree.LeafNode2($"Scale: {Vec3Str(coll->Scale)}");
+        _tree.LeafNode2(Loc.Format("Rotation: {0} (Yaw: {1}°)", Vec3Str(rotation), HeadingDegFromWorld(ref coll->World)));
+        _tree.LeafNode2(Loc.Format("Scale: {0}", Vec3Str(coll->Scale)));
         DrawMat4x3("World", ref coll->World);
         DrawMat4x3("InvWorld", ref coll->InvWorld);
-        if (_tree.LeafNode2($"Bounding sphere: {SphereStr(coll->BoundingSphere)}").SelectedOrHovered)
+        if (_tree.LeafNode2(Loc.Format("Bounding sphere: {0}", SphereStr(coll->BoundingSphere))).SelectedOrHovered)
         {
             VisualizeSphere(coll->BoundingSphere, Colors.CollisionColor1);
         }
-        if (_tree.LeafNode2($"Bounding box: {AABBStr(coll->WorldBoundingBox)}").SelectedOrHovered)
+        if (_tree.LeafNode2(Loc.Format("Bounding box: {0}", AABBStr(coll->WorldBoundingBox))).SelectedOrHovered)
         {
             VisualizeOBB(ref coll->WorldBoundingBox, ref Matrix4x3.Identity, Colors.CollisionColor1);
         }
-        _tree.LeafNode2($"Total size: {coll->TotalPrimitives} prims, {coll->TotalChildren} nodes");
-        _tree.LeafNode2($"Mesh type: {(coll->MeshIsSimple ? "simple" : coll->MemoryData != null ? "PCB in-memory" : "PCB from file")} {(coll->Loaded ? "" : "(loading)")}");
+        _tree.LeafNode2(Loc.Format("Total size: {0} prims, {1} nodes", coll->TotalPrimitives, coll->TotalChildren));
+        _tree.LeafNode2(Loc.Format("Mesh type: {0} {1}", Loc.Tr(coll->MeshIsSimple ? "simple" : coll->MemoryData != null ? "PCB in-memory" : "PCB from file"), coll->Loaded ? "" : Loc.Tr("(loading)")));
         if (coll->Mesh == null || coll->MeshIsSimple)
         {
             return;
         }
 
         var mesh = (MeshPCB*)coll->Mesh;
-        DrawColliderMeshPCBNode("Root", mesh->RootNode, ref coll->World, coll->Collider.ObjectMaterialValue & coll->Collider.ObjectMaterialMask, ~coll->Collider.ObjectMaterialMask, coll);
+        DrawColliderMeshPCBNode(Loc.Id("Root"), mesh->RootNode, ref coll->World, coll->Collider.ObjectMaterialValue & coll->Collider.ObjectMaterialMask, ~coll->Collider.ObjectMaterialMask, coll);
     }
 
     private void DrawColliderMeshPCBNode(string tag, MeshPCB.FileNode* node, ref Matrix4x3 world, ulong objMatId, ulong objMatInvMask, ColliderMesh* coll)
@@ -1507,7 +1507,7 @@ public sealed unsafe class DebugCollision() : IDisposable
             VisualizeOBB(ref node->LocalBounds, ref world, Colors.CollisionColor1);
         }
 
-        using var nv = _tree.Node2($"Vertices: {node->NumVertsRaw}+{node->NumVertsCompressed}", node->NumVertsRaw + node->NumVertsCompressed == 0);
+        using var nv = _tree.Node2(Loc.Format("Vertices: {0}+{1}", node->NumVertsRaw, node->NumVertsCompressed), node->NumVertsRaw + node->NumVertsCompressed == 0);
         if (nv.Opened)
         {
             // Collect all vertices and precompute the sort key once. The old comparer recalculated
@@ -1543,7 +1543,7 @@ public sealed unsafe class DebugCollision() : IDisposable
 
                 if (ImGui.BeginPopupContextItem($"##popup_vertex_{index}"))
                 {
-                    if (ImGui.MenuItem("Copy to Clipboard"))
+                    if (ImGui.MenuItem(Loc.Id("Copy to Clipboard")))
                     {
                         ImGui.SetClipboardText(vertexStr);
                     }
@@ -1552,7 +1552,7 @@ public sealed unsafe class DebugCollision() : IDisposable
             }
         }
         {
-            using var np = _tree.Node2($"Primitives: {node->NumPrims}", node->NumPrims == 0);
+            using var np = _tree.Node2(Loc.Format("Primitives: {0}", node->NumPrims), node->NumPrims == 0);
             if (np.Opened)
             {
                 var i = 0;
@@ -1565,19 +1565,19 @@ public sealed unsafe class DebugCollision() : IDisposable
                 }
             }
         }
-        DrawColliderMeshPCBNode($"Child 1 (+{node->Child1Offset})", node->Child1, ref world, objMatId, objMatInvMask, coll);
-        DrawColliderMeshPCBNode($"Child 2 (+{node->Child2Offset})", node->Child2, ref world, objMatId, objMatInvMask, coll);
+        DrawColliderMeshPCBNode(Loc.Format("Child 1 (+{0})", node->Child1Offset), node->Child1, ref world, objMatId, objMatInvMask, coll);
+        DrawColliderMeshPCBNode(Loc.Format("Child 2 (+{0})", node->Child2Offset), node->Child2, ref world, objMatId, objMatInvMask, coll);
     }
 
     private void DrawResource(Resource* res)
     {
         if (res != null)
         {
-            _tree.LeafNode2($"Resource: {(nint)res:X} '{res->PathString}'");
+            _tree.LeafNode2(Loc.Format("Resource: {0:X} '{1}'", (nint)res, res->PathString));
         }
         else
         {
-            _tree.LeafNode2($"Resource: null");
+            _tree.LeafNode2(Loc.Tr("Resource: null"));
         }
     }
 
@@ -2069,7 +2069,7 @@ public sealed unsafe class DebugCollision() : IDisposable
         foreach (var i in _availableLayers.SetBits())
         {
             var active = activeLayers[i];
-            if (ImGui.Checkbox($"Layer {i}", ref active))
+            if (ImGui.Checkbox(Loc.Format("Layer {0}", i), ref active))
             {
                 activeLayers[i] = active;
                 coll->LayerMask = activeLayers.Raw;
@@ -2077,12 +2077,12 @@ public sealed unsafe class DebugCollision() : IDisposable
         }
 
         var raycast = (coll->VisibilityFlags & 1) != 0;
-        if (ImGui.Checkbox("Flag: raycast", ref raycast))
+        if (ImGui.Checkbox(Loc.Id("Flag: raycast"), ref raycast))
         {
             coll->VisibilityFlags ^= 1;
         }
         var globalVisit = (coll->VisibilityFlags & 2) != 0;
-        if (ImGui.Checkbox("Flag: global visit", ref globalVisit))
+        if (ImGui.Checkbox(Loc.Id("Flag: global visit"), ref globalVisit))
         {
             coll->VisibilityFlags ^= 2;
         }
@@ -2094,7 +2094,7 @@ public sealed unsafe class DebugCollision() : IDisposable
             if (cm->Mesh != null && !cm->MeshIsSimple)
             {
                 ImGui.Separator();
-                ImGui.TextDisabled("Export outlines (Clipper2 union)");
+                ImGui.TextDisabled(Loc.Tr("Export outlines (Clipper2 union)"));
 
                 var wantedId = _materialId.Raw;
                 var wantedMask = _materialMask.Raw;
@@ -2104,7 +2104,7 @@ public sealed unsafe class DebugCollision() : IDisposable
                 var centerXZ = new Vector2(p.X, p.Z);
                 var useRadius = _exportRadiusXZ > 0f;
 
-                if (ImGui.MenuItem("Copy polygons (WPos)"))
+                if (ImGui.MenuItem(Loc.Id("Copy polygons (WPos)")))
                 {
                     var polys = CollisionOutlinesExtractor.ExtractPolygonsUnion(cm, wantedId, wantedMask,
                         _exportSnapEpsXZ, useRadius ? centerXZ : default, useRadius ? _exportRadiusXZ : 0f,
@@ -2112,7 +2112,7 @@ public sealed unsafe class DebugCollision() : IDisposable
                     var text = CollisionOutlinesExtractor.FormatForClipboard(polys, CollisionOutlinesExtractor.ClipboardVectorFormat.Vector2XZ, 5);
                     ImGui.SetClipboardText(text);
                 }
-                if (ImGui.MenuItem("Copy polygons (Vector3)"))
+                if (ImGui.MenuItem(Loc.Id("Copy polygons (Vector3)")))
                 {
                     var polys = CollisionOutlinesExtractor.ExtractPolygonsUnion(cm, wantedId, wantedMask,
                         _exportSnapEpsXZ, useRadius ? centerXZ : default, useRadius ? _exportRadiusXZ : 0f,
@@ -2128,7 +2128,7 @@ public sealed unsafe class DebugCollision() : IDisposable
             if (cs->Header != null && cs->Elements != null)
             {
                 ImGui.Separator();
-                ImGui.TextDisabled("Export outlines (Clipper2 union, merged)");
+                ImGui.TextDisabled(Loc.Tr("Export outlines (Clipper2 union, merged)"));
 
                 var wantedId = _materialId.Raw;
                 var wantedMask = _materialMask.Raw;
@@ -2137,7 +2137,7 @@ public sealed unsafe class DebugCollision() : IDisposable
                 var centerXZ = new Vector2(p.X, p.Z);
                 var useRadius = _exportRadiusXZ > 0f;
 
-                if (ImGui.MenuItem("Copy polygons (WPos, merged)"))
+                if (ImGui.MenuItem(Loc.Id("Copy polygons (WPos, merged)")))
                 {
                     var polys = CollisionOutlinesExtractor.ExtractPolygonsUnionStreamed(cs, wantedId, wantedMask,
                         _exportSnapEpsXZ, useRadius ? centerXZ : default,
@@ -2146,7 +2146,7 @@ public sealed unsafe class DebugCollision() : IDisposable
                     var text = CollisionOutlinesExtractor.FormatForClipboard(polys, CollisionOutlinesExtractor.ClipboardVectorFormat.Vector2XZ, 5);
                     ImGui.SetClipboardText(text);
                 }
-                if (ImGui.MenuItem("Copy polygons (Vector3, merged)"))
+                if (ImGui.MenuItem(Loc.Id("Copy polygons (Vector3, merged)")))
                 {
                     var polys = CollisionOutlinesExtractor.ExtractPolygonsUnionStreamed(cs, wantedId, wantedMask, _exportSnapEpsXZ,
                         useRadius ? centerXZ : default, useRadius ? _exportRadiusXZ : 0f,

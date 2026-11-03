@@ -227,7 +227,7 @@ public abstract record class StrategyConfig(
     public abstract string ToDisplayString(StrategyValue val);
     public abstract void SerializeValue(Utf8JsonWriter writer, StrategyValue val);
 
-    public string UIName => DisplayName.Length > 0 ? DisplayName : InternalName;
+    public string UIName => Loc.Tr(DisplayName.Length > 0 ? DisplayName : InternalName);
 }
 
 // the tuning knobs of the rotation module are represented by strategy config rather than usual global config classes, since we they need to be changed dynamically by planner or manual input
@@ -312,7 +312,7 @@ public record class StrategyOption(string InternalName, string DisplayName)
     public StrategyContext Context = StrategyContext.All;
     public uint Color; // used in CD planner timeline instead of default planner colors, if set
 
-    public string UIName => DisplayName.Length > 0 ? DisplayName : InternalName;
+    public string UIName => Loc.Tr(DisplayName.Length > 0 ? DisplayName : InternalName);
 }
 
 public abstract record class StrategyValue

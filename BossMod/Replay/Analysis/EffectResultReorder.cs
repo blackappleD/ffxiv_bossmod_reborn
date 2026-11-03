@@ -79,16 +79,16 @@ sealed class EffectResultReorder
 
     public void Draw(UITree tree)
     {
-        foreach (var e in tree.Nodes(_reordered, e => new($"{e.r.Path}: {ReplayUtils.ParticipantString(e.p, e.prev.Timestamp)} {(e.prevHeal ? "heal" : "dmg")} #{e.prev.GlobalSequence} vs {(e.nextHeal ? "heal" : "dmg")} #{e.next.GlobalSequence}")))
+        foreach (var e in tree.Nodes(_reordered, e => new($"{e.r.Path}: {ReplayUtils.ParticipantString(e.p, e.prev.Timestamp)} {Loc.Tr(e.prevHeal ? "heal" : "dmg")} #{e.prev.GlobalSequence} vs {Loc.Tr(e.nextHeal ? "heal" : "dmg")} #{e.next.GlobalSequence}")))
         {
-            foreach (var n in tree.Node($"Prev: {e.prev.Timestamp:O} {e.prev.ID} {ReplayUtils.ParticipantString(e.prev.Source, e.prev.Timestamp)} -> {ReplayUtils.ParticipantString(e.prev.MainTarget, e.prev.Timestamp)}"))
+            foreach (var n in tree.Node($"{Loc.Tr("Prev:")} {e.prev.Timestamp:O} {e.prev.ID} {ReplayUtils.ParticipantString(e.prev.Source, e.prev.Timestamp)} -> {ReplayUtils.ParticipantString(e.prev.MainTarget, e.prev.Timestamp)}"))
             {
                 foreach (var t in tree.Nodes(e.prev.Targets, t => new(ReplayUtils.ActionTargetString(t, e.prev.Timestamp))))
                 {
                     tree.LeafNodes(t.Effects.ValidEffects(), ReplayUtils.ActionEffectString);
                 }
             }
-            foreach (var n in tree.Node($"Next: {e.next.Timestamp:O} {e.next.ID} {ReplayUtils.ParticipantString(e.next.Source, e.next.Timestamp)} -> {ReplayUtils.ParticipantString(e.next.MainTarget, e.next.Timestamp)}"))
+            foreach (var n in tree.Node($"{Loc.Tr("Next:")} {e.next.Timestamp:O} {e.next.ID} {ReplayUtils.ParticipantString(e.next.Source, e.next.Timestamp)} -> {ReplayUtils.ParticipantString(e.next.MainTarget, e.next.Timestamp)}"))
             {
                 foreach (var t in tree.Nodes(e.next.Targets, t => new(ReplayUtils.ActionTargetString(t, e.next.Timestamp))))
                 {

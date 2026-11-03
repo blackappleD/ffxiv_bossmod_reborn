@@ -86,7 +86,7 @@ public sealed class UIPresetEditor
     {
         using (ImRaii.Disabled(_sourcePresetDefault))
         {
-            if (ImGui.InputText("Name", ref Preset.Name, 256))
+            if (ImGui.InputText(Loc.Id("Name"), ref Preset.Name, 256))
             {
                 Modified = true;
                 NameConflict = CheckNameConflict();
@@ -168,10 +168,10 @@ public sealed class UIPresetEditor
 
         using var d = ImRaii.Disabled(_sourcePresetDefault);
 
-        if (ImGui.Button("Add##module", width))
+        if (ImGui.Button(Loc.Tr("Add##module"), width))
             ImGui.OpenPopup("add_module");
 
-        if (UIMisc.Button("Remove##module", width.X, (_selectedModuleIndex < 0, "Select any module to remove"), (!ImGui.GetIO().KeyShift, "Hold shift")))
+        if (UIMisc.Button(Loc.Tr("Remove##module"), width.X, (_selectedModuleIndex < 0, Loc.Tr("Select any module to remove")), (!ImGui.GetIO().KeyShift, Loc.Tr("Hold shift"))))
         {
             var m = Preset.Modules[_selectedModuleIndex];
             AddAvailableModule(m.Type, m.Definition, m.Builder, _availableModules);
@@ -186,7 +186,7 @@ public sealed class UIPresetEditor
     {
         foreach (var sub in cat.Subcategories)
         {
-            if (ImGui.BeginMenu(sub.Key))
+            if (ImGui.BeginMenu(Loc.Id(sub.Key)))
             {
                 DrawModuleAddPopup(sub.Value, ref actions);
                 ImGui.EndMenu();
@@ -208,7 +208,7 @@ public sealed class UIPresetEditor
 
     private bool DrawModule(Type type, RotationModuleDefinition definition, bool selected = false)
     {
-        var res = ImGui.Selectable(definition.DisplayName, selected); // note: this assumes display names are unique
+        var res = ImGui.Selectable(Loc.Id(definition.DisplayName), selected); // note: this assumes display names are unique
         if (ImGui.IsItemHovered())
         {
             using var tooltip = ImRaii.Tooltip();
@@ -224,7 +224,7 @@ public sealed class UIPresetEditor
     {
         if (_selectedModuleIndex < 0)
         {
-            ImGui.TextUnformatted("Add or select rotation module to configure its strategies");
+            ImGui.TextUnformatted(Loc.Tr("Add or select rotation module to configure its strategies"));
             return;
         }
 
@@ -233,7 +233,7 @@ public sealed class UIPresetEditor
         var width = new Vector2(ImGui.GetContentRegionAvail().X, 0);
         var ms = Preset.Modules[_selectedModuleIndex];
 
-        ImGui.Checkbox("Show hidden tracks", ref _showHiddenTracks);
+        ImGui.Checkbox(Loc.Id("Show hidden tracks"), ref _showHiddenTracks);
 
         using var _ = ImRaii.PushStyle(ImGuiStyleVar.CellPadding, new Vector2(5, 5));
         using var table = ImRaii.Table("preset_options", 2, ImGuiTableFlags.BordersInnerH);
@@ -288,11 +288,11 @@ public sealed class UIPresetEditor
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
         ImGui.Dummy(new(1, 27));
-        ImGui.Text("Hotkey overrides");
+        ImGui.Text(Loc.Tr("Hotkey overrides"));
         ImGui.TableNextColumn();
         ImGui.Dummy(new(1, 24));
         ImGui.SetNextItemWidth(200 * ImGuiHelpers.GlobalScale);
-        using (var combo = ImRaii.Combo("###selectover", "Add new..."))
+        using (var combo = ImRaii.Combo("###selectover", Loc.Tr("Add new...")))
         {
             if (combo)
             {
@@ -322,7 +322,7 @@ public sealed class UIPresetEditor
             ImGui.SameLine();
             Modified |= DrawModifier(ref val.Mod, Preset.Modifier.Alt, "Alt");
             ImGui.SameLine();
-            if (ImGui.Button("Delete override"))
+            if (ImGui.Button(Loc.Id("Delete override")))
                 ms.SerializedSettings.RemoveAt(i);
         }
     }
@@ -333,10 +333,10 @@ public sealed class UIPresetEditor
         {
             ImGui.TableNextRow();
             ImGui.TableNextColumn();
-            ImGui.TextUnformatted("Auto-heal/auto-raise");
+            ImGui.TextUnformatted(Loc.Tr("Auto-heal/auto-raise"));
             ImGui.TableNextColumn();
-            ImGui.TextUnformatted("Not part of the standard rotation. Use the Healer AI module instead.");
-            if (ImGui.Button("Add Healer AI"))
+            ImGui.TextUnformatted(Loc.Tr("Not part of the standard rotation. Use the Healer AI module instead."));
+            if (ImGui.Button(Loc.Id("Add Healer AI")))
             {
                 var rot = RotationModuleRegistry.Modules[THealerAI];
                 var index = Preset.AddModule(THealerAI, rot.Definition, rot.Builder);
@@ -346,7 +346,7 @@ public sealed class UIPresetEditor
                 return true;
             }
             ImGui.SameLine();
-            if (ImGui.Button("Don't show this suggestion again"))
+            if (ImGui.Button(Loc.Id("Don't show this suggestion again")))
             {
                 _autorotConfig.SuggestHealerAI = false;
                 _autorotConfig.Modified.Fire();

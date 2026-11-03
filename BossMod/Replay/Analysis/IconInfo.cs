@@ -47,15 +47,15 @@ sealed class IconInfo : CommonEnumInfo
         }
         foreach (var (iid, data) in tree.Nodes(_data, map))
         {
-            tree.LeafNode($"Source IDs: {OIDListString(data.SourceOIDs)}");
-            tree.LeafNode($"Target IDs: {(data.TargetOIDs.Count == 0 ? "???" : data.SeenTargetNonSelf ? OIDListString(data.TargetOIDs) : "self")}");
+            tree.LeafNode(Loc.Format("Source IDs: {0}", OIDListString(data.SourceOIDs)));
+            tree.LeafNode(Loc.Format("Target IDs: {0}", data.TargetOIDs.Count == 0 ? "???" : data.SeenTargetNonSelf ? OIDListString(data.TargetOIDs) : Loc.Tr("self")));
             tree.LeafNode($"VFX: {Service.LuminaRow<Lockon>(iid)?.IconName}");
         }
     }
 
     public void DrawContextMenu()
     {
-        if (ImGui.MenuItem("Generate enum for boss module"))
+        if (ImGui.MenuItem(Loc.Id("Generate enum for boss module")))
         {
             var sb = new StringBuilder("public enum IconID : uint\n{\n");
             foreach (var (iid, data) in _data)
@@ -67,7 +67,7 @@ sealed class IconInfo : CommonEnumInfo
             ImGui.SetClipboardText(sb.ToString());
         }
 
-        if (ImGui.MenuItem("Generate missing enum values for boss module"))
+        if (ImGui.MenuItem(Loc.Id("Generate missing enum values for boss module")))
         {
             var sb = new StringBuilder();
             foreach (var (iid, data) in _data.Where(kv => _iidType?.GeneratedEnumName(kv.Key) == null))

@@ -31,7 +31,7 @@ public sealed class AIHintsVisualizer(AIHints hints, WorldState ws, Actor player
     {
         _partyHealth.Update(hints);
 
-        foreach (var _1 in tree.Node("Potential targets", hints.PotentialTargets.Count == 0))
+        foreach (var _1 in tree.Node(Loc.Tr("Potential targets"), hints.PotentialTargets.Count == 0))
         {
             tree.LeafNodes(hints.PotentialTargets, e => $"[{e.Priority}] {e.Actor} (str={e.AttackStrength:f2}), dist={e.Actor.DistanceToHitbox(player):f2}, tank={e.ShouldBeTanked}/{e.PreferProvoking}/{e.DesiredPosition}/{e.DesiredRotation}, forbid dots={e.ForbidDOTs}");
         }
@@ -39,7 +39,7 @@ public sealed class AIHintsVisualizer(AIHints hints, WorldState ws, Actor player
         tree.LeafNode($"Forced movement: {hints.ForcedMovement} (misdirection threshold={hints.MisdirectionThreshold})");
         tree.LeafNode($"Special movement: {hints.ImminentSpecialMode.mode} in {Math.Max(0, (hints.ImminentSpecialMode.activation - ws.CurrentTime).TotalSeconds):f3}s");
         var countF = hints.ForbiddenZones.Count;
-        foreach (var _1 in tree.Node("Forbidden zones", countF == 0))
+        foreach (var _1 in tree.Node(Loc.Tr("Forbidden zones"), countF == 0))
         {
             for (var i = 0; i < countF; ++i)
             {
@@ -52,7 +52,7 @@ public sealed class AIHintsVisualizer(AIHints hints, WorldState ws, Actor player
         }
         var off = countF;
         var countG = hints.GoalZones.Count;
-        foreach (var _1 in tree.Node("Goal zones", countG == 0))
+        foreach (var _1 in tree.Node(Loc.Tr("Goal zones"), countG == 0))
         {
             for (var i = 0; i < countG; ++i)
             {
@@ -62,11 +62,11 @@ public sealed class AIHintsVisualizer(AIHints hints, WorldState ws, Actor player
                 }
             }
         }
-        foreach (var _1 in tree.Node("Forbidden directions", hints.ForbiddenDirections.Count == 0))
+        foreach (var _1 in tree.Node(Loc.Tr("Forbidden directions"), hints.ForbiddenDirections.Count == 0))
         {
             tree.LeafNodes(hints.ForbiddenDirections, d => $"{d.center} +- {d.halfWidth}, at {Math.Max(0, (d.activation - ws.CurrentTime).TotalSeconds):f3}");
         }
-        foreach (var _1 in tree.Node("Predicted damage", hints.PredictedDamage.Count == 0))
+        foreach (var _1 in tree.Node(Loc.Tr("Predicted damage"), hints.PredictedDamage.Count == 0))
         {
             tree.LeafNodes(hints.PredictedDamage, d =>
             {
@@ -85,7 +85,7 @@ public sealed class AIHintsVisualizer(AIHints hints, WorldState ws, Actor player
                 return $"[{names}] ({d.Type}), at {Math.Max(0, (d.Activation - ws.CurrentTime).TotalSeconds):f3}";
             });
         }
-        foreach (var _1 in tree.Node("Party health"))
+        foreach (var _1 in tree.Node(Loc.Tr("Party health")))
         {
             var ph = _partyHealth.PartyHealth;
             tree.LeafNode($"Total: {ph.Count}");
@@ -94,11 +94,11 @@ public sealed class AIHintsVisualizer(AIHints hints, WorldState ws, Actor player
             tree.LeafNode($"Average (predicted): {ph.AvgPredicted * 100:f2} / stddev {ph.StdDevPredicted * 100:f2}");
             tree.LeafNode($"Lowest HP ally (predicted): {ws.Party[ph.LowestHPSlotPredicted]}");
         }
-        foreach (var _1 in tree.Node("Planned actions", hints.ActionsToExecute.Entries.Count == 0))
+        foreach (var _1 in tree.Node(Loc.Tr("Planned actions"), hints.ActionsToExecute.Entries.Count == 0))
         {
             tree.LeafNodes(hints.ActionsToExecute.Entries, e => $"{e.Action} @ {e.Target} (priority {e.Priority})");
         }
-        foreach (var _1 in tree.Node("Pathfinding"))
+        foreach (var _1 in tree.Node(Loc.Tr("Pathfinding")))
         {
             ImGui.TextUnformatted($"Center={hints.PathfindMapCenter}, Bounds={hints.PathfindMapBounds}");
             ImGui.TextUnformatted($"Obstacles={hints.PathfindMapObstacles}");
@@ -107,7 +107,7 @@ public sealed class AIHintsVisualizer(AIHints hints, WorldState ws, Actor player
             ImGui.TextUnformatted($"Time: Total: {_naviTimeTotal:f3}ms, Raster: {_naviTimeRaster:f3}ms, Pathfinding: {_naviTimePathfinding:f3}ms");
             ImGui.TextUnformatted($"Leeway={_navi.LeewaySeconds:f3}, ttg={_navi.TimeToGoal:f3}, dist={(_navi.Destination != null ? $"{(_navi.Destination.Value - player.Position).Length():f3}" : "---")}");
         }
-        if (ImGui.Button("Run pathfinding benchmark (x10000)"))
+        if (ImGui.Button(Loc.Id("Run pathfinding benchmark (x10000)")))
         {
             RunBenchmark(10000);
         }

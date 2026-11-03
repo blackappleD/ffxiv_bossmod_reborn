@@ -61,13 +61,13 @@ sealed class DebugHate(WorldState ws)
     {
         var uistate = FFXIVClientStructs.FFXIV.Client.Game.UI.UIState.Instance();
 
-        ImGui.TextUnformatted($"Haters (UIState)");
+        ImGui.TextUnformatted(Loc.Tr("Haters (UIState)"));
         // aggro list of current target
         var hate = (Hate*)((IntPtr)uistate + 0x08);
         ImGui.BeginTable("hate", 3);
         ImGui.TableSetupColumn("ObjectID");
-        ImGui.TableSetupColumn("Name");
-        ImGui.TableSetupColumn("Enmity");
+        ImGui.TableSetupColumn(Loc.Tr("Name"));
+        ImGui.TableSetupColumn(Loc.Tr("Enmity"));
         ImGui.TableHeadersRow();
         foreach (var h in hate->HateSpan)
         {
@@ -81,13 +81,13 @@ sealed class DebugHate(WorldState ws)
         }
         ImGui.EndTable();
 
-        ImGui.TextUnformatted("Hate (UIState)");
+        ImGui.TextUnformatted(Loc.Tr("Hate (UIState)"));
         // list of actors aggroed to player
         var hater = (Hater*)((IntPtr)uistate + 0x110);
         ImGui.BeginTable("hater", 3);
         ImGui.TableSetupColumn("ObjectID");
-        ImGui.TableSetupColumn("Name");
-        ImGui.TableSetupColumn("Enmity");
+        ImGui.TableSetupColumn(Loc.Tr("Name"));
+        ImGui.TableSetupColumn(Loc.Tr("Enmity"));
         ImGui.TableHeadersRow();
         for (var i = 0; i < hater->HaterArrayLength; ++i)
         {
@@ -104,11 +104,11 @@ sealed class DebugHate(WorldState ws)
 
         ImGui.Separator();
 
-        ImGui.TextUnformatted("Haters (WorldState)");
+        ImGui.TextUnformatted(Loc.Tr("Haters (WorldState)"));
         ImGui.BeginTable("hate", 3);
         ImGui.TableSetupColumn("ObjectID");
-        ImGui.TableSetupColumn("Name");
-        ImGui.TableSetupColumn("Enmity");
+        ImGui.TableSetupColumn(Loc.Tr("Name"));
+        ImGui.TableSetupColumn(Loc.Tr("Enmity"));
         ImGui.TableHeadersRow();
         foreach (var t in ws.Client.CurrentTargetHate.Targets)
         {

@@ -86,7 +86,7 @@ sealed class ParticipantInfo : CommonEnumInfo
             {
                 0 => "???",
                 1 => kv.Value.Types[0].ToString(),
-                _ => "mixed!"
+                _ => Loc.Tr("mixed!")
             };
             // for global, highlight by targetable; for encounter, highlight by being defined in enum
             var highlight = _oidType != null ? name == null : !kv.Value.SeenTargetable;
@@ -94,36 +94,36 @@ sealed class ParticipantInfo : CommonEnumInfo
         }
         foreach (var (oid, data) in tree.Nodes(_data, map, kv => DrawSubContextMenu(kv.Key, kv.Value)))
         {
-            foreach (var n in tree.Node($"Types ({data.Types.Count})", data.Types.Count == 0))
+            foreach (var n in tree.Node(Loc.Format("Types ({0})", data.Types.Count) + "###types", data.Types.Count == 0))
             {
                 tree.LeafNodes(data.Types, t => t.ToString());
             }
 
-            foreach (var n in tree.Node($"Zones ({data.Zones.Count})", data.Zones.Count == 0))
+            foreach (var n in tree.Node(Loc.Format("Zones ({0})", data.Zones.Count) + "###zones", data.Zones.Count == 0))
             {
                 tree.LeafNodes(data.Zones, z => $"{z.zoneId} '{Service.LuminaRow<TerritoryType>(z.zoneId)?.PlaceName.ValueNullable?.Name}' (cfc={z.cfcId})");
             }
 
-            foreach (var n in tree.Node($"Names ({data.Names.Count})", data.Names.Count == 0))
+            foreach (var n in tree.Node(Loc.Format("Names ({0})", data.Names.Count) + "###names", data.Names.Count == 0))
             {
                 tree.LeafNodes(data.Names, n => $"[{n.id}] {n.name}");
             }
 
-            tree.LeafNode($"Spawned pre fight: {string.Join(", ", data.SpawnedPreFight)}");
-            tree.LeafNode($"Spawned mid fight: {data.SpawnedMidFight}");
-            tree.LeafNode($"Radius: {RadiusString(data)}");
-            tree.LeafNode($"Seen targetable: {data.SeenTargetable}");
+            tree.LeafNode(Loc.Format("Spawned pre fight: {0}", string.Join(", ", data.SpawnedPreFight)));
+            tree.LeafNode(Loc.Format("Spawned mid fight: {0}", data.SpawnedMidFight));
+            tree.LeafNode(Loc.Format("Radius: {0}", RadiusString(data)));
+            tree.LeafNode(Loc.Format("Seen targetable: {0}", data.SeenTargetable));
         }
     }
 
     public void DrawContextMenu()
     {
-        if (ImGui.MenuItem("Generate enum for boss module"))
+        if (ImGui.MenuItem(Loc.Id("Generate enum for boss module")))
         {
             ImGui.SetClipboardText(AddOIDEnum(new()).ToString());
         }
 
-        if (ImGui.MenuItem("Generate missing enum values for boss module"))
+        if (ImGui.MenuItem(Loc.Id("Generate missing enum values for boss module")))
         {
             var sb = new StringBuilder();
             foreach (var (name, val) in Utils.DedupKeys(_data.Where(kv => _oidType?.GeneratedEnumName(kv.Key) == null).Select(d => EnumMemberString(d.Key, d.Value))))
@@ -159,11 +159,11 @@ sealed class ParticipantInfo : CommonEnumInfo
 
     private void DrawSubContextMenu(uint oid, ParticipantData data)
     {
-        if (ImGui.MenuItem("Generate module stub (trivial states)"))
+        if (ImGui.MenuItem(Loc.Id("Generate module stub (trivial states)")))
         {
             ImGui.SetClipboardText(AddBossModuleStub(new(), oid, data, false).ToString());
         }
-        if (ImGui.MenuItem("Generate module stub (with state machine)"))
+        if (ImGui.MenuItem(Loc.Id("Generate module stub (with state machine)")))
         {
             ImGui.SetClipboardText(AddBossModuleStub(new(), oid, data, true).ToString());
         }

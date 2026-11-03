@@ -36,9 +36,9 @@ sealed class UnknownActionEffects
 
     public void Draw(UITree tree)
     {
-        foreach (var (type, actions) in tree.Nodes(_unknownActionEffects, kv => new($"{kv.Key} ({kv.Value.Count} actions)")))
+        foreach (var (type, actions) in tree.Nodes(_unknownActionEffects, kv => new(Loc.Format("{0} ({1} actions)", kv.Key, kv.Value.Count))))
         {
-            foreach (var (action, entries) in tree.Nodes(actions, kv => new($"{kv.Key} ({kv.Value.Count} entries)")))
+            foreach (var (action, entries) in tree.Nodes(actions, kv => new(Loc.Format("{0} ({1} entries)", kv.Key, kv.Value.Count))))
             {
                 foreach (var entry in tree.Nodes(entries, entry => new($"{ReplayUtils.ActionEffectString(entry.Effect)}: {entry.Replay.Path} {entry.Action.Timestamp:O} {ReplayUtils.ParticipantString(entry.Action.Source, entry.Action.Timestamp)} -> {ReplayUtils.ParticipantString(entry.Action.MainTarget, entry.Action.Timestamp)} @ {ReplayUtils.ParticipantString(entry.Target.Target, entry.Action.Timestamp)}")))
                 {

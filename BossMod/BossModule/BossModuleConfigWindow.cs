@@ -11,7 +11,7 @@ public sealed class BossModuleConfigWindow : UIWindow
     private readonly UITree _tree = new();
     private readonly UITabs _tabs = new("ConfigTabs");
 
-    public BossModuleConfigWindow(BossModuleRegistry.Info info, WorldState ws) : base($"{info.ModuleType.Name} config", true, new(1200, 800))
+    public BossModuleConfigWindow(BossModuleRegistry.Info info, WorldState ws) : base(Loc.Id($"{info.ModuleType.Name} config"), true, new(1200, 800))
     {
         _info = info;
         _node = info.ConfigType != null ? Service.Config.Get<ConfigNode>(info.ConfigType) : null;
@@ -42,7 +42,7 @@ public sealed class BossModuleConfigWindow : UIWindow
         if (_node != null)
             ConfigUI.DrawNode(_node, Service.Config, _tree, _ws);
         else if (!_info.HasPrePullHints)
-            ImGui.TextUnformatted("This module does not expose any additional configuration");
+            ImGui.TextUnformatted(Loc.Tr("This module does not expose any additional configuration"));
     }
 
     private void DrawPartyRolesAssignmentsTab()

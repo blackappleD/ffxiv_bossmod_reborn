@@ -11,20 +11,20 @@ public sealed class DebugTiming
     {
         var fwk = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance();
         var dtReal = (double)(fwk->PerformanceCounterValue - _prevQPC) / fwk->PerformanceCounterFrequency;
-        ImGui.TextUnformatted($"Frame counter: {fwk->FrameCounter}");
-        ImGui.TextUnformatted($"Frame time effective: {fwk->FrameDeltaTime}");
-        ImGui.TextUnformatted($"Framerate: {fwk->FrameRate}");
-        ImGui.TextUnformatted($"Forced frame duration: {fwk->FrameDeltaTimeOverride}");
-        ImGui.TextUnformatted($"Forced next frame duration: {fwk->NextFrameDeltaTimeOverride}");
-        ImGui.TextUnformatted($"Frame duration multiplier: {fwk->FrameDeltaFactor}");
-        ImGui.TextUnformatted($"Tick speed multiplier: {fwk->GameSpeedMultiplier}");
-        ImGui.TextUnformatted($"QPC freq: {fwk->PerformanceCounterFrequency}");
-        ImGui.TextUnformatted($"QPC value: {fwk->PerformanceCounterValue}");
-        ImGui.TextUnformatted($"dt raw: {fwk->RealFrameDeltaTime}");
-        ImGui.TextUnformatted($"dt real: {dtReal} = raw + {dtReal - fwk->RealFrameDeltaTime}");
-        ImGui.TextUnformatted($"dt ms granularity: {fwk->FrameDeltaTimeMSInt} + {fwk->FrameDeltaTimeMSRem}");
-        ImGui.TextUnformatted($"dt us granularity: {fwk->FrameDeltaTimeUSInt} + {fwk->FrameDeltaTimeUSRem}");
-        ImGui.TextUnformatted($"dt timer: {DateTime.UnixEpoch.AddSeconds(fwk->UtcTime.Timestamp)}");
+        ImGui.TextUnformatted(Loc.Format("Frame counter: {0}", fwk->FrameCounter));
+        ImGui.TextUnformatted(Loc.Format("Frame time effective: {0}", fwk->FrameDeltaTime));
+        ImGui.TextUnformatted(Loc.Format("Framerate: {0}", fwk->FrameRate));
+        ImGui.TextUnformatted(Loc.Format("Forced frame duration: {0}", fwk->FrameDeltaTimeOverride));
+        ImGui.TextUnformatted(Loc.Format("Forced next frame duration: {0}", fwk->NextFrameDeltaTimeOverride));
+        ImGui.TextUnformatted(Loc.Format("Frame duration multiplier: {0}", fwk->FrameDeltaFactor));
+        ImGui.TextUnformatted(Loc.Format("Tick speed multiplier: {0}", fwk->GameSpeedMultiplier));
+        ImGui.TextUnformatted(Loc.Format("QPC freq: {0}", fwk->PerformanceCounterFrequency));
+        ImGui.TextUnformatted(Loc.Format("QPC value: {0}", fwk->PerformanceCounterValue));
+        ImGui.TextUnformatted(Loc.Format("dt raw: {0}", fwk->RealFrameDeltaTime));
+        ImGui.TextUnformatted(Loc.Format("dt real: {0} = raw + {1}", dtReal, dtReal - fwk->RealFrameDeltaTime));
+        ImGui.TextUnformatted(Loc.Format("dt ms granularity: {0} + {1}", fwk->FrameDeltaTimeMSInt, fwk->FrameDeltaTimeMSRem));
+        ImGui.TextUnformatted(Loc.Format("dt us granularity: {0} + {1}", fwk->FrameDeltaTimeUSInt, fwk->FrameDeltaTimeUSRem));
+        ImGui.TextUnformatted(Loc.Format("dt timer: {0}", DateTime.UnixEpoch.AddSeconds(fwk->UtcTime.Timestamp)));
         _prevFrameCounter = fwk->FrameCounter;
         _prevQPC = fwk->PerformanceCounterValue;
     }

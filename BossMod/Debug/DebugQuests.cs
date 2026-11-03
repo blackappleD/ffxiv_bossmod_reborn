@@ -83,18 +83,18 @@ sealed unsafe class DebugQuests
     public void Draw()
     {
         var qm = QuestManager.Instance();
-        foreach (var n in _tree.Node($"Player (seed={qm->DailyQuestSeed})###player"))
+        foreach (var n in _tree.Node(Loc.Format("Player (seed={0})###player", qm->DailyQuestSeed)))
         {
             uint i = 1;
             foreach (ref var t in qm->BeastReputation)
             {
-                _tree.LeafNode($"Tribe {i} '{Service.LuminaRow<BeastTribe>(i)?.Name}': rank={t.Rank}, value={t.Value}");
+                _tree.LeafNode(Loc.Format("Tribe {0} '{1}': rank={2}, value={3}", i, Service.LuminaRow<BeastTribe>(i)?.Name, t.Rank, t.Value));
                 ++i;
             }
         }
 
         var fwk = EventFramework.Instance();
-        foreach (var n in _tree.Node($"Dailies map ({fwk->DailyQuests.Entries.Count})###dailies_map"))
+        foreach (var n in _tree.Node(Loc.Format("Dailies map ({0})###dailies_map", fwk->DailyQuests.Entries.Count)))
         {
             foreach (var (baseId, entry) in fwk->DailyQuests.Entries)
             {
@@ -115,7 +115,7 @@ sealed unsafe class DebugQuests
             }
         }
 
-        foreach (var n in _tree.Node("Full daily map"))
+        foreach (var n in _tree.Node(Loc.Id("Full daily map")))
         {
             foreach (var (baseId, quests) in _dailyQuests)
             {
@@ -134,7 +134,7 @@ sealed unsafe class DebugQuests
         var target = TargetSystem.Instance()->GetTargetObject();
         using (ImRaii.Disabled(target == null))
         {
-            if (ImGui.Button("Compare..."))
+            if (ImGui.Button(Loc.Id("Compare...")))
             {
                 CompareLogic(target->BaseId);
             }

@@ -49,7 +49,7 @@ sealed class DebugGraphics
 
     public unsafe void DrawSceneTree()
     {
-        ImGui.Checkbox("Show only leafs of Character type", ref _showGraphicsLeafCharactersOnly);
+        ImGui.Checkbox(Loc.Id("Show only leafs of Character type"), ref _showGraphicsLeafCharactersOnly);
         var root = FindSceneRoot();
         if (root != null)
         {
@@ -107,13 +107,13 @@ sealed class DebugGraphics
 
     public unsafe void DrawWatchedMods()
     {
-        if (ImGui.Button("Clear watch list"))
+        if (ImGui.Button(Loc.Id("Clear watch list")))
         {
             _watchedRenderObjects.Clear();
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Clear modifications"))
+        if (ImGui.Button(Loc.Id("Clear modifications")))
         {
             foreach (var v in _watchedRenderObjects)
             {
@@ -153,7 +153,7 @@ sealed class DebugGraphics
 
         ImGui.BeginTable("watched_graphics", 2);
         ImGui.TableSetupColumn("Ptr", ImGuiTableColumnFlags.WidthFixed, 100);
-        ImGui.TableSetupColumn("Data");
+        ImGui.TableSetupColumn(Loc.Tr("Data"));
         ImGui.TableHeadersRow();
         foreach (var v in _watchedRenderObjects)
         {
@@ -324,8 +324,8 @@ sealed class DebugGraphics
             return;
         }
 
-        ImGui.TableSetupColumn("Name");
-        ImGui.TableSetupColumn("Value");
+        ImGui.TableSetupColumn(Loc.Tr("Name"));
+        ImGui.TableSetupColumn(Loc.Tr("Value"));
         ImGui.TableHeadersRow();
 
         ImGui.TableNextRow();
@@ -361,49 +361,49 @@ sealed class DebugGraphics
         var altitude = MathF.Asin(camera->ViewMatrix.M23);
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
-        ImGui.TextUnformatted("Camera Altitude");
+        ImGui.TextUnformatted(Loc.Tr("Camera Altitude"));
         ImGui.TableNextColumn();
         ImGui.TextUnformatted(altitude.Radians().ToString());
 
         var azimuth = MathF.Atan2(camera->ViewMatrix.M13, camera->ViewMatrix.M33);
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
-        ImGui.TextUnformatted("Camera Azimuth");
+        ImGui.TextUnformatted(Loc.Tr("Camera Azimuth"));
         ImGui.TableNextColumn();
         ImGui.TextUnformatted(azimuth.Radians().ToString());
 
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
-        ImGui.TextUnformatted("Origin");
+        ImGui.TextUnformatted(Loc.Tr("Origin"));
         ImGui.TableNextColumn();
         ImGui.TextUnformatted(Utils.Vec3String(camera->RenderCamera->Origin));
 
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
-        ImGui.TextUnformatted("Near/far/aspect");
+        ImGui.TextUnformatted(Loc.Tr("Near/far/aspect"));
         ImGui.TableNextColumn();
         ImGui.TextUnformatted(
             $"{camera->RenderCamera->NearPlane} / {camera->RenderCamera->FarPlane} / {camera->RenderCamera->AspectRatio}");
 
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
-        ImGui.TextUnformatted("Projection flags");
+        ImGui.TextUnformatted(Loc.Tr("Projection flags"));
         ImGui.TableNextColumn();
         if (ImGui.Button(camera->RenderCamera->IsOrtho
-                ? $"ortho ({camera->RenderCamera->OrthoHeight})"
-                : "perspective"))
+                ? Loc.Format("ortho ({0})", camera->RenderCamera->OrthoHeight)
+                : Loc.Tr("perspective")))
         {
             camera->RenderCamera->IsOrtho ^= true;
         }
 
         ImGui.SameLine();
-        if (ImGui.Button(camera->RenderCamera->StandardZ ? "standard-z" : "reverse-z"))
+        if (ImGui.Button(Loc.Tr(camera->RenderCamera->StandardZ ? "standard-z" : "reverse-z")))
         {
             camera->RenderCamera->StandardZ ^= true;
         }
 
         ImGui.SameLine();
-        if (ImGui.Button(camera->RenderCamera->FiniteFarPlane ? "finite-far" : "infinite-far"))
+        if (ImGui.Button(Loc.Tr(camera->RenderCamera->FiniteFarPlane ? "finite-far" : "infinite-far")))
         {
             camera->RenderCamera->FiniteFarPlane ^= true;
         }
@@ -414,7 +414,7 @@ sealed class DebugGraphics
         var lz = new Vector3(view.M13, view.M23, view.M33);
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
-        ImGui.TextUnformatted("View handedness");
+        ImGui.TextUnformatted(Loc.Tr("View handedness"));
         ImGui.TableNextColumn();
         ImGui.TextUnformatted($"{Vector3.Dot(lz, Vector3.Cross(lx, ly))}");
 
@@ -429,7 +429,7 @@ sealed class DebugGraphics
         var device = FFXIVClientStructs.FFXIV.Client.Graphics.Kernel.Device.Instance();
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
-        ImGui.TextUnformatted("Viewport size");
+        ImGui.TextUnformatted(Loc.Tr("Viewport size"));
         ImGui.TableNextColumn();
         ImGui.TextUnformatted($"{device->Width:f6} {device->Height:f6}");
     }
@@ -450,10 +450,10 @@ sealed class DebugGraphics
         }
 
         ImGui.Checkbox("Circle", ref _overlayCircle);
-        ImGui.DragFloat2("Center", ref _overlayCenter);
+        ImGui.DragFloat2(Loc.Id("Center"), ref _overlayCenter);
         ImGui.SameLine();
         // We can place the grid at players feet as long as we check player is not null
-        if (ImGui.Button("Snap center to Player Location"))
+        if (ImGui.Button(Loc.Id("Snap center to Player Location")))
         {
             if (Service.ObjectTable.LocalPlayer != null)
             {
@@ -468,11 +468,11 @@ sealed class DebugGraphics
             }
         }
 
-        ImGui.DragFloat2("Step", ref _overlayStep, 0.25f, 1, 10);
-        ImGui.DragFloat2("Max offset", ref _overlayMaxOffset);
+        ImGui.DragFloat2(Loc.Id("Step"), ref _overlayStep, 0.25f, 1, 10);
+        ImGui.DragFloat2(Loc.Id("Max offset"), ref _overlayMaxOffset);
 
         var rotationDegrees = _overlayRotation.Deg;
-        ImGui.SliderFloat("Rotation (Degrees) ## Grid overlay rotation", ref rotationDegrees, -180, 180, "%.2f");
+        ImGui.SliderFloat(Loc.Tr("Rotation (Degrees) ## Grid overlay rotation"), ref rotationDegrees, -180, 180, "%.2f");
         ImGui.SameLine();
         ImGui.InputFloat("##RotationInput", ref rotationDegrees, 0.1f, 1, "%.2f");
         _overlayRotation = new Angle(rotationDegrees * Angle.DegToRad);
@@ -527,7 +527,7 @@ sealed class DebugGraphics
          * Dropdown box that determines what shape template is being placed, circle, rectangle, etc.
          * Also has a 'no shape selected' option for putting the angle visualizer arm and shape template to invisible.
          */
-        ImGui.Combo("Select Shape Template", ref _selectedShapeIndex, _shapeTemplates, _shapeTemplates.Length);
+        ImGui.Combo(Loc.Id("Select Shape Template"), ref _selectedShapeIndex, Loc.IsChinese ? [Loc.Tr(_shapeTemplates[0]), .. _shapeTemplates[1..]] : _shapeTemplates, _shapeTemplates.Length);
         if (_selectedShapeIndex > -0 && _selectedShapeIndex < _shapeTemplates.Length)
             InsertShapesIntoOverlay(_shapeTemplates[_selectedShapeIndex]);
 
@@ -546,7 +546,7 @@ sealed class DebugGraphics
         var center = new Vector3(_overlayCenter.X, y, _overlayCenter.Y);
 
         _angVisRotDegrees = _angleVisRotation.Deg;
-        ImGui.SliderFloat("Arm Rotation (Degrees) ## Angle visualizer rotation", ref _angVisRotDegrees, -180, 180,
+        ImGui.SliderFloat(Loc.Tr("Arm Rotation (Degrees) ## Angle visualizer rotation"), ref _angVisRotDegrees, -180, 180,
             "%.2f");
 
         /* Angle Visualizer for circular overlay. Show an angle with vec 3 coordinates.
@@ -558,7 +558,7 @@ sealed class DebugGraphics
         Camera.Instance!.DrawWorldLine(center, outsideVec3, Colors.Danger, thickness: 3);
 
         // Show the coordinates where the outside point of the visualizer arm is.
-        ImGui.TextUnformatted("Vec3 coordinates at the end of angle visualizer arm : ");
+        ImGui.TextUnformatted(Loc.Tr("Vec3 coordinates at the end of angle visualizer arm : "));
         ImGui.TextUnformatted(Utils.Vec3String(outsideVec3));
     }
 
@@ -570,7 +570,7 @@ sealed class DebugGraphics
         // TODO figure out how to adjust the location by manual position entry or click on screen
         var y = Service.ObjectTable.LocalPlayer!.Position.Y;
         var origin = new Vector3(_overlayCenter.X, y, _overlayCenter.Y);
-        ImGui.SliderFloat($"Placed {shape.ToLower()} offset", ref _placedOffset, 0f, 30f, "%.2f");
+        ImGui.SliderFloat(Loc.Format("Placed {0} offset", shape.ToLower()), ref _placedOffset, 0f, 30f, "%.2f");
         _placedOffsetLocation = (_angleVisRotation.ToDirection() * _placedOffset).ToVec3();
         _placedVec3 = origin + _placedOffsetLocation;
         _placedCenter.X = _placedVec3.X;
@@ -694,11 +694,11 @@ sealed class DebugGraphics
     public void PlaceCoordinates(Vector3 placedCoords, string shape)
     {
         // Show the coordinates for the center of the placed shape
-        ImGui.TextUnformatted($"Coordinates in the center of placed {shape}: ");
+        ImGui.TextUnformatted(Loc.Format("Coordinates in the center of placed {0}: ", shape));
         // Sets a minimum of 0.0f and a maximum of 100.0f for both X and Y
         // Originally wanted to be able to just enter coordinates and have template jump, but it is difficult because
         // location is tied to angle visualizer arm and offset variables also.
-        ImGui.DragFloat2($"Center of Placed {shape}", ref _placedCenter, 0.25f, vMin: -(_overlayMaxOffset.X + 10),
+        ImGui.DragFloat2(Loc.Format("Center of Placed {0}", shape), ref _placedCenter, 0.25f, vMin: -(_overlayMaxOffset.X + 10),
             vMax: (_overlayMaxOffset.X + 10));
         _angleVisRotation = new Angle(_angVisRotDegrees * Angle.DegToRad);
     }
@@ -710,7 +710,7 @@ sealed class DebugGraphics
     public void PlacedRotationSlider(string shape)
     {
         var placedRotationDegrees = _placedRotation.Deg;
-        ImGui.SliderFloat($"Placed {shape.ToLower()} rotation (Degrees) ## Rotation for template shape",
+        ImGui.SliderFloat(Loc.Format("Placed {0} rotation (Degrees) ## Rotation for template shape", shape.ToLower()),
             ref placedRotationDegrees, -180, 180, "%.2f");
         _placedRotation = new Angle(placedRotationDegrees * Angle.DegToRad);
     }
@@ -718,43 +718,43 @@ sealed class DebugGraphics
     public void PlacedHalfAngleSlider(string shape)
     {
         var placedHalfAngleDegrees = _placedHalfAngle.Deg;
-        ImGui.SliderFloat($"Placed {shape.ToLower()} half angle (Degrees) ## Half angle slider",
+        ImGui.SliderFloat(Loc.Format("Placed {0} half angle (Degrees) ## Half angle slider", shape.ToLower()),
             ref placedHalfAngleDegrees, -180, 180, "%.2f");
         _placedHalfAngle = new Angle(placedHalfAngleDegrees * Angle.DegToRad);
     }
 
     public void PlacedHalfWidthSlider(string shape)
     {
-        ImGui.SliderFloat($"Placed {shape.ToLower()} half width", ref _placedWidth, 0, _overlayMaxOffset.X + 10,
+        ImGui.SliderFloat(Loc.Format("Placed {0} half width", shape.ToLower()), ref _placedWidth, 0, _overlayMaxOffset.X + 10,
             "%.2f");
     }
 
     public void PlacedHalfHeightSlider(string shape)
     {
-        ImGui.SliderFloat($"Placed {shape.ToLower()} half height", ref _placedHeight, 0, _overlayMaxOffset.Y + 10,
+        ImGui.SliderFloat(Loc.Format("Placed {0} half height", shape.ToLower()), ref _placedHeight, 0, _overlayMaxOffset.Y + 10,
             "%.2f");
     }
 
     public void PlacedLengthSlider(string shape)
     {
-        ImGui.SliderFloat($"Placed {shape.ToLower()} length", ref _placedHeight, 0, _overlayMaxOffset.Y + 10,
+        ImGui.SliderFloat(Loc.Format("Placed {0} length", shape.ToLower()), ref _placedHeight, 0, _overlayMaxOffset.Y + 10,
             "%.2f");
     }
 
     public void PlacedRadiusSlider(string shape)
     {
-        ImGui.SliderFloat($"Placed {shape.ToLower()} radius", ref _placedWidth, 0, _overlayMaxOffset.X + 10, "%.2f");
+        ImGui.SliderFloat(Loc.Format("Placed {0} radius", shape.ToLower()), ref _placedWidth, 0, _overlayMaxOffset.X + 10, "%.2f");
     }
 
     public void PlacedInnerRadiusSlider(string shape)
     {
-        ImGui.SliderFloat($"Placed {shape.ToLower()} inner radius", ref _placedWidth, 0, _overlayMaxOffset.X + 10,
+        ImGui.SliderFloat(Loc.Format("Placed {0} inner radius", shape.ToLower()), ref _placedWidth, 0, _overlayMaxOffset.X + 10,
             "%.2f");
     }
 
     public void PlacedOuterRadiusSlider(string shape)
     {
-        ImGui.SliderFloat($"Placed {shape.ToLower()} outer radius", ref _placedHeight, 0, _overlayMaxOffset.X + 10,
+        ImGui.SliderFloat(Loc.Format("Placed {0} outer radius", shape.ToLower()), ref _placedHeight, 0, _overlayMaxOffset.X + 10,
             "%.2f");
     }
 
@@ -768,7 +768,7 @@ sealed class DebugGraphics
 
         ImGui.SameLine();
         ImGui.SetNextItemWidth(100);
-        ImGui.InputInt("Number of edges ", ref _placedEdges);
+        ImGui.InputInt(Loc.Id("Number of edges "), ref _placedEdges);
         ImGui.SameLine();
 
         // Plus Button
@@ -791,7 +791,7 @@ sealed class DebugGraphics
             new StringBuilder($"new Circle(new WPos({circ.Center.X:F2}f, {circ.Center.Z:F2}f), {circ.Radius:F2}f)");
         ImGui.TextUnformatted(exportedCircle.ToString());
 
-        if (ImGui.Button("Copy Circle To Clipboard"))
+        if (ImGui.Button(Loc.Id("Copy Circle To Clipboard")))
         {
             ImGui.SetClipboardText(exportedCircle.ToString());
         }
@@ -852,7 +852,7 @@ sealed class DebugGraphics
 
     public void ShapeStringButton(Shape shape)
     {
-        if (ImGui.Button($"Copy {shape.GetType().Name} To Clipboard"))
+        if (ImGui.Button(Loc.Format("Copy {0} To Clipboard", shape.GetType().Name)))
         {
             ImGui.SetClipboardText(ShapeString(shape).ToString());
         }
@@ -882,7 +882,7 @@ sealed class DebugGraphics
     // Export a generated code snippet for a List<Shape> to clipboard.
     public void ListStringButton(List<Shape> shapes, string listName)
     {
-        if (ImGui.Button($"Copy {listName} To Clipboard"))
+        if (ImGui.Button(Loc.Format("Copy {0} To Clipboard", listName)))
         {
             ImGui.SetClipboardText(ListString(shapes, listName).ToString());
         }
@@ -897,21 +897,21 @@ sealed class DebugGraphics
                             _diffShapes.Exists(shape => shape.ToString() == addShape.ToString()) ||
                             _additionalShapes.Exists(shape => shape.ToString() == addShape.ToString()));
 
-        if (ImGui.Button($"Add {shapeName} To UnionShapes[]"))
+        if (ImGui.Button(Loc.Format("Add {0} To UnionShapes[]", shapeName)))
         {
             if (!shapeExists)
                 _unionShapes.Add(addShape);
         }
 
         ImGui.SameLine();
-        if (ImGui.Button($"Add {shapeName} To DiffShapes[]"))
+        if (ImGui.Button(Loc.Format("Add {0} To DiffShapes[]", shapeName)))
         {
             if (!shapeExists)
                 _diffShapes.Add(addShape);
         }
 
         ImGui.SameLine();
-        if (ImGui.Button($"Add {shapeName} To AdditionalShapes[]"))
+        if (ImGui.Button(Loc.Format("Add {0} To AdditionalShapes[]", shapeName)))
         {
             if (!shapeExists)
                 _additionalShapes.Add(addShape);
@@ -949,7 +949,7 @@ sealed class DebugGraphics
     {
         if (_unionShapes.Count > 0 || _diffShapes.Count > 0 || _additionalShapes.Count > 0)
         {
-            ImGui.Checkbox("Draw Shapes on Arena", ref _overlayAllCustom);
+            ImGui.Checkbox(Loc.Id("Draw Shapes on Arena"), ref _overlayAllCustom);
             // Draw all custom polygon arena bounds in the world.
             DrawCameraShapes();
 
@@ -1059,7 +1059,7 @@ sealed class DebugGraphics
             ImGui.EndTable();
 
             // Various item deletion options from Shapes lists
-            if (ImGui.Button(" Remove Single Shape") &&
+            if (ImGui.Button(Loc.Id(" Remove Single Shape")) &&
                 ((_selectedDiffShapesIdx >= 0 && _selectedDiffShapesIdx < _diffShapes.Count) ||
                  (_selectedUnionShapesIdx >= 0 && _selectedUnionShapesIdx < _unionShapes.Count) ||
                  (_selectedAdditionalShapesIdx >= 0 && _selectedAdditionalShapesIdx < _additionalShapes.Count)))
@@ -1081,25 +1081,25 @@ sealed class DebugGraphics
                 }
             }
 
-            if (ImGui.Button("Clear Union List"))
+            if (ImGui.Button(Loc.Id("Clear Union List")))
             {
                 _unionShapes.Clear();
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("Clear Diff List"))
+            if (ImGui.Button(Loc.Id("Clear Diff List")))
             {
                 _diffShapes.Clear();
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("Clear Additional List"))
+            if (ImGui.Button(Loc.Id("Clear Additional List")))
             {
                 _additionalShapes.Clear();
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("Clear All Shapes"))
+            if (ImGui.Button(Loc.Id("Clear All Shapes")))
             {
                 _unionShapes.Clear();
                 _selectedUnionShapesIdx = -1;
@@ -1109,17 +1109,17 @@ sealed class DebugGraphics
                 _selectedAdditionalShapesIdx = -1;
             }
 
-            if (ImGui.CollapsingHeader("Union Shapes List code snippet generation."))
+            if (ImGui.CollapsingHeader(Loc.Id("Union Shapes List code snippet generation.")))
             {
                 ListCodeGenWidget(_unionShapes, "unionShapes");
             }
 
-            if (ImGui.CollapsingHeader("Difference Shapes List code snippet generation."))
+            if (ImGui.CollapsingHeader(Loc.Id("Difference Shapes List code snippet generation.")))
             {
                 ListCodeGenWidget(_diffShapes, "diffShapes");
             }
 
-            if (ImGui.CollapsingHeader("Additional Shapes List code snippet generation."))
+            if (ImGui.CollapsingHeader(Loc.Id("Additional Shapes List code snippet generation.")))
             {
                 ListCodeGenWidget(_additionalShapes, "additionalShapes");
             }

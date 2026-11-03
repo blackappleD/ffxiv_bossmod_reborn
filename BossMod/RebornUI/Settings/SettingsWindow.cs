@@ -305,7 +305,7 @@ internal sealed partial class SettingsWindow : RebornFoldWindow
         var widest = 0f;
         foreach (var p in _pages)
         {
-            widest = MathF.Max(widest, ImGui.CalcTextSize(p.Label).X);
+            widest = MathF.Max(widest, ImGui.CalcTextSize(Loc.Tr(p.Label)).X);
         }
         return MathF.Max(190f * Scale, widest + 24f * Scale + M3Style.Spacing(16f, 12f) + M3Style.Spacing(14f, 10f) + 20f * Scale);
     }
@@ -332,7 +332,7 @@ internal sealed partial class SettingsWindow : RebornFoldWindow
             var button = M3Widgets.IconButtonSize;
             ImGui.SetCursorPosX(ImGui.GetCursorPosX() + MathF.Max(0f, (inner - button) * 0.5f));
             var open = RailSearchOpen;
-            if (M3Widgets.IconToggle("##bmr_search_toggle", FontAwesomeIcon.Search, ref open, open ? "Close search" : "Search settings"))
+            if (M3Widgets.IconToggle("##bmr_search_toggle", FontAwesomeIcon.Search, ref open, Loc.Tr(open ? "Close search" : "Search settings")))
             {
                 if (open)
                 {
@@ -355,7 +355,8 @@ internal sealed partial class SettingsWindow : RebornFoldWindow
         var tools = M3.Scheme.Tertiary;
         for (var i = 0; i < _navItems.Count; ++i)
         {
-            _navItems[i] = _navItems[i] with { Selected = !Searching && _pages[i] == _page, Accent = _pages[i].Section == SectionTools ? tools : null };
+            var p = _pages[i];
+            _navItems[i] = _navItems[i] with { Selected = !Searching && p == _page, Accent = p.Section == SectionTools ? tools : null, Label = Loc.Tr(p.Label), Tooltip = Loc.Tr(p.Description), Section = Loc.Tr(p.Section) };
         }
 
         if (M3Navigation.Draw("bmr_nav", _navItems, expanded) is { } clicked)
@@ -378,7 +379,7 @@ internal sealed partial class SettingsWindow : RebornFoldWindow
         {
             drawList.AddRectFilled(origin, origin + new Vector2(width, height), M3.U32(s.OnSurface, M3.StateHover), M3.ShapeMedium);
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-            M3Tooltip.Show("Home");
+            M3Tooltip.Show(Loc.Tr("Home"));
         }
 
         var tileMin = new Vector2(expanded ? origin.X + M3.Space2 : origin.X + (width - size) * 0.5f, origin.Y + M3.Space1);
@@ -420,7 +421,7 @@ internal sealed partial class SettingsWindow : RebornFoldWindow
 
     private void DrawSearchField(float width)
     {
-        if (M3Widgets.SearchField("##bmr_search", "Search settings", ref _searchText, width, busy: Searching))
+        if (M3Widgets.SearchField("##bmr_search", Loc.Tr("Search settings"), ref _searchText, width, busy: Searching))
         {
             UpdateSearch();
         }
@@ -475,16 +476,16 @@ internal sealed partial class SettingsWindow : RebornFoldWindow
                 _loggedPageError = error;
                 Service.Logger.Error(ex, $"[RebornUI] Exception while drawing page {name}");
             }
-            M3Widgets.Banner("##bmr_page_error", $"Something went wrong while drawing this page: {ex.Message}", M3Severity.Error, FontAwesomeIcon.Bug);
+            M3Widgets.Banner("##bmr_page_error", Loc.Format("Something went wrong while drawing this page: {0}", ex.Message), M3Severity.Error, FontAwesomeIcon.Bug);
         }
     }
 
     private void DrawTopAppBar()
     {
-        var title = Searching ? "Search results" : _page.Label;
+        var title = Loc.Tr(Searching ? "Search results" : _page.Label);
         var subtitle = Searching
-            ? _searchResults.Count == 1 ? "1 matching group of settings" : $"{_searchResults.Count} matching groups of settings"
-            : _page.Description;
+            ? _searchResults.Count == 1 ? Loc.Tr("1 matching group of settings") : Loc.Format("{0} matching groups of settings", _searchResults.Count)
+            : Loc.Tr(_page.Description);
 
         var clearSize = M3Widgets.IconButtonSize;
         using var bar = M3TopAppBar.Begin(title, subtitle, _windowActions.Length, Brand, Searching ? clearSize + 4f * Scale : 0f);
@@ -493,7 +494,7 @@ internal sealed partial class SettingsWindow : RebornFoldWindow
         if (Searching)
         {
             ImGui.SetCursorScreenPos(bar.TrailingPosition(clearSize));
-            if (M3Widgets.IconButton("##bmr_clear_search", FontAwesomeIcon.Times, "Clear search"))
+            if (M3Widgets.IconButton("##bmr_clear_search", FontAwesomeIcon.Times, Loc.Tr("Clear search")))
             {
                 ClearSearch();
             }
@@ -504,7 +505,7 @@ internal sealed partial class SettingsWindow : RebornFoldWindow
     {
         if (n.Node != null && SettingsLayout.For(n.Node.GetType())?.Notice is { } notice)
         {
-            M3Widgets.Banner($"##notice_{n.PathText}", notice.Text, notice.Severity, notice.Icon);
+            M3Widgets.Banner($"##notice_{n.PathText}", Loc.Tr(notice.Text), notice.Severity, notice.Icon);
             ImGui.Dummy(new(0f, M3.Space2));
         }
 
@@ -526,7 +527,7 @@ internal sealed partial class SettingsWindow : RebornFoldWindow
             {
                 if (c.Children.Count > 0)
                 {
-                    M3Widgets.SectionLabel(c.Name);
+                    M3Widgets.SectionLabel(Loc.Tr(c.Name));
                     DrawChildNodes(c.Children);
                 }
                 continue;
@@ -541,7 +542,7 @@ internal sealed partial class SettingsWindow : RebornFoldWindow
 
             var expanded = wasExpanded;
             var top = ImGui.GetCursorScreenPos().Y;
-            using (var card = M3ExpandableCard.Begin($"node_{c.PathText}", c.Name, ref expanded, c.Icon, accent))
+            using (var card = M3ExpandableCard.Begin($"node_{c.PathText}", Loc.Tr(c.Name), ref expanded, c.Icon, accent))
             {
                 if (card.Expanded)
                 {
@@ -615,7 +616,7 @@ internal sealed partial class SettingsWindow : RebornFoldWindow
 
     private void Search(UINode n, bool parentMatched)
     {
-        var whole = parentMatched || Utils.TextMatch(n.Name, _searchText) || TagsMatch(n.Tags);
+        var whole = parentMatched || TextMatch(n.Name) || TagsMatch(n.Tags);
         var hasSettings = n.PrePullHintModules.Count > 0 || n.Node != null && SettingsRenderer.NodeHasSettings(n.Node);
         if (hasSettings)
         {
@@ -623,7 +624,7 @@ internal sealed partial class SettingsWindow : RebornFoldWindow
             var hintCount = n.PrePullHintModules.Count;
             foreach (var info in n.PrePullHintModules)
             {
-                if (whole || Utils.TextMatch(PrePullHintSettingLabel(info, hintCount > 1), _searchText))
+                if (whole || TextMatch(PrePullHintSettingLabel(info, hintCount > 1)))
                 {
                     result.Hints.Add(info);
                 }
@@ -633,7 +634,7 @@ internal sealed partial class SettingsWindow : RebornFoldWindow
             {
                 foreach (var field in SettingsRenderer.View(n.Node.GetType()).Fields)
                 {
-                    if (field.Section.Length > 0 && Utils.TextMatch(field.Section, _searchText) || Utils.TextMatch(field.Label, _searchText) || TagsMatch(field.Display.Tags))
+                    if (field.Section.Length > 0 && TextMatch(field.Section) || TextMatch(field.Label) || TagsMatch(field.Display.Tags))
                     {
                         result.Fields.Add(field.Meta.Name);
                     }
@@ -656,7 +657,7 @@ internal sealed partial class SettingsWindow : RebornFoldWindow
     {
         foreach (var tag in tags)
         {
-            if (Utils.TextMatch(tag, _searchText))
+            if (TextMatch(tag))
             {
                 return true;
             }
@@ -664,11 +665,16 @@ internal sealed partial class SettingsWindow : RebornFoldWindow
         return false;
     }
 
+    // matches both the english text and its translation
+    private bool TextMatch(string text) => Utils.TextMatch(text, _searchText) || Loc.IsChinese && Utils.TextMatch(Loc.Tr(text), _searchText);
+
+    private static string DisplayPath(UINode n) => n.Parent != null ? $"{DisplayPath(n.Parent)} › {Loc.Tr(n.Name)}" : Loc.Tr(n.Name);
+
     private void DrawSearchResults()
     {
         if (_searchResults.Count == 0)
         {
-            M3Widgets.EmptyState("##bmr_search_empty", "No settings found", $"Nothing matches \"{_searchText}\". Try a shorter or different word.", FontAwesomeIcon.Search);
+            M3Widgets.EmptyState("##bmr_search_empty", Loc.Tr("No settings found"), Loc.Format("Nothing matches \"{0}\". Try a shorter or different word.", _searchText), FontAwesomeIcon.Search);
             return;
         }
 
@@ -677,12 +683,12 @@ internal sealed partial class SettingsWindow : RebornFoldWindow
         {
             if (++shown > MaxSearchResults)
             {
-                M3Text.Draw($"Showing the first {MaxSearchResults} of {_searchResults.Count} groups. Refine the search to see the rest.", M3TextStyle.Muted, true);
+                M3Text.Draw(Loc.Format("Showing the first {0} of {1} groups. Refine the search to see the rest.", MaxSearchResults, _searchResults.Count), M3TextStyle.Muted, true);
                 break;
             }
 
             var root = RootOf(r.Node);
-            using var card = M3Card.Begin($"search_{r.Node.PathText}", r.Node.PathText, root.Icon != FontAwesomeIcon.None ? root.Icon : FontAwesomeIcon.Cog, M3.AccentFor(shown - 1), M3CardStyle.Outlined);
+            using var card = M3Card.Begin($"search_{r.Node.PathText}", DisplayPath(r.Node), root.Icon != FontAwesomeIcon.None ? root.Icon : FontAwesomeIcon.Cog, M3.AccentFor(shown - 1), M3CardStyle.Outlined);
             foreach (var info in r.Hints)
             {
                 SettingsRenderer.DrawPrePullHintSetting(info, PrePullHintSettingLabel(info, r.Node.PrePullHintModules.Count > 1));
@@ -694,7 +700,7 @@ internal sealed partial class SettingsWindow : RebornFoldWindow
             }
 
             var page = _pages.Find(p => p.Node == root);
-            if (page != null && M3SettingRow.NavigationRow($"##jump_{r.Node.PathText}", $"Open {page.Label}", null, FontAwesomeIcon.ExternalLinkAlt, FontAwesomeIcon.ChevronRight, M3.Scheme.Tertiary))
+            if (page != null && M3SettingRow.NavigationRow($"##jump_{r.Node.PathText}", Loc.Format("Open {0}", Loc.Tr(page.Label)), null, FontAwesomeIcon.ExternalLinkAlt, FontAwesomeIcon.ChevronRight, M3.Scheme.Tertiary))
             {
                 for (var n = r.Node; n != root && n != null; n = n.Parent)
                 {

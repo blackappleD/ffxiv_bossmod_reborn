@@ -129,13 +129,13 @@ sealed class IPCList(Replay replay, Replay.Encounter? enc, IEnumerable<WorldStat
 
     private void ContextMenu(NetworkState.OpServerIPC op)
     {
-        if (ImGui.MenuItem($"Filter out opcode {op.Packet.ID}"))
+        if (ImGui.MenuItem(Loc.Format("Filter out opcode {0}", op.Packet.ID)))
         {
             _filteredPackets.Add(op.Packet.ID);
             _filterInvert = false;
             _nodes = null;
         }
-        if (ImGui.MenuItem($"Focus opcode {op.Packet.ID}"))
+        if (ImGui.MenuItem(Loc.Format("Focus opcode {0}", op.Packet.ID)))
         {
             _filteredPackets.Clear();
             _filteredPackets.Add(op.Packet.ID);
@@ -143,7 +143,7 @@ sealed class IPCList(Replay replay, Replay.Encounter? enc, IEnumerable<WorldStat
             _nodes = null;
         }
         ImGui.Separator();
-        if (ImGui.MenuItem("Jump to timestamp", "double click"))
+        if (ImGui.MenuItem(Loc.Id("Jump to timestamp"), Loc.Tr("double click")))
             scrollTo(op.Timestamp);
     }
 }

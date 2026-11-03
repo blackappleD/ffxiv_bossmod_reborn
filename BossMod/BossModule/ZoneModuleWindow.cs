@@ -9,7 +9,7 @@ public sealed class ZoneModuleWindow : UIWindow
     private readonly ZoneModuleManager _zmm;
     private bool _wasOpen;
 
-    public ZoneModuleWindow(ZoneModuleManager zmm) : base("Zone module###Zone module", false, new(400f, 400f))
+    public ZoneModuleWindow(ZoneModuleManager zmm) : base(Loc.Tr("Zone module###Zone module"), false, new(400f, 400f))
     {
         _zmm = zmm;
         RespectCloseHotkey = false;
@@ -34,7 +34,7 @@ public sealed class ZoneModuleWindow : UIWindow
             var title = _zmm.ActiveModule!.WindowName();
             if (title.IsNullOrEmpty())
             {
-                title = "Zone module###Zone module";
+                title = Loc.Tr("Zone module###Zone module");
             }
             WindowName = title;
         }

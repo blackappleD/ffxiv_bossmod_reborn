@@ -130,19 +130,19 @@ internal static class MaterialUI
     private static (string, Vector4?) RotationStatus(RotationModuleManager rotation)
     {
         var preset = rotation.Preset;
-        return preset == RotationModuleManager.ForceDisable ? ("Force-disabled", M3.Scheme.Error)
-            : preset != null ? ($"Running {preset.Name}", M3.Severity(M3Severity.Success))
-            : ("No preset active", null);
+        return preset == RotationModuleManager.ForceDisable ? (Loc.Tr("Force-disabled"), M3.Scheme.Error)
+            : preset != null ? (Loc.Format("Running {0}", preset.Name), M3.Severity(M3Severity.Success))
+            : (Loc.Tr("No preset active"), null);
     }
 
     private static (string, Vector4?) AIStatus(AIManager ai)
     {
         if (ai.Beh == null)
         {
-            return ("Off", null);
+            return (Loc.Tr("Off"), null);
         }
 
         var master = ai.WorldState.Party[ai.MasterSlot];
-        return (master != null ? $"On, following {master.Name} (slot {ai.MasterSlot + 1})" : "On", M3.Severity(M3Severity.Success));
+        return (master != null ? Loc.Format("On, following {0} (slot {1})", master.Name, ai.MasterSlot + 1) : Loc.Tr("On"), M3.Severity(M3Severity.Success));
     }
 }

@@ -18,9 +18,9 @@ public sealed class AboutTab(DirectoryInfo? replayDir)
     {
         using var wrap = ImRaii.TextWrapPos(0);
 
-        ImGui.TextUnformatted("BossModReborn (BMR) provides boss fight radar, auto-rotation, cooldown planning, and AI. All of its modules can be toggled individually. Support for it can be found in the Discord server linked at the bottom of this tab.");
-        ImGui.TextUnformatted("This is a FORK of the original BossMod (VBM). Only ask for support on the Combat Reborn Discord.");
-        ImGui.TextUnformatted("Please also make sure to not load VBM and this fork at the same time. The consequences of doing that are unexplored and unsupported.");
+        ImGui.TextUnformatted(Loc.Tr("BossModReborn (BMR) provides boss fight radar, auto-rotation, cooldown planning, and AI. All of its modules can be toggled individually. Support for it can be found in the Discord server linked at the bottom of this tab."));
+        ImGui.TextUnformatted(Loc.Tr("This is a FORK of the original BossMod (VBM). Only ask for support on the Combat Reborn Discord."));
+        ImGui.TextUnformatted(Loc.Tr("Please also make sure to not load VBM and this fork at the same time. The consequences of doing that are unexplored and unsupported."));
         ImGui.Spacing();
         DrawSection("Radar",
         [
@@ -58,33 +58,33 @@ public sealed class AboutTab(DirectoryInfo? replayDir)
             "Useful for creating fight modules, analyzing problems with them, and making CD plans.",
             "When asking for help, make sure to provide a replay! Please note that replays will contain your player name!",
             "Enabled in Settings > Show replay management UI (or enable auto recording).",
-            $"Files are located in '{replayDir}'.",
+            Loc.Format("Files are located in '{0}'.", replayDir),
         ]);
         ImGui.Spacing();
         ImGui.Spacing();
 
         using (ImRaii.PushColor(ImGuiCol.Button, DiscordColor.ABGR))
         {
-            if (ImGui.Button("Combat Reborn Discord", new(220, 0)))
+            if (ImGui.Button(Loc.Id("Combat Reborn Discord"), new(220, 0)))
             {
                 _lastErrorMessage = OpenLink("https://discord.gg/p54TZMPnC9");
             }
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("BossModReborn GitHub", new(220, 0)))
+        if (ImGui.Button(Loc.Id("BossModReborn GitHub"), new(220, 0)))
         {
             _lastErrorMessage = OpenLink("https://github.com/FFXIV-CombatReborn/BossmodReborn");
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("BossMod Wiki", new(130, 0)))
+        if (ImGui.Button(Loc.Id("BossMod Wiki"), new(130, 0)))
         {
             _lastErrorMessage = OpenLink("https://github.com/awgil/ffxiv_bossmod/wiki");
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Open replay folder", new(180, 0)) && replayDir != null)
+        if (ImGui.Button(Loc.Id("Open replay folder"), new(180, 0)) && replayDir != null)
         {
             _lastErrorMessage = OpenDirectory(replayDir);
         }
@@ -110,7 +110,7 @@ public sealed class AboutTab(DirectoryInfo? replayDir)
 
         using (ImRaii.PushColor(ImGuiCol.Text, TitleColor.ABGR))
         {
-            ImGui.TextUnformatted(title);
+            ImGui.TextUnformatted(Loc.Tr(title));
         }
 
         ImGui.Separator();
@@ -119,7 +119,7 @@ public sealed class AboutTab(DirectoryInfo? replayDir)
         {
             ImGui.Bullet();
             ImGui.SameLine();
-            ImGui.TextUnformatted(point);
+            ImGui.TextUnformatted(Loc.Tr(point));
         }
         ImGui.PopTextWrapPos();
     }
@@ -134,7 +134,7 @@ public sealed class AboutTab(DirectoryInfo? replayDir)
         catch (Exception e)
         {
             Service.Log($"Error opening link {link}: {e}");
-            return $"Failed to open link '{link}', open it manually in the browser.";
+            return Loc.Format("Failed to open link '{0}', open it manually in the browser.", link);
         }
     }
 
@@ -142,7 +142,7 @@ public sealed class AboutTab(DirectoryInfo? replayDir)
     {
         if (!dir.Exists)
         {
-            return $"Directory '{dir}' not found.";
+            return Loc.Format("Directory '{0}' not found.", dir);
         }
 
         try
@@ -153,7 +153,7 @@ public sealed class AboutTab(DirectoryInfo? replayDir)
         catch (Exception e)
         {
             Service.Log($"Error opening directory {dir}: {e}");
-            return $"Failed to open folder '{dir}', open it manually.";
+            return Loc.Format("Failed to open folder '{0}', open it manually.", dir);
         }
     }
 }

@@ -385,18 +385,18 @@ public class PartyRolesConfig : ConfigNode
 
     public override void DrawCustom(UITree tree, WorldState ws)
     {
-        if (ImGui.Button("Auto-Assign Roles"))
+        if (ImGui.Button(Loc.Id("Auto-Assign Roles")))
         {
             AutoAssignRoles(ws.Party);
         }
         ImGui.SameLine();
-        ImGui.TextUnformatted("Click to automatically assign party roles based on job and party order");
+        ImGui.TextUnformatted(Loc.Tr("Click to automatically assign party roles based on job and party order"));
 
-        foreach (var _ in tree.Node("Tank auto-assign priority (drag to reorder, highest to lowest)"))
+        foreach (var _ in tree.Node(Loc.Id("Tank auto-assign priority (drag to reorder, highest to lowest)")))
         {
-            ImGui.TextColored(ImGuiColors.TankBlue, "Main Tank:");
+            ImGui.TextColored(ImGuiColors.TankBlue, Loc.Tr("Main Tank:"));
             DrawTankPriority("mt", MainTankPriority);
-            ImGui.TextColored(ImGuiColors.TankBlue, "Off Tank:");
+            ImGui.TextColored(ImGuiColors.TankBlue, Loc.Tr("Off Tank:"));
             DrawTankPriority("ot", OffTankPriority);
         }
 
@@ -417,7 +417,7 @@ public class PartyRolesConfig : ConfigNode
                     ImGui.TableSetupColumn(name, ImGuiTableColumnFlags.WidthFixed, size);
                 }
 
-                ImGui.TableSetupColumn("Name");
+                ImGui.TableSetupColumn(Loc.Tr("Name"));
                 ImGui.TableHeadersRow();
 
                 List<(ulong cid, string name, char role, Assignment assignment)> party = [with(PartyState.MaxPartySize)];
@@ -464,20 +464,20 @@ public class PartyRolesConfig : ConfigNode
         if (AssignmentsPerSlot(ws.Party).Length == 0)
         {
             using var color = ImRaii.PushColor(ImGuiCol.Text, Colors.TextColor2);
-            ImGui.TextUnformatted("Invalid assignments: there should be exactly one raid member per role");
+            ImGui.TextUnformatted(Loc.Tr("Invalid assignments: there should be exactly one raid member per role"));
         }
         else
         {
             using var color = ImRaii.PushColor(ImGuiCol.Text, Colors.TextColor4);
-            ImGui.TextUnformatted("All good!");
+            ImGui.TextUnformatted(Loc.Tr("All good!"));
         }
 
-        if (ImGui.Button("Clear all assignments"))
+        if (ImGui.Button(Loc.Id("Clear all assignments")))
         {
             Assignments.Clear();
             Modified.Fire();
         }
         ImGui.SameLine();
-        ImGui.TextUnformatted("Clears all assignments, for example to debloat config file size.");
+        ImGui.TextUnformatted(Loc.Tr("Clears all assignments, for example to debloat config file size."));
     }
 }

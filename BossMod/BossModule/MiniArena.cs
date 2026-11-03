@@ -169,7 +169,7 @@ public sealed partial class MiniArena(WPos center, ArenaBounds bounds, Func<Acto
         // Opens context menu on right mouse click of the mini radar
         if (ImGui.BeginPopupContextWindow("MyWindowContext", ImGuiPopupFlags.MouseButtonRight))
         {
-            if (ImGui.MenuItem("Recenter and Resize Radar"))
+            if (ImGui.MenuItem(Loc.Id("Recenter and Resize Radar")))
             {
                 Service.BossModWindow?.RecenterWindow();
             }

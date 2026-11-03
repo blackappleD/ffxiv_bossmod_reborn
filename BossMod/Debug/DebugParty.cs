@@ -13,16 +13,16 @@ sealed class DebugParty
         // also content ID for all alliance members always seems to be 0; this isn't a huge deal, since alliance members are always in the same zone and thus have valid object IDs
         var gm = GroupManager.Instance()->GetGroup(secondary);
         var ui = UIState.Instance();
-        ImGui.TextUnformatted($"Num members: {gm->MemberCount}, alliance={(!gm->IsAlliance ? "no" : gm->IsSmallGroupAlliance ? "small-group" : "yes")}, has-helpers={ui->Buddy.DutyHelperInfo.HasHelpers}");
+        ImGui.TextUnformatted(Loc.Format("Num members: {0}, alliance={1}, has-helpers={2}", gm->MemberCount, !gm->IsAlliance ? "no" : gm->IsSmallGroupAlliance ? "small-group" : "yes", ui->Buddy.DutyHelperInfo.HasHelpers));
 
         ImGui.BeginTable("party-custom", 7, ImGuiTableFlags.Resizable);
-        ImGui.TableSetupColumn("Index");
+        ImGui.TableSetupColumn(Loc.Tr("Index"));
         ImGui.TableSetupColumn("ContentId");
         ImGui.TableSetupColumn("EntityId");
-        ImGui.TableSetupColumn("Name");
-        ImGui.TableSetupColumn("Zone");
-        ImGui.TableSetupColumn("World");
-        ImGui.TableSetupColumn("Position");
+        ImGui.TableSetupColumn(Loc.Tr("Name"));
+        ImGui.TableSetupColumn(Loc.Tr("Zone"));
+        ImGui.TableSetupColumn(Loc.Tr("World"));
+        ImGui.TableSetupColumn(Loc.Tr("Position"));
         ImGui.TableHeadersRow();
         for (var i = 0; i < gm->MemberCount; ++i)
         {

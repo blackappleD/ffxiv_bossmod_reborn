@@ -187,7 +187,7 @@ public sealed class MapVisualizer
             {
                 if (Map.IsTeleShadow(hoverNode))
                 {
-                    ImGui.TextUnformatted("Tele: shadow");
+                    ImGui.TextUnformatted(Loc.Tr("Tele: shadow"));
                 }
                 if (Map.HasTeleEdges(hoverNode))
                 {
@@ -224,25 +224,25 @@ public sealed class MapVisualizer
         }
 
         // pathfinding controls
-        if (ImGui.Button("Reset pf"))
+        if (ImGui.Button(Loc.Id("Reset pf")))
         {
             ExecTimed(() => _pathfind = BuildPathfind());
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Step pf"))
+        if (ImGui.Button(Loc.Id("Step pf")))
         {
             ExecTimed(() => _pathfind.ExecuteStep());
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Run pf"))
+        if (ImGui.Button(Loc.Id("Run pf")))
         {
             ExecTimed(() => _pathfind.Execute());
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Step back") && _pathfind.NumSteps > 0)
+        if (ImGui.Button(Loc.Id("Step back")) && _pathfind.NumSteps > 0)
         {
             ExecTimed(() =>
             {
@@ -256,7 +256,7 @@ public sealed class MapVisualizer
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Run until reopen"))
+        if (ImGui.Button(Loc.Id("Run until reopen")))
         {
             ExecTimed(() =>
             {
@@ -269,7 +269,7 @@ public sealed class MapVisualizer
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Step x100"))
+        if (ImGui.Button(Loc.Id("Step x100")))
         {
             ExecTimed(() =>
             {
@@ -295,25 +295,25 @@ public sealed class MapVisualizer
         if (Map.HasTeleporters)
         {
             ImGui.Separator();
-            ImGui.TextUnformatted("Teleporters");
+            ImGui.TextUnformatted(Loc.Tr("Teleporters"));
 
             var showShadow = MapVizPrefs.ShowTeleShadow;
             var showEntrances = MapVizPrefs.ShowTeleEntrances;
             var showConnections = MapVizPrefs.ShowTeleConnections;
 
-            if (ImGui.Checkbox("Show shadow###tele_shadow", ref showShadow))
+            if (ImGui.Checkbox(Loc.Id("Show shadow###tele_shadow"), ref showShadow))
             {
                 MapVizPrefs.ShowTeleShadow = showShadow;
             }
 
             ImGui.SameLine();
-            if (ImGui.Checkbox("Show entrances###tele_entr", ref showEntrances))
+            if (ImGui.Checkbox(Loc.Id("Show entrances###tele_entr"), ref showEntrances))
             {
                 MapVizPrefs.ShowTeleEntrances = showEntrances;
             }
 
             ImGui.SameLine();
-            if (ImGui.Checkbox("Show connections###tele_conn", ref showConnections))
+            if (ImGui.Checkbox(Loc.Id("Show connections###tele_conn"), ref showConnections))
             {
                 MapVizPrefs.ShowTeleConnections = showConnections;
             }
@@ -322,7 +322,7 @@ public sealed class MapVisualizer
             ImGui.TextUnformatted($"Shadow cells: {cntShadow}, Entrances: {cntEntrances}, Edges: {cntEdges}");
         }
 
-        using var n = ImRaii.TreeNode("Waypoints");
+        using var n = ImRaii.TreeNode(Loc.Id("Waypoints"));
         if (n)
         {
             DrawWaypoints(hoverNode >= 0 ? hoverNode : _pathfind.BestIndex());

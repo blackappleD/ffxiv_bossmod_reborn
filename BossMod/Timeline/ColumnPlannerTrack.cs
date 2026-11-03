@@ -232,21 +232,21 @@ public abstract class ColumnPlannerTrack(Timeline timeline, StateMachineTree tre
         var modified = false;
 
         var startGlobal = e.Window.TimeSinceGlobalStart(Tree);
-        if (ImGui.InputFloat("Press at (relative to pull)", ref startGlobal))
+        if (ImGui.InputFloat(Loc.Id("Press at (relative to pull)"), ref startGlobal))
         {
             (e.Window.AttachNode, e.Window.Delay) = Tree.AbsoluteTimeToNodeAndDelay(startGlobal, PhaseBranches);
             modified = true;
         }
 
         var startPhase = e.Window.TimeSincePhaseStart();
-        if (ImGui.InputFloat("Press at (relative to phase)", ref startPhase))
+        if (ImGui.InputFloat(Loc.Id("Press at (relative to phase)"), ref startPhase))
         {
             (e.Window.AttachNode, e.Window.Delay) = Tree.PhaseTimeToNodeAndDelay(startPhase, e.Window.AttachNode.PhaseID, PhaseBranches);
             modified = true;
         }
 
-        modified |= ImGui.InputFloat("Press at (relative to state)", ref e.Window.Delay);
-        modified |= ImGui.InputFloat("Window length", ref e.WindowLength);
+        modified |= ImGui.InputFloat(Loc.Id("Press at (relative to state)"), ref e.Window.Delay);
+        modified |= ImGui.InputFloat(Loc.Id("Window length"), ref e.WindowLength);
 
         modified |= DrawConditionEditor(e);
 

@@ -34,7 +34,7 @@ public sealed class UIPresetDatabaseEditor(RotationDatabase rotationDB)
         }
         else
         {
-            ImGui.TextUnformatted("Select preset to edit or create a new one.");
+            ImGui.TextUnformatted(Loc.Tr("Select preset to edit or create a new one."));
         }
     }
 
@@ -48,32 +48,32 @@ public sealed class UIPresetDatabaseEditor(RotationDatabase rotationDB)
             return;
         }
 
-        ImGui.OpenPopup("Unsaved modifications"); // TODO: why do i have to do it every frame???
+        ImGui.OpenPopup(Loc.Id("Unsaved modifications")); // TODO: why do i have to do it every frame???
         var modalOpen = true;
-        using var modal = ImRaii.PopupModal("Unsaved modifications", ref modalOpen, ImGuiWindowFlags.AlwaysAutoResize);
+        using var modal = ImRaii.PopupModal(Loc.Id("Unsaved modifications"), ref modalOpen, ImGuiWindowFlags.AlwaysAutoResize);
         if (!modal)
             return;
-        ImGui.TextUnformatted($"Currently opened preset {_selectedPreset?.Preset.Name} has unsaved modifications.");
-        ImGui.TextUnformatted("To select a new preset, you need to either save or discard them.");
-        ImGui.TextUnformatted("How do you want to proceed?");
+        ImGui.TextUnformatted(Loc.Format("Currently opened preset {0} has unsaved modifications.", _selectedPreset?.Preset.Name));
+        ImGui.TextUnformatted(Loc.Tr("To select a new preset, you need to either save or discard them."));
+        ImGui.TextUnformatted(Loc.Tr("How do you want to proceed?"));
         if (DrawSaveCurrentPresetButton())
         {
             SaveCurrentPreset();
             CompleteChangeCurrentPreset();
         }
         ImGui.SameLine();
-        if (UIMisc.Button("Save as copy", _selectedPresetIndex < 0, "Can't save new preset as copy"))
+        if (UIMisc.Button(Loc.Id("Save as copy"), _selectedPresetIndex < 0, Loc.Tr("Can't save new preset as copy")))
         {
             SaveCurrentPresetAsCopy();
             CompleteChangeCurrentPreset();
         }
         ImGui.SameLine();
-        if (ImGui.Button("Discard"))
+        if (ImGui.Button(Loc.Id("Discard")))
         {
             CompleteChangeCurrentPreset();
         }
         ImGui.SameLine();
-        if (ImGui.Button("Cancel") || !modalOpen)
+        if (ImGui.Button(Loc.Id("Cancel")) || !modalOpen)
         {
             _pendingSelectPresetIndex = -1;
         }
@@ -83,7 +83,7 @@ public sealed class UIPresetDatabaseEditor(RotationDatabase rotationDB)
 
     private void DrawPresetSelector()
     {
-        UIMisc.HelpMarker("""
+        UIMisc.HelpMarker(Loc.Tr("""
             To start using autorotation, create a *preset*.
             Preset configures rotation *modules* and their *strategies*.
             Module is a piece of code that evaluates game state and fills prioritized list of candidate actions.
@@ -92,7 +92,7 @@ public sealed class UIPresetDatabaseEditor(RotationDatabase rotationDB)
             For example, you might want to create a 'single target' and 'aoe' presets, which would use the same modules, but would configure their strategies differently.
             You could optionally assign keyboard modifiers to each strategy value; such value would only be applied if modifier is held.
             This allows you, for example, to set up preset so that it delays 2-minute burst if shift is held.
-            """);
+            """));
         ImGui.SameLine();
 
         var selectedPresetList = _selectedPresetDefault ? PresetDB.DefaultPresets : PresetDB.UserPresets;
@@ -103,7 +103,7 @@ public sealed class UIPresetDatabaseEditor(RotationDatabase rotationDB)
         }
 
         ImGui.SetNextItemWidth(200);
-        using (var combo = ImRaii.Combo("Preset", _selectedPreset == null ? "" : _selectedPresetIndex < 0 ? "<new>" : selectedPresetList[_selectedPresetIndex].Name))
+        using (var combo = ImRaii.Combo(Loc.Id("Preset"), _selectedPreset == null ? "" : _selectedPresetIndex < 0 ? Loc.Tr("<new>") : selectedPresetList[_selectedPresetIndex].Name))
         {
             if (combo)
             {
@@ -117,25 +117,25 @@ public sealed class UIPresetDatabaseEditor(RotationDatabase rotationDB)
         if (DrawSaveCurrentPresetButton())
             SaveCurrentPreset();
         ImGui.SameLine();
-        if (UIMisc.Button("Save as copy", _selectedPresetIndex < 0, "Can't save new preset as copy"))
+        if (UIMisc.Button(Loc.Id("Save as copy"), _selectedPresetIndex < 0, Loc.Tr("Can't save new preset as copy")))
             SaveCurrentPresetAsCopy();
         ImGui.SameLine();
-        if (UIMisc.Button("Revert", 0, (!HaveUnsavedModifications, "Current preset is not modified"), (_selectedPresetIndex < 0, "No preset is selected")))
+        if (UIMisc.Button(Loc.Id("Revert"), 0, (!HaveUnsavedModifications, Loc.Tr("Current preset is not modified")), (_selectedPresetIndex < 0, Loc.Tr("No preset is selected"))))
             RevertCurrentPreset();
         ImGui.SameLine();
-        if (UIMisc.Button("New", HaveUnsavedModifications, "Current preset is modified, save or discard changes"))
+        if (UIMisc.Button(Loc.Id("New"), HaveUnsavedModifications, Loc.Tr("Current preset is modified, save or discard changes")))
             CreateNewPreset(-1, false);
         ImGui.SameLine();
-        if (UIMisc.Button("Copy", 0, (HaveUnsavedModifications, "Current preset is modified, save or discard changes"), (_selectedPresetIndex < 0, "No preset is selected")))
+        if (UIMisc.Button(Loc.Id("Copy"), 0, (HaveUnsavedModifications, Loc.Tr("Current preset is modified, save or discard changes")), (_selectedPresetIndex < 0, Loc.Tr("No preset is selected"))))
             CreateNewPreset(_selectedPresetIndex, _selectedPresetDefault);
         ImGui.SameLine();
-        if (UIMisc.Button("Delete", 0, (_selectedPresetDefault, "The default preset can't be deleted. If you would like to hide it, you can do so in Settings -> Autorotation."), (!ImGui.GetIO().KeyShift, "Hold shift to delete"), (_selectedPresetIndex < 0, "No preset is selected")))
+        if (UIMisc.Button(Loc.Id("Delete"), 0, (_selectedPresetDefault, Loc.Tr("The default preset can't be deleted. If you would like to hide it, you can do so in Settings -> Autorotation.")), (!ImGui.GetIO().KeyShift, Loc.Tr("Hold shift to delete")), (_selectedPresetIndex < 0, Loc.Tr("No preset is selected"))))
             DeleteCurrentPreset();
         ImGui.SameLine();
-        if (UIMisc.Button("Export", _selectedPreset == null, "No preset is selected"))
+        if (UIMisc.Button(Loc.Id("Export"), _selectedPreset == null, Loc.Tr("No preset is selected")))
             ExportToClipboard();
         ImGui.SameLine();
-        if (UIMisc.Button("Import", HaveUnsavedModifications, "Current preset is modified, save or discard changes"))
+        if (UIMisc.Button(Loc.Id("Import"), HaveUnsavedModifications, Loc.Tr("Current preset is modified, save or discard changes")))
             ImportNewPresetFromClipboard();
     }
 
@@ -168,7 +168,7 @@ public sealed class UIPresetDatabaseEditor(RotationDatabase rotationDB)
         }
     }
 
-    private bool DrawSaveCurrentPresetButton() => UIMisc.Button("Save", 0, (!HaveUnsavedModifications, "Current preset is not modified"), (_selectedPreset?.NameConflict ?? false, "Current preset name is empty or duplicates name of other existing preset"));
+    private bool DrawSaveCurrentPresetButton() => UIMisc.Button(Loc.Id("Save"), 0, (!HaveUnsavedModifications, Loc.Tr("Current preset is not modified")), (_selectedPreset?.NameConflict ?? false, Loc.Tr("Current preset name is empty or duplicates name of other existing preset")));
 
     private void RevertCurrentPreset() => _selectedPreset = new(PresetDB, _selectedPresetIndex, _selectedPresetDefault, _selectedModuleType);
 
@@ -272,7 +272,7 @@ public sealed class UIPresetDatabaseEditor(RotationDatabase rotationDB)
 
                 Service.Notifications.AddNotification(new()
                 {
-                    Content = $"Imported plan '{plan.Name}' for L{plan.Level} {plan.Class}"
+                    Content = Loc.Format("Imported plan '{0}' for L{1} {2}", plan.Name, plan.Level, plan.Class)
                 });
 
                 return;
@@ -293,7 +293,7 @@ public sealed class UIPresetDatabaseEditor(RotationDatabase rotationDB)
             Service.Logger.Warning(ex, $"Failed to parse preset");
             Service.Notifications.AddNotification(new()
             {
-                Title = "Error while importing preset",
+                Title = Loc.Tr("Error while importing preset"),
                 Content = ex.Message,
                 Type = Dalamud.Interface.ImGuiNotification.NotificationType.Warning
             });

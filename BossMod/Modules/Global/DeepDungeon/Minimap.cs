@@ -203,7 +203,7 @@ public sealed class Minimap(DeepDungeonState state, Angle playerRotation, int cu
                 if (ImGui.IsItemHovered())
                 {
                     ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-                    ImGui.SetTooltip(i == CurrentDestination ? "Click to clear destination" : "Click to set destination");
+                    ImGui.SetTooltip(Loc.Tr(i == CurrentDestination ? "Click to clear destination" : "Click to set destination"));
                 }
                 if (ImGui.IsItemClicked())
                 {

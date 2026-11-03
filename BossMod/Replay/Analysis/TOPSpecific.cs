@@ -38,7 +38,7 @@ sealed class TOPSpecific
 
     public void Draw(UITree tree)
     {
-        foreach (var _ in tree.Node("Flamethrower rotation offsets"))
+        foreach (var _ in tree.Node(Loc.Id("Flamethrower rotation offsets")))
         {
             _plotFlamethrowers.Begin();
             foreach (var i in _flamethrowers)

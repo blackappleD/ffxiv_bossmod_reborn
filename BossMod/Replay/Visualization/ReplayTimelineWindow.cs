@@ -17,7 +17,7 @@ sealed class ReplayTimelineWindow : UIWindow
     private readonly ColumnPlayersDetails _colPlayers;
     private readonly UITree _configTree = new();
 
-    public ReplayTimelineWindow(Replay replay, Replay.Encounter enc, BitMask showPlayers, PlanDatabase planDB, ReplayDetailsWindow timelineSync) : base($"Replay timeline: {replay.Path} @ {enc.Time.Start:O}", true, new(1600, 1000))
+    public ReplayTimelineWindow(Replay replay, Replay.Encounter enc, BitMask showPlayers, PlanDatabase planDB, ReplayDetailsWindow timelineSync) : base(Loc.Id($"Replay timeline: {replay.Path} @ {enc.Time.Start:O}"), true, new(1600, 1000))
     {
         _encounter = enc;
         _timelineSync = timelineSync;
@@ -36,12 +36,12 @@ sealed class ReplayTimelineWindow : UIWindow
 
     public override void Draw()
     {
-        if (ImGui.Button("Config"))
+        if (ImGui.Button(Loc.Id("Config")))
         {
             ImGui.OpenPopup("config");
         }
         ImGui.SameLine();
-        if (ImGui.Button($"Save {(_colPlayers.AnyPlanModified ? "all changes" : "(no changes)")}"))
+        if (ImGui.Button(Loc.Id(_colPlayers.AnyPlanModified ? "Save all changes" : "Save (no changes)")))
         {
             _colPlayers.SaveAll();
         }
@@ -63,18 +63,18 @@ sealed class ReplayTimelineWindow : UIWindow
 
     private void DrawConfig()
     {
-        UICombo.Enum("State text", ref _colStates.TextDisplay);
-        foreach (var _ in _configTree.Node("Enemy casts columns"))
+        UICombo.Enum(Loc.Id("State text"), ref _colStates.TextDisplay);
+        foreach (var _ in _configTree.Node(Loc.Id("Enemy casts columns")))
         {
             _colCastEvents.DrawConfig(_configTree);
         }
 
-        foreach (var n in _configTree.Node("Enemy details"))
+        foreach (var n in _configTree.Node(Loc.Id("Enemy details")))
         {
             _colEnemies.DrawConfig(_configTree);
         }
 
-        foreach (var n in _configTree.Node("Player details"))
+        foreach (var n in _configTree.Node(Loc.Id("Player details")))
         {
             _colPlayers.DrawConfig(_configTree);
         }

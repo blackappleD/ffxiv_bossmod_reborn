@@ -34,31 +34,31 @@ public sealed unsafe class DebugAddon : IDisposable
 
     public void Draw()
     {
-        ImGui.TextUnformatted("Addons:");
+        ImGui.TextUnformatted(Loc.Tr("Addons:"));
         foreach (var (k, v) in _addonRcvs)
         {
             var hook = _rcvAddonHooks[v];
-            if (ImGui.Button($"{(hook.Enabled ? "Disable" : "Enable")} {k} ({v:X})"))
+            if (ImGui.Button($"{(hook.Enabled ? Loc.Tr("Disable") : Loc.Tr("Enable"))} {k} ({v:X})"))
             {
                 hook.Enabled ^= true;
             }
         }
 
-        ImGui.TextUnformatted("Agents:");
+        ImGui.TextUnformatted(Loc.Tr("Agents:"));
         foreach (var (k, v) in _agentRcvs)
         {
             var hook = _rcvAgentHooks[v];
-            if (ImGui.Button($"{(hook.Enabled ? "Disable" : "Enable")} {k} ({v:X})"))
+            if (ImGui.Button($"{(hook.Enabled ? Loc.Tr("Disable") : Loc.Tr("Enable"))} {k} ({v:X})"))
             {
                 hook.Enabled ^= true;
             }
         }
 
-        ImGui.InputText("Addon name / agent id", ref _newHook, 256);
+        ImGui.InputText(Loc.Id("Addon name / agent id"), ref _newHook, 256);
         if (_newHook.Length > 0 && !_addonRcvs.ContainsKey(_newHook) && Service.GameGui.GetAddonByName(_newHook) is var addon && addon != null)
         {
             ImGui.SameLine();
-            if (ImGui.Button("Hook addon!"))
+            if (ImGui.Button(Loc.Id("Hook addon!")))
             {
                 var address = addon.Address;
                 _addonRcvs[_newHook] = address;
@@ -77,7 +77,7 @@ public sealed unsafe class DebugAddon : IDisposable
         if (_newHook.Length > 0 && uint.TryParse(_newHook, out var agentId) && agentId > 0 && !_agentRcvs.ContainsKey(agentId) && AgentModule.Instance()->GetAgentByInternalId((AgentId)agentId) is var agent && agent != null)
         {
             ImGui.SameLine();
-            if (ImGui.Button("Hook agent!"))
+            if (ImGui.Button(Loc.Id("Hook agent!")))
             {
                 var address = (nint)agent->VirtualTable->ReceiveEvent;
                 _agentRcvs[agentId] = address;

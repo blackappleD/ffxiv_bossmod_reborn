@@ -5,7 +5,7 @@
     <!-- Fork versioning: upstream's first three segments, then a four-digit fork revision starting at 2001
          (upstream 7.5.7.3 -> 7.5.7.2001). Bump LocalRevision for each new local build; publish.yml still overrides with the tag. -->
     <UpstreamVersion>7.5.7</UpstreamVersion>
-    <LocalRevision>2001</LocalRevision>
+    <LocalRevision>2002</LocalRevision>
     <Version>$(UpstreamVersion).$(LocalRevision)</Version>
     <Description>Boss mod.</Description>
     <Copyright></Copyright>
@@ -128,6 +128,11 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Pathfinding\ObstacleMaps\*" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Localization\zh_CN\*.json">
+      <LogicalName>BossMod.Localization.zh_CN.%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="RebornUI\Images\*.png">

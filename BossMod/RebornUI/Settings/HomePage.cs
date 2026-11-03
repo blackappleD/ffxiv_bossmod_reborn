@@ -59,10 +59,10 @@ internal sealed class HomePage(DirectoryInfo? replayDir, Action<string> navigate
             ImGui.SameLine(0f, M3.Space3);
             using (ImRaii.Group())
             {
-                M3Text.Draw("BossMod Reborn (BMR) provides fight radars, automovement, and cooldown planning. Each feature can be turned on and off on its own, and support is available on the Combat Reborn Discord.", M3TextStyle.Body, true);
+                M3Text.Draw(Loc.Tr("BossMod Reborn (BMR) provides fight radars, automovement, and cooldown planning. Each feature can be turned on and off on its own, and support is available on the Combat Reborn Discord."), M3TextStyle.Body, true);
             }
             ImGui.Dummy(new(0f, M3.Space1));
-            M3Widgets.Banner("##home_fork", "This is a fork of the original BossMod (VBM). Only ask for support on the Combat Reborn Discord, and don't load VBM and BMR at the same time: the consequences are unexplored and unsupported.",
+            M3Widgets.Banner("##home_fork", Loc.Tr("This is a fork of the original BossMod (VBM). Only ask for support on the Combat Reborn Discord, and don't load VBM and BMR at the same time: the consequences are unexplored and unsupported."),
                 M3Severity.Warning, FontAwesomeIcon.ExclamationTriangle);
         }
 
@@ -83,14 +83,14 @@ internal sealed class HomePage(DirectoryInfo? replayDir, Action<string> navigate
         {
             ImGui.TableNextColumn();
             ref readonly var feature = ref _features[i];
-            using var card = M3Card.Begin($"home_feature_{i}", feature.Title, feature.Icon, M3.AccentFor(i));
+            using var card = M3Card.Begin($"home_feature_{i}", Loc.Tr(feature.Title), feature.Icon, M3.AccentFor(i));
             foreach (var point in feature.Points)
             {
-                M3Text.Bullet(point, M3TextStyle.Muted, dot: M3.AccentFor(i));
+                M3Text.Bullet(Loc.Tr(point), M3TextStyle.Muted, dot: M3.AccentFor(i));
             }
 
             ImGui.Dummy(new(0f, M3.Space1));
-            if (M3Widgets.Button($"##home_open_{i}", feature.Action, M3ButtonStyle.Tonal, FontAwesomeIcon.ArrowRight))
+            if (M3Widgets.Button($"##home_open_{i}", Loc.Tr(feature.Action), M3ButtonStyle.Tonal, FontAwesomeIcon.ArrowRight))
             {
                 navigate(feature.Page);
             }
@@ -99,12 +99,12 @@ internal sealed class HomePage(DirectoryInfo? replayDir, Action<string> navigate
 
     private void DrawLinks()
     {
-        using var card = M3Card.Begin("home_links", "Links", FontAwesomeIcon.Link, M3.Scheme.Secondary);
+        using var card = M3Card.Begin("home_links", Loc.Tr("Links"), FontAwesomeIcon.Link, M3.Scheme.Secondary);
         var error = "";
         var flow = new M3Flow();
 
-        flow.Next(M3Widgets.ButtonWidth(FontAwesomeIcon.Comments, "Combat Reborn Discord"));
-        if (M3Widgets.Button("##home_discord", "Combat Reborn Discord", M3ButtonStyle.Filled, FontAwesomeIcon.Comments, accent: DiscordColor))
+        flow.Next(M3Widgets.ButtonWidth(FontAwesomeIcon.Comments, Loc.Tr("Combat Reborn Discord")));
+        if (M3Widgets.Button("##home_discord", Loc.Tr("Combat Reborn Discord"), M3ButtonStyle.Filled, FontAwesomeIcon.Comments, accent: DiscordColor))
         {
             error = OpenLink(DiscordUrl);
         }
@@ -115,14 +115,14 @@ internal sealed class HomePage(DirectoryInfo? replayDir, Action<string> navigate
             error = OpenLink(GitHubUrl);
         }
 
-        flow.Next(M3Widgets.ButtonWidth(FontAwesomeIcon.Book, "BossMod wiki"));
-        if (M3Widgets.Button("##home_wiki", "BossMod wiki", M3ButtonStyle.Tonal, FontAwesomeIcon.Book))
+        flow.Next(M3Widgets.ButtonWidth(FontAwesomeIcon.Book, Loc.Tr("BossMod wiki")));
+        if (M3Widgets.Button("##home_wiki", Loc.Tr("BossMod wiki"), M3ButtonStyle.Tonal, FontAwesomeIcon.Book))
         {
             error = OpenLink(WikiUrl);
         }
 
-        flow.Next(M3Widgets.ButtonWidth(FontAwesomeIcon.FolderOpen, "Open replay folder"));
-        if (M3Widgets.Button("##home_replays", "Open replay folder", M3ButtonStyle.Outlined, FontAwesomeIcon.FolderOpen, enabled: replayDir != null, tooltip: replayDir?.FullName))
+        flow.Next(M3Widgets.ButtonWidth(FontAwesomeIcon.FolderOpen, Loc.Tr("Open replay folder")));
+        if (M3Widgets.Button("##home_replays", Loc.Tr("Open replay folder"), M3ButtonStyle.Outlined, FontAwesomeIcon.FolderOpen, enabled: replayDir != null, tooltip: replayDir?.FullName))
         {
             error = OpenDirectory(replayDir!);
         }
@@ -143,7 +143,7 @@ internal sealed class HomePage(DirectoryInfo? replayDir, Action<string> navigate
         catch (Exception e)
         {
             Service.Log($"Error opening link {link}: {e}");
-            return $"Failed to open link '{link}', open it manually in the browser.";
+            return Loc.Format("Failed to open link '{0}', open it manually in the browser.", link);
         }
     }
 
@@ -151,7 +151,7 @@ internal sealed class HomePage(DirectoryInfo? replayDir, Action<string> navigate
     {
         if (!dir.Exists)
         {
-            return $"Directory '{dir}' not found.";
+            return Loc.Format("Directory '{0}' not found.", dir);
         }
 
         try
@@ -162,7 +162,7 @@ internal sealed class HomePage(DirectoryInfo? replayDir, Action<string> navigate
         catch (Exception e)
         {
             Service.Log($"Error opening directory {dir}: {e}");
-            return $"Failed to open folder '{dir}', open it manually.";
+            return Loc.Format("Failed to open folder '{0}', open it manually.", dir);
         }
     }
 }

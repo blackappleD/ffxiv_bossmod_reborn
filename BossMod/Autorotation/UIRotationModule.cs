@@ -7,15 +7,15 @@ public sealed class UIRotationModule
 {
     public static void DescribeModule(Type type, RotationModuleDefinition definition)
     {
-        ImGui.TextUnformatted(definition.DisplayName);
-        ImGui.TextUnformatted(definition.Description);
+        ImGui.TextUnformatted(Loc.Tr(definition.DisplayName));
+        ImGui.TextUnformatted(Loc.Tr(definition.Description));
         ImGui.TextUnformatted($"L{definition.MinLevel}-{definition.MaxLevel} {string.Join(" ", GetClasses(definition))}");
-        ImGui.TextUnformatted($"Author/contributors: {definition.Author}");
-        ImGui.TextUnformatted($"Quality: {(int)definition.Quality}/{(int)RotationModuleQuality.Count - 1} {GeneratedEnumMetadata.For(definition.Quality).Attribute<PropertyDisplayAttribute>()?.Label ?? ""}");
+        ImGui.TextUnformatted(Loc.Format("Author/contributors: {0}", definition.Author));
+        ImGui.TextUnformatted(Loc.Format("Quality: {0}/{1} {2}", (int)definition.Quality, (int)RotationModuleQuality.Count - 1, Loc.Tr(GeneratedEnumMetadata.For(definition.Quality).Attribute<PropertyDisplayAttribute>()?.Label ?? "")));
         using (ImRaii.Disabled())
         {
-            ImGui.TextUnformatted($"Class: {type.FullName}");
-            ImGui.TextUnformatted($"Order group: {definition.Order}");
+            ImGui.TextUnformatted(Loc.Format("Class: {0}", type.FullName));
+            ImGui.TextUnformatted(Loc.Format("Order group: {0}", definition.Order));
         }
     }
 

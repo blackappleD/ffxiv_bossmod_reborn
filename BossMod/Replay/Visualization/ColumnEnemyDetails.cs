@@ -30,7 +30,7 @@ public sealed class ColumnEnemyDetails : Timeline.ColumnGroup
         {
             DrawColumnToggle(_casts, "Casts");
             DrawColumnToggle(_hp, "HP");
-            foreach (var _1 in tree.Node("Statuses"))
+            foreach (var _1 in tree.Node(Loc.Id("Statuses")))
             {
                 _statuses.DrawConfig(tree);
             }
@@ -41,7 +41,7 @@ public sealed class ColumnEnemyDetails : Timeline.ColumnGroup
     private void DrawColumnToggle(IToggleableColumn col, string name)
     {
         var visible = col.Visible;
-        if (ImGui.Checkbox(name, ref visible))
+        if (ImGui.Checkbox(Loc.Id(name), ref visible))
         {
             col.Visible = visible;
         }

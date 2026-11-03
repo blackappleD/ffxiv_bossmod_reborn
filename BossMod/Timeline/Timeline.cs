@@ -20,7 +20,7 @@ public sealed class Timeline
         public virtual void DrawHeader(Vector2 topLeft)
         {
             ImGui.SetCursorPos(topLeft - ImGui.GetWindowPos() + new Vector2(Width * 0.5f, ImGui.GetFrameHeight() * -0.5f));
-            UIMisc.TextRotated(Name, MathF.PI / 3);
+            UIMisc.TextRotated(Loc.Tr(Name), MathF.PI / 3);
         }
 
         public virtual void Draw() { }
@@ -143,7 +143,7 @@ public sealed class Timeline
         if (_allFilters.Count > 0)
         {
             ImGui.AlignTextToFramePadding();
-            ImGui.Text("Condition filters:");
+            ImGui.Text(Loc.Tr("Condition filters:"));
         }
         for (var i = 0; i < _allFilters.Count; ++i)
         {
@@ -152,7 +152,7 @@ public sealed class Timeline
             var isHidden = _hiddenFilters.Contains(k);
             using (ImRaii.PushColor(ImGuiCol.Button, 0xff000080, isHidden))
             {
-                if (ImGui.Button(k))
+                if (ImGui.Button(Loc.Id(k)))
                 {
                     if (isHidden)
                         _hiddenFilters.Remove(k);
@@ -203,7 +203,7 @@ public sealed class Timeline
                 first = false;
                 foreach (var s in strings)
                 {
-                    ImGui.TextUnformatted(s);
+                    ImGui.TextUnformatted(Loc.Tr(s));
                 }
             }
             ImGui.EndTooltip();

@@ -81,13 +81,13 @@ public class UIBitmapEditor
     {
         DrawModeButtons();
         DrawUndoRedoButtons();
-        UIMisc.HelpMarker("Wheel to zoom, shift-wheel to change brush size");
+        UIMisc.HelpMarker(Loc.Tr("Wheel to zoom, shift-wheel to change brush size"));
         ImGui.SameLine();
-        ImGui.TextUnformatted($"Brush radius: {BrushRadius}");
+        ImGui.TextUnformatted(Loc.Format("Brush radius: {0}", BrushRadius));
         if (HoveredPixel.x >= 0 && HoveredPixel.y >= 0)
         {
             ImGui.SameLine();
-            ImGui.TextUnformatted($"Hovered pixel: {HoveredPixel.x}x{HoveredPixel.y}");
+            ImGui.TextUnformatted(Loc.Format("Hovered pixel: {0}x{1}", HoveredPixel.x, HoveredPixel.y));
         }
     }
 
@@ -99,7 +99,7 @@ public class UIBitmapEditor
         {
             var active = CurrentMode == i + 1;
             using var color = ImRaii.PushColor(ImGuiCol.Button, 0xff008080, active);
-            if (ImGui.Button(_modeNames[i]))
+            if (ImGui.Button(Loc.Id(_modeNames[i])))
             {
                 CurrentMode = active ? 0 : i + 1;
             }
@@ -113,7 +113,7 @@ public class UIBitmapEditor
     {
         using (ImRaii.Disabled(!CanUndo()))
         {
-            if (ImGui.Button("Undo"))
+            if (ImGui.Button(Loc.Id("Undo")))
             {
                 Undo();
             }
@@ -122,7 +122,7 @@ public class UIBitmapEditor
         ImGui.SameLine();
         using (ImRaii.Disabled(!CanRedo()))
         {
-            if (ImGui.Button("Redo"))
+            if (ImGui.Button(Loc.Id("Redo")))
             {
                 Redo();
             }

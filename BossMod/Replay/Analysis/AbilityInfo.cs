@@ -120,7 +120,7 @@ sealed class AbilityInfo : CommonEnumInfo
             _plot.Begin();
             foreach (var i in _points)
             {
-                _plot.Point(new(i.Angle, i.Range), i.Hit ? Colors.TextColor2 : Colors.PlayerGeneric, () => $"{(i.Hit ? "hit" : "miss")} {i.Target.NameAt(i.Inst.Action.Timestamp)} {i.Target.InstanceID:X} {i.Inst.TimestampString()}");
+                _plot.Point(new(i.Angle, i.Range), i.Hit ? Colors.TextColor2 : Colors.PlayerGeneric, () => $"{Loc.Tr(i.Hit ? "hit" : "miss")} {i.Target.NameAt(i.Inst.Action.Timestamp)} {i.Target.InstanceID:X} {i.Inst.TimestampString()}");
             }
 
             _plot.End();
@@ -169,7 +169,7 @@ sealed class AbilityInfo : CommonEnumInfo
             _plot.Begin();
             foreach (var i in _points)
             {
-                _plot.Point(new(i.Normal, i.Length), i.Hit ? Colors.TextColor2 : Colors.PlayerGeneric, () => $"{(i.Hit ? "hit" : "miss")} {i.Target.NameAt(i.Inst.Action.Timestamp)} {i.Target.InstanceID:X} {i.Inst.TimestampString()}");
+                _plot.Point(new(i.Normal, i.Length), i.Hit ? Colors.TextColor2 : Colors.PlayerGeneric, () => $"{Loc.Tr(i.Hit ? "hit" : "miss")} {i.Target.NameAt(i.Inst.Action.Timestamp)} {i.Target.InstanceID:X} {i.Inst.TimestampString()}");
             }
 
             _plot.End();
@@ -255,7 +255,7 @@ sealed class AbilityInfo : CommonEnumInfo
             _plot.Begin();
             foreach (var i in _points)
             {
-                _plot.Point(new(i.Angle.Deg, 1), i.Hit ? Colors.TextColor2 : Colors.PlayerGeneric, () => $"{(i.Hit ? "hit" : "miss")} {i.Target.NameAt(i.Inst.Action.Timestamp)} {i.Target.InstanceID:X} {i.Inst.TimestampString()}");
+                _plot.Point(new(i.Angle.Deg, 1), i.Hit ? Colors.TextColor2 : Colors.PlayerGeneric, () => $"{Loc.Tr(i.Hit ? "hit" : "miss")} {i.Target.NameAt(i.Inst.Action.Timestamp)} {i.Target.InstanceID:X} {i.Inst.TimestampString()}");
             }
 
             _plot.End();
@@ -354,7 +354,7 @@ sealed class AbilityInfo : CommonEnumInfo
 
             foreach (var (kind, points) in _byKind)
             {
-                DrawPoints(tree, $"Type {kind}", points);
+                DrawPoints(tree, Loc.Format("Type {0}", kind), points);
             }
 
             DrawPoints(tree, "Ignore immunity", _immuneIgnores);
@@ -381,7 +381,7 @@ sealed class AbilityInfo : CommonEnumInfo
 
         private void DrawPoints(UITree tree, string tag, List<Point> points)
         {
-            foreach (var n in tree.Node($"{tag} ({points.Count} instances)", points.Count == 0))
+            foreach (var n in tree.Node(Loc.Format("{0} ({1} instances)", Loc.Tr(tag), points.Count) + "###" + tag, points.Count == 0))
             {
                 foreach (var an in tree.Nodes(points, p => new($"{p.Inst.TimestampString()}: {ReplayUtils.ParticipantPosRotString(p.Inst.Action.Source, p.Inst.Action.Timestamp)} -> {ReplayUtils.ParticipantString(p.Target.Target, p.Inst.Action.Timestamp)}")))
                 {
@@ -556,29 +556,29 @@ sealed class AbilityInfo : CommonEnumInfo
         }
         foreach (var (aid, data) in tree.Nodes(_data, map))
         {
-            tree.LeafNode($"Caster IDs: {OIDListString(data.CasterOIDs)}");
-            tree.LeafNode($"Target IDs: {OIDListString(data.TargetOIDs)}");
-            tree.LeafNode($"Targets:{JoinStrings(ActionTargetStrings(data))}");
-            tree.LeafNode($"Cast time: {data.CastTime:f1}");
+            tree.LeafNode(Loc.Format("Caster IDs: {0}", OIDListString(data.CasterOIDs)));
+            tree.LeafNode(Loc.Format("Target IDs: {0}", OIDListString(data.TargetOIDs)));
+            tree.LeafNode(Loc.Format("Targets:{0}", JoinStrings(ActionTargetStrings(data))));
+            tree.LeafNode(Loc.Format("Cast time: {0:f1}", data.CastTime));
             if (aid.Type == ActionType.Spell)
             {
-                foreach (var n in tree.Node("Lumina data"))
+                foreach (var n in tree.Node(Loc.Id("Lumina data")))
                 {
                     var row = Service.LuminaRow<Lumina.Excel.Sheets.Action>(aid.ID);
-                    tree.LeafNode($"Category: {row?.ActionCategory.ValueNullable?.Name}");
-                    tree.LeafNode($"Cast time: {row?.Cast100ms * 0.1f:f1} + {row?.ExtraCastTime100ms * 0.1f:f1}");
-                    tree.LeafNode($"Target range: {row?.Range}");
-                    tree.LeafNode($"Effect shape: {row?.CastType} ({(row != null ? DescribeShape(row.Value) : "")})");
-                    tree.LeafNode($"Effect range: {row?.EffectRange}");
-                    tree.LeafNode($"Effect width: {row?.XAxisModifier}");
-                    tree.LeafNode($"Omen: {row?.Omen.ValueNullable?.Path} / {row?.Omen.ValueNullable?.PathAlly}");
+                    tree.LeafNode(Loc.Format("Category: {0}", row?.ActionCategory.ValueNullable?.Name));
+                    tree.LeafNode(Loc.Format("Cast time: {0:f1} + {1:f1}", row?.Cast100ms * 0.1f, row?.ExtraCastTime100ms * 0.1f));
+                    tree.LeafNode(Loc.Format("Target range: {0}", row?.Range));
+                    tree.LeafNode(Loc.Format("Effect shape: {0} ({1})", row?.CastType, row != null ? DescribeShape(row.Value) : ""));
+                    tree.LeafNode(Loc.Format("Effect range: {0}", row?.EffectRange));
+                    tree.LeafNode(Loc.Format("Effect width: {0}", row?.XAxisModifier));
+                    tree.LeafNode(Loc.Format("Omen: {0} / {1}", row?.Omen.ValueNullable?.Path, row?.Omen.ValueNullable?.PathAlly));
                     var omenAlt = row != null ? Service.LuminaRow<Lumina.Excel.Sheets.Omen>(row.Value.OmenAlt.RowId) : null;
-                    tree.LeafNode($"Omen alt: {omenAlt?.Path} / {omenAlt?.PathAlly}");
+                    tree.LeafNode(Loc.Format("Omen alt: {0} / {1}", omenAlt?.Path, omenAlt?.PathAlly));
                 }
             }
-            foreach (var n in tree.Node("Instances", data.Instances.Count == 0))
+            foreach (var n in tree.Node(Loc.Id("Instances"), data.Instances.Count == 0))
             {
-                foreach (var an in tree.Nodes(data.Instances, inst => new($"{inst.TimestampString()}: {ReplayUtils.ParticipantPosRotString(inst.Action.Source, inst.Action.Timestamp)} -> {ReplayUtils.ParticipantString(inst.Action.MainTarget, inst.Action.Timestamp)} {Utils.Vec3String(inst.Action.TargetPos)} / {inst.Action.Rotation} ({inst.Action.Targets.Count} affected)", inst.Action.Targets.Count == 0)))
+                foreach (var an in tree.Nodes(data.Instances, inst => new(Loc.Format("{0}: {1} -> {2} {3} / {4} ({5} affected)", inst.TimestampString(), ReplayUtils.ParticipantPosRotString(inst.Action.Source, inst.Action.Timestamp), ReplayUtils.ParticipantString(inst.Action.MainTarget, inst.Action.Timestamp), Utils.Vec3String(inst.Action.TargetPos), inst.Action.Rotation, inst.Action.Targets.Count), inst.Action.Targets.Count == 0)))
                 {
                     foreach (var tn in tree.Nodes(an.Action.Targets, t => new(ReplayUtils.ActionTargetString(t, an.Action.Timestamp))))
                     {
@@ -586,11 +586,11 @@ sealed class AbilityInfo : CommonEnumInfo
                     }
                 }
             }
-            foreach (var n in tree.Node("Casts", data.Casts.Count == 0))
+            foreach (var n in tree.Node(Loc.Id("Casts"), data.Casts.Count == 0))
             {
                 if (ImGui.BeginPopupContextItem("casts-ctx"))
                 {
-                    if (ImGui.MenuItem("Copy (WPos, Angle) array"))
+                    if (ImGui.MenuItem(Loc.Id("Copy (WPos, Angle) array")))
                     {
                         data.Casts.Sort(static (a, b) => a.Item3.Time.Start.CompareTo(b.Item3.Time.Start));
                         var inv = CultureInfo.InvariantCulture;
@@ -614,62 +614,62 @@ sealed class AbilityInfo : CommonEnumInfo
                 }
                 tree.LeafNodes(data.Casts, c => $"{c.Item1.Path} @ {c.Item3.Time.Start:O} + {c.Item3.Time.Duration:f3}/{c.Item3.ExpectedCastTime:f3}: {ReplayUtils.ParticipantString(c.Item2, c.Item3.Time.Start)} / {c.Item3.Rotation} -> {ReplayUtils.ParticipantPosRotString(c.Item3.Target, c.Item3.Time.Start)} / {Utils.Vec3String(c.Item3.Location)}");
             }
-            foreach (var an in tree.Node("Source position analysis"))
+            foreach (var an in tree.Node(Loc.Id("Source position analysis")))
             {
                 data.SrcPosAnalysis ??= new(data.Instances);
                 data.SrcPosAnalysis.Draw();
             }
-            foreach (var an in tree.Node("Cone analysis (origin & rotation at source)"))
+            foreach (var an in tree.Node(Loc.Id("Cone analysis (origin & rotation at source)")))
             {
                 data.ConeAnalysisSourcePosRot ??= new(data.Instances, ConeAnalysis.Targeting.SourcePosRot);
                 data.ConeAnalysisSourcePosRot.Draw();
             }
-            foreach (var an in tree.Node("Cone analysis (origin at target, rotation from source)"))
+            foreach (var an in tree.Node(Loc.Id("Cone analysis (origin at target, rotation from source)")))
             {
                 data.ConeAnalysisTargetPosSourceRot ??= new(data.Instances, ConeAnalysis.Targeting.TargetPosSourceRot);
                 data.ConeAnalysisTargetPosSourceRot.Draw();
             }
-            foreach (var an in tree.Node("Cone analysis (origin at source, directed at target)"))
+            foreach (var an in tree.Node(Loc.Id("Cone analysis (origin at source, directed at target)")))
             {
                 data.ConeAnalysisSourcePosDirToTarget ??= new(data.Instances, ConeAnalysis.Targeting.SourcePosDirToTarget);
                 data.ConeAnalysisSourcePosDirToTarget.Draw();
             }
-            foreach (var an in tree.Node("Rect analysis (rotation from action)"))
+            foreach (var an in tree.Node(Loc.Id("Rect analysis (rotation from action)")))
             {
                 data.RectAnalysisActionRot ??= new(data.Instances, true);
                 data.RectAnalysisActionRot.Draw();
             }
-            foreach (var an in tree.Node("Rect analysis (rotation from source)"))
+            foreach (var an in tree.Node(Loc.Id("Rect analysis (rotation from source)")))
             {
                 data.RectAnalysisSourceRot ??= new(data.Instances, false);
                 data.RectAnalysisSourceRot.Draw();
             }
-            foreach (var an in tree.Node("Damage falloff analysis (by distance)"))
+            foreach (var an in tree.Node(Loc.Id("Damage falloff analysis (by distance)")))
             {
                 data.DamageFalloffAnalysisDist ??= new(data.Instances, false, false);
                 data.DamageFalloffAnalysisDist.Draw();
             }
-            foreach (var an in tree.Node("Damage falloff analysis (by distance from source)"))
+            foreach (var an in tree.Node(Loc.Id("Damage falloff analysis (by distance from source)")))
             {
                 data.DamageFalloffAnalysisDistFromSource ??= new(data.Instances, false, true);
                 data.DamageFalloffAnalysisDistFromSource.Draw();
             }
-            foreach (var an in tree.Node("Damage falloff analysis (by max coord)"))
+            foreach (var an in tree.Node(Loc.Id("Damage falloff analysis (by max coord)")))
             {
                 data.DamageFalloffAnalysisMinCoord ??= new(data.Instances, true, false);
                 data.DamageFalloffAnalysisMinCoord.Draw();
             }
-            foreach (var an in tree.Node("Gaze analysis"))
+            foreach (var an in tree.Node(Loc.Id("Gaze analysis")))
             {
                 data.GazeAnalysis ??= new(data.Instances);
                 data.GazeAnalysis.Draw();
             }
-            foreach (var an in tree.Node("Knockback analysis"))
+            foreach (var an in tree.Node(Loc.Id("Knockback analysis")))
             {
                 data.KnockbackAnalysis ??= new(data.Instances);
                 data.KnockbackAnalysis.Draw(tree);
             }
-            foreach (var an in tree.Node("Caster link analysis"))
+            foreach (var an in tree.Node(Loc.Id("Caster link analysis")))
             {
                 data.CasterLinkAnalysis ??= new(data.Instances);
                 data.CasterLinkAnalysis.Draw(tree);
@@ -679,7 +679,7 @@ sealed class AbilityInfo : CommonEnumInfo
 
     public void DrawContextMenu()
     {
-        if (ImGui.MenuItem("Generate enum for boss module"))
+        if (ImGui.MenuItem(Loc.Id("Generate enum for boss module")))
         {
             var enumPairs = new List<(string, string)>(_data.Count);
             foreach (var d in _data)
@@ -697,7 +697,7 @@ sealed class AbilityInfo : CommonEnumInfo
             ImGui.SetClipboardText(sb.ToString());
         }
 
-        if (ImGui.MenuItem("Generate missing enum values for boss module"))
+        if (ImGui.MenuItem(Loc.Id("Generate missing enum values for boss module")))
         {
             var missingPairs = new List<(string, string)>();
             foreach (var kv in _data)

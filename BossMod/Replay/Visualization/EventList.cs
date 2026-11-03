@@ -13,14 +13,14 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
 
     public void Draw()
     {
-        foreach (var n in _tree.Node("Full data"))
+        foreach (var n in _tree.Node(Loc.Id("Full data")))
         {
-            foreach (var no in _tree.Node("Raw ops", contextMenu: () => OpListContextMenu(_listsRaw.Ops)))
+            foreach (var no in _tree.Node(Loc.Id("Raw ops"), contextMenu: () => OpListContextMenu(_listsRaw.Ops)))
             {
                 _listsRaw.Ops ??= new(r, null, null, r.Ops, scrollTo);
                 _listsRaw.Ops.Draw(_tree, r.Ops[0].Timestamp);
             }
-            foreach (var no in _tree.Node("Server IPCs", contextMenu: () => IPCListContextMenu(_listsRaw.IPCs, null)))
+            foreach (var no in _tree.Node(Loc.Id("Server IPCs"), contextMenu: () => IPCListContextMenu(_listsRaw.IPCs, null)))
             {
                 _listsRaw.IPCs ??= new(r, null, r.Ops, scrollTo);
                 _listsRaw.IPCs.Draw(_tree, r.Ops[0].Timestamp);
@@ -29,16 +29,16 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
             DrawContents(null, null);
             DrawUserMarkers();
         }
-        foreach (var e in _tree.Nodes(r.Encounters, e => new($"{BossModuleRegistry.FindByOID(e.OID)?.ModuleType.Name}: {e.InstanceID:X}, zone={e.Zone}, start={e.Time.Start:O}, duration={e.Time}, countdown on pull={e.CountdownOnPull:f3}")))
+        foreach (var e in _tree.Nodes(r.Encounters, e => new(Loc.Format("{0}: {1:X}, zone={2}, start={3:O}, duration={4}, countdown on pull={5:f3}", BossModuleRegistry.FindByOID(e.OID)?.ModuleType.Name, e.InstanceID, e.Zone, e.Time.Start, e.Time, e.CountdownOnPull))))
         {
             var moduleInfo = BossModuleRegistry.FindByOID(e.OID);
             ref var lists = ref CollectionsMarshal.GetValueRefOrAddDefault(_listsFiltered, e, out _);
-            foreach (var n in _tree.Node("Raw ops", contextMenu: () => OpListContextMenu(_listsFiltered[e].Ops)))
+            foreach (var n in _tree.Node(Loc.Id("Raw ops"), contextMenu: () => OpListContextMenu(_listsFiltered[e].Ops)))
             {
                 lists.Ops ??= new(r, e, moduleInfo, OpsInRange(r.Ops, e.Time.Start, e.Time.End), scrollTo);
                 lists.Ops.Draw(_tree, e.Time.Start);
             }
-            foreach (var n in _tree.Node("Server IPCs", contextMenu: () => IPCListContextMenu(_listsFiltered[e].IPCs, moduleInfo)))
+            foreach (var n in _tree.Node(Loc.Id("Server IPCs"), contextMenu: () => IPCListContextMenu(_listsFiltered[e].IPCs, moduleInfo)))
             {
                 lists.IPCs ??= new(r, e, OpsInRange(r.Ops, e.Time.Start, e.Time.End), scrollTo);
                 lists.IPCs.Draw(_tree, e.Time.Start);
@@ -66,7 +66,7 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
         var mapEffects = filter != null ? r.EncounterMapEffects(filter) : r.MapEffects;
         var dirus = filter != null ? r.EncounterDirectorUpdates(filter) : r.DirectorUpdates;
 
-        foreach (var n in _tree.Node("Participants"))
+        foreach (var n in _tree.Node(Loc.Id("Participants")))
         {
             if (filter == null)
             {
@@ -74,7 +74,7 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
             }
             else
             {
-                foreach (var (oid, list) in _tree.Nodes(filter.ParticipantsByOID, kv => new($"{kv.Key:X} '{oidType?.GeneratedEnumName(kv.Key)}' ({kv.Value.Count} objects)")))
+                foreach (var (oid, list) in _tree.Nodes(filter.ParticipantsByOID, kv => new(Loc.Format("{0:X} '{1}' ({2} objects)", kv.Key, oidType?.GeneratedEnumName(kv.Key), kv.Value.Count))))
                 {
                     DrawParticipants(list, actions, statuses, tp, reference, filter, aidType, sidType);
                 }
@@ -84,7 +84,7 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
         var boss = filter?.ParticipantsByOID[filter.OID].Find(p => p.InstanceID == filter.InstanceID);
         if (boss != null)
         {
-            foreach (var n in _tree.Node("Boss casts", boss.Casts.Count == 0))
+            foreach (var n in _tree.Node(Loc.Id("Boss casts"), boss.Casts.Count == 0))
             {
                 DrawCasts(boss.Casts, reference, aidType);
             }
@@ -98,11 +98,11 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
             (actionIsCrap(a) ? otherActions : interestingActions).Add(a);
         }
 
-        foreach (var n in _tree.Node("Interesting actions", interestingActions.Count == 0))
+        foreach (var n in _tree.Node(Loc.Id("Interesting actions"), interestingActions.Count == 0))
         {
             DrawActions(interestingActions, tp, aidType);
         }
-        foreach (var n in _tree.Node("Other actions", otherActions.Count == 0))
+        foreach (var n in _tree.Node(Loc.Id("Other actions"), otherActions.Count == 0))
         {
             DrawActions(otherActions, tp, aidType);
         }
@@ -114,11 +114,11 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
             (statusIsCrap(s) ? otherStatuses : interestingStatuses).Add(s);
         }
 
-        foreach (var n in _tree.Node("Interesting statuses", interestingStatuses.Count == 0))
+        foreach (var n in _tree.Node(Loc.Id("Interesting statuses"), interestingStatuses.Count == 0))
         {
             DrawStatuses(interestingStatuses, tp, sidType);
         }
-        foreach (var n in _tree.Node("Other statuses", otherStatuses.Count == 0))
+        foreach (var n in _tree.Node(Loc.Id("Other statuses"), otherStatuses.Count == 0))
         {
             DrawStatuses(otherStatuses, tp, sidType);
         }
@@ -129,7 +129,7 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
             haveTethers = true;
             break;
         }
-        foreach (var n in _tree.Node("Tethers", !haveTethers))
+        foreach (var n in _tree.Node(Loc.Id("Tethers"), !haveTethers))
         {
             _tree.LeafNodes(tethers, t => $"{tp(t.Time.Start)} + {t.Time}: {t.ID} ({tidType?.GeneratedEnumName(t.ID)}) @ {ReplayUtils.ParticipantString(t.Source, t.Time.Start)} -> {ReplayUtils.ParticipantString(t.Target, t.Time.Start)}");
         }
@@ -140,7 +140,7 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
             haveIcons = true;
             break;
         }
-        foreach (var n in _tree.Node("Icons", !haveIcons))
+        foreach (var n in _tree.Node(Loc.Id("Icons"), !haveIcons))
         {
             _tree.LeafNodes(icons, i => $"{tp(i.Timestamp)}: {i.ID} ({iidType?.GeneratedEnumName(i.ID)}) @ {ReplayUtils.ParticipantString(i.Source, i.Timestamp)} -> {ReplayUtils.ParticipantString(i.Target, i.Timestamp)}");
         }
@@ -151,11 +151,11 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
             haveMapEffects = true;
             break;
         }
-        foreach (var n in _tree.Node("Map effects", !haveMapEffects))
+        foreach (var n in _tree.Node(Loc.Id("Map effects"), !haveMapEffects))
         {
             if (haveMapEffects)
             {
-                foreach (var n2 in _tree.Node("All"))
+                foreach (var n2 in _tree.Node(Loc.Id("All")))
                 {
                     _tree.LeafNodes(mapEffects, ec => $"{tp(ec.Timestamp)}: {ec.Index:X2} = {ec.State:X8}");
                 }
@@ -166,7 +166,7 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
                 mapEffectIndices.Add(ec.Index);
             }
 
-            foreach (var index in _tree.Nodes(mapEffectIndices, index => new($"Index {index:X2}")))
+            foreach (var index in _tree.Nodes(mapEffectIndices, index => new(Loc.Format("Index {0:X2}", index))))
             {
                 var filtered = new List<Replay.MapEffect>();
                 foreach (var ec in mapEffects)
@@ -187,11 +187,11 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
             haveDirus = true;
             break;
         }
-        foreach (var n in _tree.Node("Director updates", !haveDirus))
+        foreach (var n in _tree.Node(Loc.Id("Director updates"), !haveDirus))
         {
             if (haveDirus)
             {
-                foreach (var n2 in _tree.Node("All"))
+                foreach (var n2 in _tree.Node(Loc.Id("All")))
                 {
                     _tree.LeafNodes(dirus, d => $"{tp(d.Timestamp)}: {d.UpdateID:X8} [0x{d.Param1:X}, 0x{d.Param2:X}, 0x{d.Param3:X}, 0x{d.Param4:X}]");
                 }
@@ -221,17 +221,17 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
 
     private void DrawParticipants(IEnumerable<Replay.Participant> list, IEnumerable<Replay.Action> actions, IEnumerable<Replay.Status> statuses, Func<DateTime, string> tp, DateTime reference, Replay.Encounter? filter, Type? aidType, Type? sidType)
     {
-        foreach (var p in _tree.Nodes(list, p => new($"{ReplayUtils.ParticipantString(p, p.WorldExistence.Count > 0 ? p.WorldExistence[0].Start : default)}: first seen at {tp(p.EffectiveExistence.Start)}, last seen at {tp(p.EffectiveExistence.End)}")))
+        foreach (var p in _tree.Nodes(list, p => new(Loc.Format("{0}: first seen at {1}, last seen at {2}", ReplayUtils.ParticipantString(p, p.WorldExistence.Count > 0 ? p.WorldExistence[0].Start : default), tp(p.EffectiveExistence.Start), tp(p.EffectiveExistence.End)))))
         {
-            foreach (var n in _tree.Node("Existence", p.WorldExistence.Count == 0))
+            foreach (var n in _tree.Node(Loc.Id("Existence"), p.WorldExistence.Count == 0))
             {
                 _tree.LeafNodes(p.WorldExistence, r => $"{tp(r.Start)}-{tp(r.End)} ({r})");
             }
-            foreach (var n in _tree.Node("Casts", p.Casts.Count == 0))
+            foreach (var n in _tree.Node(Loc.Id("Casts"), p.Casts.Count == 0))
             {
                 DrawCasts(p.Casts, reference, aidType);
             }
-            foreach (var an in _tree.Node("Actions", !p.HasAnyActions))
+            foreach (var an in _tree.Node(Loc.Id("Actions"), !p.HasAnyActions))
             {
                 var pActions = new List<Replay.Action>();
                 foreach (var a in actions)
@@ -244,7 +244,7 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
 
                 DrawActions(pActions, tp, aidType);
             }
-            foreach (var an in _tree.Node("Affected by actions", !p.IsTargetOfAnyActions))
+            foreach (var an in _tree.Node(Loc.Id("Affected by actions"), !p.IsTargetOfAnyActions))
             {
                 var pActions = new List<Replay.Action>();
                 foreach (var a in actions)
@@ -260,7 +260,7 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
                 }
                 DrawActions(pActions, tp, aidType);
             }
-            foreach (var an in _tree.Node("Statuses", !p.HasAnyStatuses))
+            foreach (var an in _tree.Node(Loc.Id("Statuses"), !p.HasAnyStatuses))
             {
                 var pStatuses = new List<Replay.Status>();
                 foreach (var s in statuses)
@@ -273,7 +273,7 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
 
                 DrawStatuses(pStatuses, tp, sidType);
             }
-            foreach (var an in _tree.Node("Targetable", p.TargetableHistory.Count == 0))
+            foreach (var an in _tree.Node(Loc.Id("Targetable"), p.TargetableHistory.Count == 0))
             {
                 _tree.LeafNodes(p.TargetableHistory, r => $"{tp(r.Key)} = {r.Value}");
             }
@@ -281,11 +281,11 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
             {
                 _tree.LeafNodes(p.EventObjectAnimation, r => $"{tp(r.Key)} = {r.Value:X8}");
             }
-            foreach (var an in _tree.Node("Event state", p.EventState.Count == 0))
+            foreach (var an in _tree.Node(Loc.Id("Event state"), p.EventState.Count == 0))
             {
                 _tree.LeafNodes(p.EventState, r => $"{tp(r.Key)} = {r.Value}");
             }
-            foreach (var an in _tree.Node("Action timeline events", p.ActionTimeline.Count == 0))
+            foreach (var an in _tree.Node(Loc.Id("Action timeline events"), p.ActionTimeline.Count == 0))
             {
                 _tree.LeafNodes(p.ActionTimeline, r => $"{tp(r.Key)} = {r.Value:X4}");
             }
@@ -303,7 +303,7 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
         }
     }
 
-    private string ActionString(Replay.Action a, Func<DateTime, string> tp, Type? aidType) => $"{tp(a.Timestamp)}: {a.ID} ({aidType?.GeneratedEnumName(a.ID.ID)}): {ReplayUtils.ParticipantPosRotString(a.Source, a.Timestamp)} -> {ReplayUtils.ParticipantString(a.MainTarget, a.Timestamp)} {Utils.Vec3String(a.TargetPos)} ({a.Targets.Count} affected) #{a.GlobalSequence}";
+    private string ActionString(Replay.Action a, Func<DateTime, string> tp, Type? aidType) => Loc.Format("{0}: {1} ({2}): {3} -> {4} {5} ({6} affected) #{7}", tp(a.Timestamp), a.ID, aidType?.GeneratedEnumName(a.ID.ID), ReplayUtils.ParticipantPosRotString(a.Source, a.Timestamp), ReplayUtils.ParticipantString(a.MainTarget, a.Timestamp), Utils.Vec3String(a.TargetPos), a.Targets.Count, a.GlobalSequence);
 
     private void DrawActions(IEnumerable<Replay.Action> list, Func<DateTime, string> tp, Type? aidType)
     {
@@ -316,22 +316,22 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
         }
     }
 
-    private string StatusString(Replay.Status s, Func<DateTime, string> tp, Type? sidType) => $"{tp(s.Time.Start)} + {s.InitialDuration:f2} / {s.Time}: {Utils.StatusString(s.ID)} ({sidType?.GeneratedEnumName(s.ID)}) ({s.StartingExtra:X}) @ {ReplayUtils.ParticipantString(s.Target, s.Time.Start)} from {ReplayUtils.ParticipantString(s.Source, s.Time.Start)}";
+    private string StatusString(Replay.Status s, Func<DateTime, string> tp, Type? sidType) => Loc.Format("{0} + {1:f2} / {2}: {3} ({4}) ({5:X}) @ {6} from {7}", tp(s.Time.Start), s.InitialDuration, s.Time, Utils.StatusString(s.ID), sidType?.GeneratedEnumName(s.ID), s.StartingExtra, ReplayUtils.ParticipantString(s.Target, s.Time.Start), ReplayUtils.ParticipantString(s.Source, s.Time.Start));
 
     private void DrawStatuses(IEnumerable<Replay.Status> statuses, Func<DateTime, string> tp, Type? sidType) => _tree.LeafNodes(statuses, s => StatusString(s, tp, sidType));
 
     private void DrawEncounterDetails(Replay.Encounter enc, Func<DateTime, string> tp)
     {
-        foreach (var n in _tree.Node("State transitions", enc.States.Count == 0))
+        foreach (var n in _tree.Node(Loc.Id("State transitions"), enc.States.Count == 0))
         {
             var enter = enc.Time.Start;
-            foreach (var s in _tree.Nodes(enc.States, s => new($"{s.FullName:X}: {tp(enter)} - {tp(s.Exit)} = {new Replay.TimeRange(enter, s.Exit)} (expected {s.ExpectedDuration:f1})", true)))
+            foreach (var s in _tree.Nodes(enc.States, s => new(Loc.Format("{0}: {1} - {2} = {3} (expected {4:f1})", s.FullName, tp(enter), tp(s.Exit), new Replay.TimeRange(enter, s.Exit), s.ExpectedDuration), true)))
             {
                 enter = s.Exit;
             }
         }
 
-        foreach (var n in _tree.Node("Errors", enc.Errors.Count == 0))
+        foreach (var n in _tree.Node(Loc.Id("Errors"), enc.Errors.Count == 0))
         {
             _tree.LeafNodes(enc.Errors, error => $"{tp(error.Timestamp)} [{error.CompType}] {error.Message}");
         }
@@ -339,7 +339,7 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
 
     private void DrawUserMarkers()
     {
-        foreach (var n in _tree.Node("User markers", r.UserMarkers.Count == 0))
+        foreach (var n in _tree.Node(Loc.Id("User markers"), r.UserMarkers.Count == 0))
         {
             _tree.LeafNodes(r.UserMarkers, kv => $"{kv.Key:O}: {kv.Value}");
         }
@@ -351,7 +351,7 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
 
     private void DrawTimelines(Replay.Encounter enc)
     {
-        if (ImGui.Button("Show timeline"))
+        if (ImGui.Button(Loc.Id("Show timeline")))
         {
             OpenTimeline(enc, new());
         }
@@ -367,7 +367,7 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
 
             ImGui.SameLine();
         }
-        if (ImGui.Button("All"))
+        if (ImGui.Button(Loc.Id("All")))
         {
             OpenTimeline(enc, new((1u << enc.PartyMembers.Count) - 1));
         }
@@ -380,21 +380,21 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
             return;
         }
 
-        if (ImGui.MenuItem("Clear filters"))
+        if (ImGui.MenuItem(Loc.Id("Clear filters")))
         {
             list.ClearFilters();
         }
-        if (ImGui.MenuItem("Show actor-size events", "", list.ShowActorSizeEvents, true))
+        if (ImGui.MenuItem(Loc.Id("Show actor-size events"), "", list.ShowActorSizeEvents, true))
         {
             list.ShowActorSizeEvents = !list.ShowActorSizeEvents;
         }
-        if (ImGui.MenuItem("Show CLMV events", "", list.ShowCLMVEvents, true))
+        if (ImGui.MenuItem(Loc.Id("Show CLMV events"), "", list.ShowCLMVEvents, true))
         {
             list.ShowCLMVEvents = !list.ShowCLMVEvents;
         }
-        if (ImGui.MenuItem("Pop out"))
+        if (ImGui.MenuItem(Loc.Id("Pop out")))
         {
-            var windowName = $"Raw ops: {r.Path}, {(list.Encounter != null ? $"{list.ModuleInfo?.ModuleType.Name}: {list.Encounter.InstanceID:X} @ {list.Encounter.Time.Start} + {list.Encounter.Time}" : "full")}";
+            var windowName = Loc.Format("Raw ops: {0}, {1}", r.Path, list.Encounter != null ? $"{list.ModuleInfo?.ModuleType.Name}: {list.Encounter.InstanceID:X} @ {list.Encounter.Time.Start} + {list.Encounter.Time}" : Loc.Tr("full"));
             _ = new UISimpleWindow(windowName, () => list.Draw(new(), list.Encounter?.Time.Start ?? r.Ops[0].Timestamp), true, new(1000, 1000));
         }
     }
@@ -406,13 +406,13 @@ sealed class EventList(Replay r, Action<DateTime> scrollTo, PlanDatabase planDB,
             return;
         }
 
-        if (ImGui.MenuItem("Clear filters"))
+        if (ImGui.MenuItem(Loc.Id("Clear filters")))
         {
             list.ClearFilters();
         }
-        if (ImGui.MenuItem("Pop out"))
+        if (ImGui.MenuItem(Loc.Id("Pop out")))
         {
-            var windowName = $"Server IPCs: {r.Path}, {(list.Encounter != null ? $"{moduleInfo?.ModuleType.Name}: {list.Encounter.InstanceID:X} @ {list.Encounter.Time.Start} + {list.Encounter.Time}" : "full")}";
+            var windowName = Loc.Format("Server IPCs: {0}, {1}", r.Path, list.Encounter != null ? $"{moduleInfo?.ModuleType.Name}: {list.Encounter.InstanceID:X} @ {list.Encounter.Time.Start} + {list.Encounter.Time}" : Loc.Tr("full"));
             _ = new UISimpleWindow(windowName, () => list.Draw(new(), list.Encounter?.Time.Start ?? r.Ops[0].Timestamp), true, new(1000, 1000));
         }
     }

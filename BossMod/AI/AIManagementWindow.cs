@@ -15,7 +15,7 @@ sealed class AIManagementWindow : UIWindow
 
     public AIManagementWindow(AIManager manager) : base(_windowID, false, new(100f, 100f))
     {
-        WindowName = _title;
+        WindowName = Loc.Tr(_title);
         _manager = manager;
         _subscriptions = new
         (
@@ -45,55 +45,55 @@ sealed class AIManagementWindow : UIWindow
 
         ImGui.TextUnformatted($"Navi={_manager.Controller.NaviTargetPos}");
 
-        configModified |= ImGui.Checkbox("Forbid actions", ref _config.ForbidActions);
+        configModified |= ImGui.Checkbox(Loc.Id("Forbid actions"), ref _config.ForbidActions);
         ImGui.SameLine();
-        configModified |= ImGui.Checkbox("Forbid movement", ref _config.ForbidMovement);
+        configModified |= ImGui.Checkbox(Loc.Id("Forbid movement"), ref _config.ForbidMovement);
         ImGui.SameLine();
-        configModified |= ImGui.Checkbox("Idle while mounted", ref _config.ForbidAIMovementMounted);
+        configModified |= ImGui.Checkbox(Loc.Id("Idle while mounted"), ref _config.ForbidAIMovementMounted);
         ImGui.SameLine();
-        configModified |= ImGui.Checkbox("Follow during combat", ref _config.FollowDuringCombat);
+        configModified |= ImGui.Checkbox(Loc.Id("Follow during combat"), ref _config.FollowDuringCombat);
         if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
-            ImGui.Text("Must be enabled for follow target.");
+            ImGui.Text(Loc.Tr("Must be enabled for follow target."));
             ImGui.EndTooltip();
         }
         ImGui.Spacing();
-        configModified |= ImGui.Checkbox("Follow during active boss module", ref _config.FollowDuringActiveBossModule);
+        configModified |= ImGui.Checkbox(Loc.Id("Follow during active boss module"), ref _config.FollowDuringActiveBossModule);
         if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
-            ImGui.Text("Must be enabled for following targets during active boss modules.");
+            ImGui.Text(Loc.Tr("Must be enabled for following targets during active boss modules."));
             ImGui.EndTooltip();
         }
         ImGui.SameLine();
-        configModified |= ImGui.Checkbox("Follow out of combat", ref _config.FollowOutOfCombat);
+        configModified |= ImGui.Checkbox(Loc.Id("Follow out of combat"), ref _config.FollowOutOfCombat);
         ImGui.SameLine();
-        configModified |= ImGui.Checkbox("Follow target", ref _config.FollowTarget);
+        configModified |= ImGui.Checkbox(Loc.Id("Follow target"), ref _config.FollowTarget);
         if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
-            ImGui.Text("Follow the target with your distance settings.\nFollow during combat and follow during active boss module need to be activated.");
+            ImGui.Text(Loc.Tr("Follow the target with your distance settings.\nFollow during combat and follow during active boss module need to be activated."));
             ImGui.EndTooltip();
         }
         ImGui.Spacing();
-        configModified |= ImGui.Checkbox("Manual targeting", ref _config.ManualTarget);
+        configModified |= ImGui.Checkbox(Loc.Id("Manual targeting"), ref _config.ManualTarget);
         if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
-            ImGui.Text("Allows manual targeting with an active AI autorotation.");
+            ImGui.Text(Loc.Tr("Allows manual targeting with an active AI autorotation."));
             ImGui.EndTooltip();
         }
         ImGui.SameLine();
-        configModified |= ImGui.Checkbox("Disable loading obstacle maps", ref _config.DisableObstacleMaps);
+        configModified |= ImGui.Checkbox(Loc.Id("Disable loading obstacle maps"), ref _config.DisableObstacleMaps);
 
-        ImGui.Text("Follow party slot");
+        ImGui.Text(Loc.Tr("Follow party slot"));
         ImGui.SameLine();
         ImGui.SetNextItemWidth(250);
         ImGui.SetNextWindowSizeConstraints(default, new Vector2(float.MaxValue, ImGui.GetTextLineHeightWithSpacing() * 50f));
-        if (ImRaii.Combo("##Leader", _manager.Beh == null ? "<idle>" : _manager.WorldState.Party[_manager.MasterSlot]?.Name ?? "<unknown>"))
+        if (ImRaii.Combo("##Leader", _manager.Beh == null ? Loc.Tr("<idle>") : _manager.WorldState.Party[_manager.MasterSlot]?.Name ?? Loc.Tr("<unknown>")))
         {
-            if (ImGui.Selectable("<idle>", _manager.Beh == null))
+            if (ImGui.Selectable(Loc.Id("<idle>"), _manager.Beh == null))
             {
                 _manager.SwitchToIdle();
             }
@@ -115,21 +115,21 @@ sealed class AIManagementWindow : UIWindow
         if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
-            ImGui.Text("Select player to follow to enable AI. Usually you select yourself for this.");
+            ImGui.Text(Loc.Tr("Select player to follow to enable AI. Usually you select yourself for this."));
             ImGui.EndTooltip();
         }
         ImGui.Separator();
-        ImGui.Text("Desired positional");
+        ImGui.Text(Loc.Tr("Desired positional"));
         ImGui.SameLine();
         ImGui.SetNextItemWidth(100f);
         var positionalIndex = (int)_config.DesiredPositional;
-        if (ImGui.Combo("##DesiredPositional", ref positionalIndex, positionals, 4))
+        if (ImGui.Combo("##DesiredPositional", ref positionalIndex, Loc.Tr(positionals), 4))
         {
             _config.DesiredPositional = (Positional)positionalIndex;
             configModified = true;
         }
         ImGui.SameLine();
-        ImGui.Text("Max distance - to targets");
+        ImGui.Text(Loc.Tr("Max distance - to targets"));
         ImGui.SameLine();
         ImGui.SetNextItemWidth(100);
         var maxDistanceTargetStr = _config.MaxDistanceToTarget.ToString(CultureInfo.InvariantCulture);
@@ -145,11 +145,11 @@ sealed class AIManagementWindow : UIWindow
         if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
-            ImGui.Text("Maximum distance in yalms to keep away from targets.");
+            ImGui.Text(Loc.Tr("Maximum distance in yalms to keep away from targets."));
             ImGui.EndTooltip();
         }
         ImGui.SameLine();
-        ImGui.Text("- to slots");
+        ImGui.Text(Loc.Tr("- to slots"));
         ImGui.SameLine();
         ImGui.SetNextItemWidth(100f);
         var maxDistanceSlotStr = _config.MaxDistanceToSlot.ToString(CultureInfo.InvariantCulture);
@@ -165,10 +165,10 @@ sealed class AIManagementWindow : UIWindow
         if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
-            ImGui.Text("Maximum distance in yalms to keep away from followed allies.");
+            ImGui.Text(Loc.Tr("Maximum distance in yalms to keep away from followed allies."));
             ImGui.EndTooltip();
         }
-        ImGui.Text("Minimum distance");
+        ImGui.Text(Loc.Tr("Minimum distance"));
         ImGui.SameLine();
         ImGui.SetNextItemWidth(100f);
         var minDistanceStr = _config.MinDistance.ToString(CultureInfo.InvariantCulture);
@@ -184,11 +184,11 @@ sealed class AIManagementWindow : UIWindow
         if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
-            ImGui.Text("Distance in yalms to keep away from target hitbox.");
+            ImGui.Text(Loc.Tr("Distance in yalms to keep away from target hitbox."));
             ImGui.EndTooltip();
         }
         ImGui.SameLine();
-        ImGui.Text("Pref distance to forbidden zones");
+        ImGui.Text(Loc.Tr("Pref distance to forbidden zones"));
         ImGui.SameLine();
         ImGui.SetNextItemWidth(100f);
         var prefDistanceStr = _config.PreferredDistance.ToString(CultureInfo.InvariantCulture);
@@ -204,10 +204,10 @@ sealed class AIManagementWindow : UIWindow
         if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
-            ImGui.Text("Distance in yalms to keep away from forbidden zones.");
+            ImGui.Text(Loc.Tr("Distance in yalms to keep away from forbidden zones."));
             ImGui.EndTooltip();
         }
-        ImGui.Text("Movement decision delay");
+        ImGui.Text(Loc.Tr("Movement decision delay"));
         ImGui.SameLine();
         ImGui.SetNextItemWidth(100f);
         var movementDelayStr = _config.MoveDelay.ToString(CultureInfo.InvariantCulture);
@@ -223,11 +223,11 @@ sealed class AIManagementWindow : UIWindow
         if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
-            ImGui.Text("Minimum time to start moving after movement decision has been made.\nAvoid setting this too high depending on the content.");
+            ImGui.Text(Loc.Tr("Minimum time to start moving after movement decision has been made.\nAvoid setting this too high depending on the content."));
             ImGui.EndTooltip();
         }
         ImGui.SameLine();
-        ImGui.Text("Autorotation AI preset");
+        ImGui.Text(Loc.Tr("Autorotation AI preset"));
         ImGui.SameLine();
         ImGui.SetNextItemWidth(250f);
         ImGui.SetNextWindowSizeConstraints(default, new Vector2(float.MaxValue, ImGui.GetTextLineHeightWithSpacing() * 50f));
@@ -243,7 +243,7 @@ sealed class AIManagementWindow : UIWindow
 
         if (aipreset != null)
         {
-            presetNames.Add("Deactivate");
+            presetNames.Add(Loc.Tr("Deactivate"));
         }
 
         var countnames = presetNames.Count;
@@ -275,9 +275,9 @@ sealed class AIManagementWindow : UIWindow
     public void UpdateTitle()
     {
         var masterSlot = _manager?.MasterSlot ?? -1;
-        var masterName = _manager?.Autorot?.WorldState?.Party[masterSlot]?.Name ?? "unknown";
+        var masterName = _manager?.Autorot?.WorldState?.Party[masterSlot]?.Name ?? Loc.Tr("unknown");
         var masterSlotNumber = masterSlot != -1 ? (masterSlot + 1).ToString() : "N/A";
 
-        WindowName = $"AI: {(_manager?.Beh != null ? "on" : "off")}, master={masterName}[{masterSlotNumber}]{_windowID}";
+        WindowName = Loc.Format(_manager?.Beh != null ? "AI: on, master={0}[{1}]" : "AI: off, master={0}[{1}]", masterName, masterSlotNumber) + _windowID;
     }
 }

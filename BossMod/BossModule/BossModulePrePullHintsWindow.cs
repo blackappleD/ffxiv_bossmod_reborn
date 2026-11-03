@@ -36,7 +36,7 @@ public sealed class BossModulePrePullHintsWindow : RebornUI.RebornWindow
         if (show)
         {
             var encounterName = string.IsNullOrEmpty(module!.PrimaryActor.Name) ? module.GetType().Name : module.PrimaryActor.Name;
-            WindowName = $"Pre-fight hints: {encounterName}{WindowID}";
+            WindowName = Loc.Format("Pre-fight hints: {0}", encounterName) + WindowID;
         }
     }
 
@@ -60,7 +60,7 @@ public sealed class BossModulePrePullHintsWindow : RebornUI.RebornWindow
 
     private void DrawThemed(BossModule module)
     {
-        M3Text.Draw("Before the pull", M3TextStyle.Heading);
+        M3Text.Draw(Loc.Tr("Before the pull"), M3TextStyle.Heading);
         ImGui.Dummy(new(0f, M3.Space1));
         using (ImRaii.TextWrapPos(0f))
         {
@@ -68,19 +68,19 @@ public sealed class BossModulePrePullHintsWindow : RebornUI.RebornWindow
             var len = hints.Length;
             for (var i = 0; i < len; ++i)
             {
-                M3Text.Bullet(hints[i]);
+                M3Text.Bullet(Loc.Tr(hints[i]));
             }
         }
 
         M3Widgets.Divider(6f);
 
-        if (M3Widgets.Button("##dismiss", "Dismiss for now", M3ButtonStyle.Filled, FontAwesomeIcon.Check))
+        if (M3Widgets.Button("##dismiss", Loc.Tr("Dismiss for now"), M3ButtonStyle.Filled, FontAwesomeIcon.Check))
         {
             Dismiss(module);
         }
 
         ImGui.SameLine(0f, M3.Space2);
-        if (M3Widgets.Button("##never", "Never show again", M3ButtonStyle.Text, FontAwesomeIcon.EyeSlash, tooltip: NeverShowTooltip))
+        if (M3Widgets.Button("##never", Loc.Tr("Never show again"), M3ButtonStyle.Text, FontAwesomeIcon.EyeSlash, tooltip: Loc.Tr(NeverShowTooltip)))
         {
             NeverShowAgain(module);
         }
@@ -88,7 +88,7 @@ public sealed class BossModulePrePullHintsWindow : RebornUI.RebornWindow
 
     private void DrawClassic(BossModule module)
     {
-        ImGui.TextWrapped("Before the pull:");
+        ImGui.TextWrapped(Loc.Tr("Before the pull:"));
         ImGui.Separator();
         using (ImRaii.TextWrapPos(0f))
         {
@@ -98,26 +98,26 @@ public sealed class BossModulePrePullHintsWindow : RebornUI.RebornWindow
             {
                 ImGui.Bullet();
                 ImGui.SameLine();
-                ImGui.TextUnformatted(hints[i]);
+                ImGui.TextUnformatted(Loc.Tr(hints[i]));
             }
         }
 
         ImGui.Spacing();
         ImGui.Separator();
 
-        if (ImGui.Button("Dismiss for now"))
+        if (ImGui.Button(Loc.Id("Dismiss for now")))
         {
             Dismiss(module);
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Never show again"))
+        if (ImGui.Button(Loc.Id("Never show again")))
         {
             NeverShowAgain(module);
         }
         if (ImGui.IsItemHovered())
         {
-            ImGui.SetTooltip(NeverShowTooltip);
+            ImGui.SetTooltip(Loc.Tr(NeverShowTooltip));
         }
     }
 

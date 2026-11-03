@@ -42,6 +42,7 @@ internal static class SettingsRenderer
     private static readonly Dictionary<Type, NodeView> _views = [];
     private static readonly Dictionary<Type, PropertyRenderer> _propertyRenderers = [];
     private static readonly Dictionary<Type, string[]> _enumLabels = [];
+    private static int _enumLabelsVersion = -1;
     private static readonly Dictionary<uint, bool> _expandedGroups = [];
     private static Dictionary<Type, ConfigNode>? _defaults;
 
@@ -76,7 +77,7 @@ internal static class SettingsRenderer
 
             if (group.Label is { Length: > 0 } label)
             {
-                M3Widgets.SectionLabel(label);
+                M3Widgets.SectionLabel(Loc.Tr(label));
             }
 
             DrawFields(node, root, tree, ws, view, group.Roots, fields);
@@ -130,7 +131,7 @@ internal static class SettingsRenderer
             var named = group.Label is { Length: > 0 };
             var cardTitle = named ? group.Label : shown == 0 ? title : null;
             var cardIcon = named ? group.Icon : shown == 0 ? icon : FontAwesomeIcon.None;
-            using (M3Card.Begin($"{typeName}#{i}", cardTitle, cardIcon, M3.AccentFor(shown + accentOffset)))
+            using (M3Card.Begin($"{typeName}#{i}", Loc.Tr(cardTitle), cardIcon, M3.AccentFor(shown + accentOffset)))
             {
                 DrawFields(node, root, tree, ws, view, group.Roots, null);
                 view.Layout?.SectionExtras?.Invoke(node, group.Label ?? "", tree, ws);
@@ -151,6 +152,7 @@ internal static class SettingsRenderer
 
     public static NodeView View(Type type)
     {
+        // views keep english text (it is also used for searching and section lookups), it is translated when drawn
         if (_views.TryGetValue(type, out var cached))
         {
             return cached;
@@ -371,7 +373,7 @@ internal static class SettingsRenderer
         }
         else
         {
-            var row = new RowText(field.Label, field.Meta.Name, transient ? TransientTooltip(field.Tooltip) : field.Tooltip, enabled, transient ? M3.Scheme.Tertiary : null);
+            var row = new RowText(Loc.Tr(field.Label), field.Meta.Name, transient ? TransientTooltip(Loc.Tr(field.Tooltip)) : Loc.Tr(field.Tooltip), enabled, transient ? M3.Scheme.Tertiary : null);
             modified = DrawProperty(row, node, field, value, root, ws);
         }
 
@@ -384,7 +386,7 @@ internal static class SettingsRenderer
     private static string TransientTooltip(string tooltip)
     {
         const string note = "Temporarily changed by another plugin (e.g. AutoDuty). Your own value is kept in the config file and restored when that plugin is done; changing it here keeps your new value.";
-        return tooltip.Length > 0 ? $"{tooltip}\n{note}" : note;
+        return tooltip.Length > 0 ? $"{tooltip}\n{Loc.Tr(note)}" : Loc.Tr(note);
     }
 
     private static bool IsEnabled(ConfigNode node, NodeView view, FieldView field)
@@ -431,8 +433,8 @@ internal static class SettingsRenderer
     public static void DrawPrePullHintSetting(BossModuleRegistry.Info info, string label = "Show pre-fight hint popup for this encounter")
     {
         var show = BossModuleManager.Config.ShowPrePullHintsFor(info.PrimaryActorOID);
-        var supporting = BossModuleManager.Config.ShowPrePullHints ? null : "Pre-fight hint popups are turned off for every encounter in Radar and hints.";
-        if (M3Widgets.RowSwitch($"{label}###PrePullHints{info.PrimaryActorOID:X8}", ref show, supporting))
+        var supporting = BossModuleManager.Config.ShowPrePullHints ? null : Loc.Tr("Pre-fight hint popups are turned off for every encounter in Radar and hints.");
+        if (M3Widgets.RowSwitch($"{Loc.Tr(label)}###PrePullHints{info.PrimaryActorOID:X8}", ref show, supporting))
         {
             BossModuleManager.Config.SetShowPrePullHintsFor(info.PrimaryActorOID, show);
         }
@@ -466,7 +468,7 @@ internal static class SettingsRenderer
         if (field.Options is { Length: >= 2 } options)
         {
             var index = v ? 1 : 0;
-            if (DrawComboRow(row, ref index, 2, i => options[i]))
+            if (DrawComboRow(row, ref index, 2, i => Loc.Tr(options[i])))
             {
                 field.Meta.Setter(node, index != 0);
                 return true;
@@ -491,7 +493,7 @@ internal static class SettingsRenderer
         var labels = EnumLabels(type);
         if (field.Options is { } options && options.Length == labels.Length)
         {
-            labels = options;
+            labels = Loc.Tr(options);
         }
 
         var index = GeneratedEnumMetadata.IndexOf(type, v);
@@ -525,7 +527,7 @@ internal static class SettingsRenderer
 
     private static bool DrawProperty(in RowText row, ConfigNode node, FieldView field, float v)
     {
-        var changed = field.Slider is { } slider ? DrawSliderRow(row, ref v, slider, field.Format) : DrawNumberRow(row, ref v);
+        var changed = field.Slider is { } slider ? DrawSliderRow(row, ref v, slider, Loc.Tr(field.Format)) : DrawNumberRow(row, ref v);
         if (changed)
         {
             field.Meta.Setter(node, v);
@@ -536,7 +538,7 @@ internal static class SettingsRenderer
     private static bool DrawProperty(in RowText row, ConfigNode node, FieldView field, double v)
     {
         var f = (float)v;
-        var changed = field.Slider is { } slider ? DrawSliderRow(row, ref f, slider, field.Format) : DrawNumberRow(row, ref f);
+        var changed = field.Slider is { } slider ? DrawSliderRow(row, ref f, slider, Loc.Tr(field.Format)) : DrawNumberRow(row, ref f);
         if (changed)
         {
             field.Meta.Setter(node, (double)f);
@@ -651,14 +653,14 @@ internal static class SettingsRenderer
         var controls = new Vector2(button * (hasPresets ? 2 : 1) + (hasPresets ? M3.Space1 : 0), button);
 
         var valid = v.Validate();
-        var text = valid ? row : row with { LabelColor = M3.Scheme.Error, Supporting = row.Supporting.Length > 0 ? $"{row.Supporting}\nEvery role needs a valid, unique group." : "Every role needs a valid, unique group." };
+        var text = valid ? row : row with { LabelColor = M3.Scheme.Error, Supporting = row.Supporting.Length > 0 ? $"{row.Supporting}\n{Loc.Tr("Every role needs a valid, unique group.")}" : Loc.Tr("Every role needs a valid, unique group.") };
         var info = BeginRow(text, controls);
 
         var modified = false;
         if (hasPresets)
         {
             var popup = $"##{row.Id}presets";
-            if (M3Widgets.IconButton($"##{row.Id}preset", FontAwesomeIcon.ListUl, "Apply a preset", enabled: row.Enabled))
+            if (M3Widgets.IconButton($"##{row.Id}preset", FontAwesomeIcon.ListUl, Loc.Tr("Apply a preset"), enabled: row.Enabled))
             {
                 M3Menu.Open(popup);
             }
@@ -669,7 +671,7 @@ internal static class SettingsRenderer
                 {
                     foreach (var preset in presets)
                     {
-                        if (M3Menu.Item($"##{preset.Name}", preset.Name))
+                        if (M3Menu.Item($"##{preset.Name}", Loc.Tr(preset.Name)))
                         {
                             var len = Math.Min(preset.Preset.Length, v.Assignments.Length);
                             for (var j = 0; j < len; ++j)
@@ -685,7 +687,7 @@ internal static class SettingsRenderer
             ImGui.SameLine(0f, M3.Space1);
         }
 
-        if (M3Widgets.IconButton($"##{row.Id}expand", expanded ? FontAwesomeIcon.ChevronUp : FontAwesomeIcon.ChevronDown, expanded ? "Hide assignments" : "Edit assignments"))
+        if (M3Widgets.IconButton($"##{row.Id}expand", expanded ? FontAwesomeIcon.ChevronUp : FontAwesomeIcon.ChevronDown, Loc.Tr(expanded ? "Hide assignments" : "Edit assignments")))
         {
             _expandedGroups[key] = expanded = !expanded;
         }
@@ -715,10 +717,10 @@ internal static class SettingsRenderer
         var radioWidth = M3Widgets.RadioSize().X;
         for (var i = 0; i < columns; ++i)
         {
-            ImGui.TableSetupColumn(names[i], ImGuiTableColumnFlags.WidthFixed, MathF.Max(radioWidth, ImGui.CalcTextSize(names[i]).X));
+            ImGui.TableSetupColumn(Loc.Tr(names[i]), ImGuiTableColumnFlags.WidthFixed, MathF.Max(radioWidth, ImGui.CalcTextSize(Loc.Tr(names[i])).X));
         }
-        ImGui.TableSetupColumn("None", ImGuiTableColumnFlags.WidthFixed, MathF.Max(radioWidth, ImGui.CalcTextSize("None").X));
-        ImGui.TableSetupColumn("Role");
+        ImGui.TableSetupColumn(Loc.Tr("None"), ImGuiTableColumnFlags.WidthFixed, MathF.Max(radioWidth, ImGui.CalcTextSize(Loc.Tr("None")).X));
+        ImGui.TableSetupColumn(Loc.Tr("Role"));
         ImGui.TableHeadersRow();
 
         var assignments = root.Get<PartyRolesConfig>().SlotsPerAssignment(ws.Party);
@@ -808,7 +810,7 @@ internal static class SettingsRenderer
         if (canReset)
         {
             ImGui.SetCursorScreenPos(origin + new Vector2(swatch + M3.Space1, (size.Y - reset) * 0.5f));
-            if (M3Widgets.IconButton($"##{row.Id}reset", FontAwesomeIcon.Undo, "Reset to default", diameter: reset, enabled: row.Enabled))
+            if (M3Widgets.IconButton($"##{row.Id}reset", FontAwesomeIcon.Undo, Loc.Tr("Reset to default"), diameter: reset, enabled: row.Enabled))
             {
                 color = fallback!.Value;
                 changed = true;
@@ -838,6 +840,13 @@ internal static class SettingsRenderer
 
     private static string[] EnumLabels(Type type)
     {
+        // display names are translated, so the cache is dropped when the language changes
+        if (_enumLabelsVersion != Loc.Version)
+        {
+            _enumLabels.Clear();
+            _enumLabelsVersion = Loc.Version;
+        }
+
         if (_enumLabels.TryGetValue(type, out var labels))
         {
             return labels;

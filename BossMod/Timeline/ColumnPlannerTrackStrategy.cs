@@ -99,7 +99,7 @@ public sealed class ColumnPlannerTrackStrategy(Timeline timeline, StateMachineTr
         }
 
         ImGui.SetCursorPos(originAdj + new Vector2(Width * 0.5f, 0) + new WDir(ImGui.GetFrameHeight() * 0.5f, 0).Rotate(new WDir(HeaderSin, HeaderCos)).ToVec2());
-        UIMisc.TextRotated(Name, HeaderAngle);
+        UIMisc.TextRotated(Loc.Tr(Name), HeaderAngle);
 
         wl.PopClipRect();
 
@@ -115,7 +115,7 @@ public sealed class ColumnPlannerTrackStrategy(Timeline timeline, StateMachineTr
                     ImGui.CloseCurrentPopup();
                 }
                 ImGui.Separator();
-                if (ImGui.Selectable("Hide column"))
+                if (ImGui.Selectable(Loc.Id("Hide column")))
                 {
                     Width = 0;
                 }

@@ -43,32 +43,32 @@ public sealed class CooldownPlannerColumns : Timeline.ColumnGroup
 
     public void DrawCommonControls()
     {
-        if (ImGui.Button("Modules"))
+        if (ImGui.Button(Loc.Id("Modules")))
         {
             ImGui.OpenPopup("modules");
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Column visibility"))
+        if (ImGui.Button(Loc.Id("Column visibility")))
         {
             ImGui.OpenPopup("columns");
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Export to clipboard"))
+        if (ImGui.Button(Loc.Id("Export to clipboard")))
         {
             ExportToClipboard();
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Import from clipboard"))
+        if (ImGui.Button(Loc.Id("Import from clipboard")))
         {
             ImportFromClipboard();
         }
 
         ImGui.SameLine();
         ImGui.SetNextItemWidth(150);
-        Modified |= ImGui.InputText("Name", ref Plan.Name, 255);
+        Modified |= ImGui.InputText(Loc.Id("Name"), ref Plan.Name, 255);
 
         using (var popup = ImRaii.Popup("modules"))
         {
@@ -105,7 +105,7 @@ public sealed class CooldownPlannerColumns : Timeline.ColumnGroup
                     var added = true;
                     using (var disable = ImRaii.Disabled(disableRemove))
                     {
-                        if (ImGui.Checkbox(m.Definition.DisplayName, ref added))
+                        if (ImGui.Checkbox(Loc.Id(m.Definition.DisplayName), ref added))
                         {
                             post += RemoveModuleAction(i);
                         }
@@ -116,7 +116,7 @@ public sealed class CooldownPlannerColumns : Timeline.ColumnGroup
                         using var tooltip = ImRaii.Tooltip();
                         if (tooltip.Alive)
                         {
-                            ImGui.TextUnformatted("Hold shift to remove");
+                            ImGui.TextUnformatted(Loc.Tr("Hold shift to remove"));
                             UIRotationModule.DescribeModule(m.Type, m.Definition);
                         }
                     }
@@ -150,7 +150,7 @@ public sealed class CooldownPlannerColumns : Timeline.ColumnGroup
                     }
 
                     var added = false;
-                    if (ImGui.Checkbox(m.Definition.DisplayName, ref added))
+                    if (ImGui.Checkbox(Loc.Id(m.Definition.DisplayName), ref added))
                     {
                         post += AddModuleAction(mt, m);
                     }
@@ -174,12 +174,12 @@ public sealed class CooldownPlannerColumns : Timeline.ColumnGroup
             {
                 for (var i = 0; i < Plan.Modules.Count; ++i)
                 {
-                    if (ImGui.BeginMenu(Plan.Modules[i].Definition.DisplayName))
+                    if (ImGui.BeginMenu(Loc.Id(Plan.Modules[i].Definition.DisplayName)))
                     {
                         foreach (var col in _colsStrategy[i])
                         {
                             var visible = col.Width > 0;
-                            if (ImGui.Checkbox(col.Name, ref visible))
+                            if (ImGui.Checkbox(Loc.Id(col.Name), ref visible))
                             {
                                 col.Width = visible ? _trackWidth : 0;
                             }
@@ -199,7 +199,7 @@ public sealed class CooldownPlannerColumns : Timeline.ColumnGroup
         }
 
         ImGui.SameLine();
-        ImGui.TextUnformatted($"Current phase: {selectedPhase + 1}/{_tree.Phases.Count}");
+        ImGui.TextUnformatted(Loc.Format("Current phase: {0}/{1}", selectedPhase + 1, _tree.Phases.Count));
         ImGui.SameLine();
         if (ImGui.Button(">##Phase") && selectedPhase < _tree.Phases.Count - 1)
         {
@@ -208,7 +208,7 @@ public sealed class CooldownPlannerColumns : Timeline.ColumnGroup
 
         var selPhase = _tree.Phases[selectedPhase];
         ImGui.SameLine();
-        if (ImGui.SliderFloat("###phase-duration", ref selPhase.Duration, 0, selPhase.MaxTime, $"{selPhase.Name.Replace("%", "%%", StringComparison.Ordinal)}: %.1f"))
+        if (ImGui.SliderFloat("###phase-duration", ref selPhase.Duration, 0, selPhase.MaxTime, $"{Loc.Tr(selPhase.Name).Replace("%", "%%", StringComparison.Ordinal)}: %.1f"))
         {
             Plan.PhaseDurations[selectedPhase] = selPhase.Duration;
             if (_syncTimings)
@@ -234,7 +234,7 @@ public sealed class CooldownPlannerColumns : Timeline.ColumnGroup
         }
 
         ImGui.SameLine();
-        ImGui.TextUnformatted($"Current branch: {_phaseBranches[selectedPhase] + 1}/{selPhase.StartingNode.NumBranches}");
+        ImGui.TextUnformatted(Loc.Format("Current branch: {0}/{1}", _phaseBranches[selectedPhase] + 1, selPhase.StartingNode.NumBranches));
         ImGui.SameLine();
         if (ImGui.Button(">##Branch") && _phaseBranches[selectedPhase] < selPhase.StartingNode.NumBranches - 1)
         {

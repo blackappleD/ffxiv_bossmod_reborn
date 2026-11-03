@@ -52,13 +52,13 @@ public class M10STheXtremesConfig : ConfigNode
 
             if (playerAssignment == PartyRolesConfig.Assignment.Unassigned)
             {
-                ImGui.TextColoredWrapped(Colors.TextColor2, "Set player role under Party Roles Assignment for selected option(s) to work!");
+                ImGui.TextColoredWrapped(Colors.TextColor2, Loc.Tr("Set player role under Party Roles Assignment for selected option(s) to work!"));
             }
         }
 
         if (!WaterAlleyOopAssignment.Validate())
         {
-            ImGui.TextColoredWrapped(Colors.TextColor2, "Invalid role assignments for Double/Reverse Alley-Oop!");
+            ImGui.TextColoredWrapped(Colors.TextColor2, Loc.Tr("Invalid role assignments for Double/Reverse Alley-Oop!"));
         }
     }
 }

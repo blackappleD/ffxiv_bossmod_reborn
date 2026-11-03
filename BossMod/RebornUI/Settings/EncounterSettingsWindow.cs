@@ -8,6 +8,8 @@ namespace BossMod.RebornUI;
 internal sealed class EncounterSettingsWindow(BossModuleRegistry.Info info, WorldState ws) : RebornWindow($"{info.ModuleType.Name} config", true, new(900, 700))
 {
     private static readonly M3Tab[] _tabs = [new("Encounter", FontAwesomeIcon.SlidersH), new("Party roles", FontAwesomeIcon.Users)];
+    private static M3Tab[] _localizedTabs = _tabs;
+    private static int _localizedTabsVersion = -1;
 
     private readonly BossModuleRegistry.Info _info = info;
     private readonly ConfigNode? _node = info.ConfigType != null ? Service.Config.Get<ConfigNode>(info.ConfigType) : null;
@@ -20,7 +22,12 @@ internal sealed class EncounterSettingsWindow(BossModuleRegistry.Info info, Worl
 
     public override void Draw()
     {
-        var clicked = M3Navigation.Tabs("##tabs", _tabs, _tab);
+        if (_localizedTabsVersion != Loc.Version)
+        {
+            _localizedTabsVersion = Loc.Version;
+            _localizedTabs = Array.ConvertAll(_tabs, t => t with { Label = Loc.Tr(t.Label) });
+        }
+        var clicked = M3Navigation.Tabs("##tabs", _localizedTabs, _tab);
         if (clicked >= 0)
         {
             _tab = clicked;
@@ -47,7 +54,7 @@ internal sealed class EncounterSettingsWindow(BossModuleRegistry.Info info, Worl
     {
         if (_info.HasPrePullHints)
         {
-            using var card = M3Card.Begin("hints", "Pre-fight hints", FontAwesomeIcon.CommentDots, M3.Scheme.Secondary);
+            using var card = M3Card.Begin("hints", Loc.Tr("Pre-fight hints"), FontAwesomeIcon.CommentDots, M3.Scheme.Secondary);
             SettingsRenderer.DrawPrePullHintSetting(_info);
         }
 
@@ -57,7 +64,7 @@ internal sealed class EncounterSettingsWindow(BossModuleRegistry.Info info, Worl
         }
         else if (!_info.HasPrePullHints)
         {
-            M3Widgets.EmptyState("##nosettings", "No settings", "This module does not expose any additional configuration.", FontAwesomeIcon.SlidersH);
+            M3Widgets.EmptyState("##nosettings", Loc.Tr("No settings"), Loc.Tr("This module does not expose any additional configuration."), FontAwesomeIcon.SlidersH);
         }
     }
 
@@ -69,7 +76,7 @@ internal sealed class EncounterSettingsWindow(BossModuleRegistry.Info info, Worl
         }
         else
         {
-            M3Widgets.EmptyState("##noplayer", "Not logged in", "Party roles can be assigned once you're logged in.", FontAwesomeIcon.Users);
+            M3Widgets.EmptyState("##noplayer", Loc.Tr("Not logged in"), Loc.Tr("Party roles can be assigned once you're logged in."), FontAwesomeIcon.Users);
         }
     }
 }

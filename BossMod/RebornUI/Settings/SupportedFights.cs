@@ -51,14 +51,14 @@ public sealed partial class ModuleViewer
 
     private void DrawMaterialFilters()
     {
-        M3Widgets.SearchField("##search", "Search fights, e.g. \"Ultimate\"", ref _searchText, ImGui.GetContentRegionAvail().X, 100);
+        M3Widgets.SearchField("##search", Loc.Tr("Search fights, e.g. \"Ultimate\""), ref _searchText, ImGui.GetContentRegionAvail().X, 100);
 
-        M3Widgets.SectionLabel("Expansions");
+        M3Widgets.SectionLabel(Loc.Tr("Expansions"));
         for (var e = BossModuleInfo.Expansion.RealmReborn; e < BossModuleInfo.Expansion.Count; ++e)
         {
             ref var expansion = ref Expansions[(int)e];
             var (anyEnabled, allEnabled) = _moduleConfig.ExpansionEnabledState(e);
-            var action = DrawMaterialFilterRow($"expansion-{e}", expansion.name, expansion.icon, !_filterExpansions[(int)e], anyEnabled, allEnabled, "expansion");
+            var action = DrawMaterialFilterRow($"expansion-{e}", Loc.Tr(expansion.name), expansion.icon, !_filterExpansions[(int)e], anyEnabled, allEnabled, true);
             switch (action)
             {
                 case MaterialFilterAction.Toggle:
@@ -74,12 +74,12 @@ public sealed partial class ModuleViewer
             }
         }
 
-        M3Widgets.SectionLabel("Content types");
+        M3Widgets.SectionLabel(Loc.Tr("Content types"));
         for (var c = BossModuleInfo.Category.Uncategorized; c < BossModuleInfo.Category.Count; ++c)
         {
             ref var category = ref Categories[(int)c];
             var (anyEnabled, allEnabled) = _moduleConfig.CategoryEnabledState(c);
-            var action = DrawMaterialFilterRow($"category-{c}", category.name, category.icon, !_filterCategories[(int)c], anyEnabled, allEnabled, "category");
+            var action = DrawMaterialFilterRow($"category-{c}", Loc.Tr(category.name), category.icon, !_filterCategories[(int)c], anyEnabled, allEnabled, false);
             switch (action)
             {
                 case MaterialFilterAction.Toggle:
@@ -96,7 +96,7 @@ public sealed partial class ModuleViewer
         }
     }
 
-    private static MaterialFilterAction DrawMaterialFilterRow(string id, string name, uint icon, bool visible, bool anyEnabled, bool allEnabled, string kind)
+    private static MaterialFilterAction DrawMaterialFilterRow(string id, string name, uint icon, bool visible, bool anyEnabled, bool allEnabled, bool expansion)
     {
         using var scope = ImRaii.PushId(id);
         var action = MaterialFilterAction.None;
@@ -110,13 +110,15 @@ public sealed partial class ModuleViewer
         {
             action = enabled ? MaterialFilterAction.Enable : MaterialFilterAction.Disable;
         }
-        M3Tooltip.Hovered(anyEnabled != allEnabled ? $"Some modules in this {kind} are disabled. Click to enable all." : allEnabled ? $"Disable all modules in this {kind}." : $"Enable all modules in this {kind}.");
+        M3Tooltip.Hovered(Loc.Tr(expansion
+            ? anyEnabled != allEnabled ? "Some modules in this expansion are disabled. Click to enable all." : allEnabled ? "Disable all modules in this expansion." : "Enable all modules in this expansion."
+            : anyEnabled != allEnabled ? "Some modules in this category are disabled. Click to enable all." : allEnabled ? "Disable all modules in this category." : "Enable all modules in this category."));
 
         ImGui.SetCursorScreenPos(new(start.X + hit + M3.Space1, start.Y));
         var texture = Service.Texture?.GetFromGameIcon(icon).GetWrapOrDefault();
         var room = ImGui.GetContentRegionAvail().X - (M3Widgets.ChipWidth("", texture: texture) + 1f);
         var label = M3Navigation.Truncate(name, MathF.Max(16f * M3.Scale, room));
-        var tooltip = label != name ? $"{name}\nClick to show or hide. Right-click to show only this one." : "Click to show or hide. Right-click to show only this one.";
+        var tooltip = label != name ? $"{name}\n{Loc.Tr("Click to show or hide. Right-click to show only this one.")}" : Loc.Tr("Click to show or hide. Right-click to show only this one.");
         if (M3Widgets.Chip("##filter", label, visible, tooltip: tooltip, texture: texture))
         {
             action = MaterialFilterAction.Toggle;
@@ -163,7 +165,7 @@ public sealed partial class ModuleViewer
                         continue;
                     }
 
-                    if (!_searchText.IsNullOrEmpty() && !group.Info.Name.Contains(_searchText, StringComparison.OrdinalIgnoreCase))
+                    if (!_searchText.IsNullOrEmpty() && !group.Info.Name.Contains(_searchText, StringComparison.OrdinalIgnoreCase) && !Loc.Tr(group.Info.Name).Contains(_searchText, StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
                     }
@@ -176,8 +178,8 @@ public sealed partial class ModuleViewer
 
         if (!anyShown)
         {
-            M3Widgets.EmptyState("##nofights", "No fights to show",
-                _searchText.Length > 0 ? $"Nothing matches \"{_searchText}\" with the current filters." : "Every expansion or content type is hidden by the filters.", FontAwesomeIcon.Filter);
+            M3Widgets.EmptyState("##nofights", Loc.Tr("No fights to show"),
+                _searchText.Length > 0 ? Loc.Format("Nothing matches \"{0}\" with the current filters.", _searchText) : Loc.Tr("Every expansion or content type is hidden by the filters."), FontAwesomeIcon.Filter);
         }
     }
 
@@ -207,11 +209,11 @@ public sealed partial class ModuleViewer
         {
             _moduleConfig.SetModulesEnabled(moduleOIDs, enabled);
         }
-        M3Tooltip.Hovered(anyEnabled != allEnabled ? "Some modules in this group are disabled. Click to enable all." : enabled ? "Disable all modules in this group." : "Enable all modules in this group.");
+        M3Tooltip.Hovered(Loc.Tr(anyEnabled != allEnabled ? "Some modules in this group are disabled. Click to enable all." : enabled ? "Disable all modules in this group." : "Enable all modules in this group."));
         x += hit + M3.Space1;
 
         ImGui.SetCursorScreenPos(new(x, start.Y));
-        using var node = M3Tree.Node(group.NodeLabel, group.Info.Name, trailing: moduleOIDs.Count > 1 ? moduleOIDs.Count.ToString() : null);
+        using var node = M3Tree.Node(group.NodeLabel, Loc.Tr(group.Info.Name), trailing: moduleOIDs.Count > 1 ? moduleOIDs.Count.ToString() : null);
         if (!node.Open)
         {
             return;
@@ -243,12 +245,12 @@ public sealed partial class ModuleViewer
         {
             _moduleConfig.SetModuleEnabled(mod.Info.PrimaryActorOID, moduleEnabled);
         }
-        M3Tooltip.Hovered(moduleEnabled ? "Disable this module." : "Enable this module.");
+        M3Tooltip.Hovered(Loc.Tr(moduleEnabled ? "Disable this module." : "Enable this module."));
 
         var x = start.X + hit + M3.Space1;
         ImGui.SetCursorScreenPos(new(x, start.Y));
         var hasConfig = mod.Info.ConfigType != null || mod.Info.HasPrePullHints;
-        if (M3Widgets.IconButton(mod.ConfigID, FontAwesomeIcon.Cog, hasConfig ? "Encounter settings" : "This module has no settings", diameter: height, enabled: hasConfig))
+        if (M3Widgets.IconButton(mod.ConfigID, FontAwesomeIcon.Cog, Loc.Tr(hasConfig ? "Encounter settings" : "This module has no settings"), diameter: height, enabled: hasConfig))
         {
             _ = new EncounterSettingsWindow(mod.Info, ws);
         }
@@ -256,7 +258,7 @@ public sealed partial class ModuleViewer
         x += height;
         ImGui.SetCursorScreenPos(new(x, start.Y));
         var hasPlans = mod.Info.PlanLevel > 0 && _planDB != null;
-        if (M3Widgets.IconButton(mod.PlansID, FontAwesomeIcon.ClipboardList, hasPlans ? "Cooldown plans" : "This module doesn't support cooldown planning", diameter: height, enabled: hasPlans))
+        if (M3Widgets.IconButton(mod.PlansID, FontAwesomeIcon.ClipboardList, Loc.Tr(hasPlans ? "Cooldown plans" : "This module doesn't support cooldown planning"), diameter: height, enabled: hasPlans))
         {
             ImGui.OpenPopup(mod.PopupID);
         }
@@ -278,8 +280,9 @@ public sealed partial class ModuleViewer
         drawList.AddText(textPos, M3.U32(accent), mod.DisplayName);
         var hoverMax = textPos + textSize;
 
-        if (MaterialMaturityBadge(maturity) is { } badge)
+        if (MaterialMaturityBadge(maturity) is { } badgeText)
         {
+            var badge = Loc.Tr(badgeText);
             var badgeMin = new Vector2(hoverMax.X + M3.Space2, start.Y + (height - M3Badge.Size(badge).Y) * 0.5f);
             var badgeMax = M3Badge.Paint(drawList, badgeMin, badge, accent);
             hoverMax = new(badgeMax.X, MathF.Max(hoverMax.Y, badgeMax.Y));
@@ -287,8 +290,8 @@ public sealed partial class ModuleViewer
 
         if (ImGui.IsWindowHovered() && ImGui.IsMouseHoveringRect(textPos, hoverMax))
         {
-            var description = GeneratedEnumMetadata.For(maturity).Attribute<PropertyDisplayAttribute>()?.Label ?? maturity.ToString();
-            M3Tooltip.Show($"Maturity: {description}\n{mod.HelpText.TrimEnd()}");
+            var description = Loc.Tr(GeneratedEnumMetadata.For(maturity).Attribute<PropertyDisplayAttribute>()?.Label ?? maturity.ToString());
+            M3Tooltip.Show(Loc.Format("Maturity: {0}\n{1}", description, BuildModuleHelpText(mod.Info).TrimEnd()));
         }
 
         ImGui.SetCursorScreenPos(new(start.X, start.Y + height));

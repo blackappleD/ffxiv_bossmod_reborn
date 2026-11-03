@@ -45,7 +45,7 @@ public sealed class UITabs(string id)
         {
             var t = _tabs[i];
 
-            using var tab = ImRaii.TabItem(t.Name, t.Name == _forceSelect ? ImGuiTabItemFlags.SetSelected : ImGuiTabItemFlags.None);
+            using var tab = ImRaii.TabItem(Loc.Id(t.Name), t.Name == _forceSelect ? ImGuiTabItemFlags.SetSelected : ImGuiTabItemFlags.None);
 
             if (tab)
             {

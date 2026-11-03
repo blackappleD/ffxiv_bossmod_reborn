@@ -87,7 +87,7 @@ public static class UICombo
         if (!label.StartsWith('#'))
         {
             ImGui.SameLine();
-            ImGui.TextWrapped(label);
+            ImGui.TextWrapped(Loc.Tr(label));
         }
         return result;
     }
@@ -119,11 +119,11 @@ public static class UICombo
         var result = false;
         ImGui.SetNextItemWidth(200f);
         var len = values.Length;
-        if (ImGui.BeginCombo(label, value < len ? values[value] : value.ToString()))
+        if (ImGui.BeginCombo(Loc.Id(label), value < len ? Loc.Tr(values[value]) : value.ToString()))
         {
             for (var i = 0; i < len; ++i)
             {
-                if (ImGui.Selectable(values[i], value == i))
+                if (ImGui.Selectable(Loc.Tr(values[i]), value == i))
                 {
                     value = i;
                     result = true;

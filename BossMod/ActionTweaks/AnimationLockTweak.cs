@@ -72,9 +72,9 @@ public sealed class AnimationLockTweak
         }
 
         Service.Log($"[ALT] Unexpected animation lock {packetOriginalAnimLock:f6} -> {packetModifiedAnimLock:f6} -> {gameCurrAnimLock:f6}, disabling anim lock tweak feature");
-        Service.ChatGui.PrintError("[BossMod] Unexpected animation lock! Disabling animation lock reduction feature.");
-        Service.ChatGui.PrintError("[BossMod] This can be caused by another plugin affecting the animation lock.");
-        Service.ChatGui.PrintError("[BossMod] If you are sure you are not using any of them, please report this as a bug.");
+        Service.ChatGui.PrintError(Loc.Tr("[BossMod] Unexpected animation lock! Disabling animation lock reduction feature."));
+        Service.ChatGui.PrintError(Loc.Tr("[BossMod] This can be caused by another plugin affecting the animation lock."));
+        Service.ChatGui.PrintError(Loc.Tr("[BossMod] If you are sure you are not using any of them, please report this as a bug."));
         _config.RemoveAnimationLockDelay = false; // disable the tweak (but don't save the config, in case this condition is temporary)
     }
 }

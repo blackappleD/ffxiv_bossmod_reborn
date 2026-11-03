@@ -302,7 +302,7 @@ public abstract partial class AutoClear : ZoneModule
 
     public override bool WantDrawExtra() => Config.EnableMinimap && !Palace.IsBossFloor;
 
-    public sealed override string WindowName() => "BMR DD minimap###BMRDD";
+    public sealed override string WindowName() => $"{Loc.Tr("BMR DD minimap")}###BMRDD";
 
     private bool CanAutoUse(PomanderID p, Actor player)
     {

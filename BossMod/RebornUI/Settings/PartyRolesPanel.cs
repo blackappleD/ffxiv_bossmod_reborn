@@ -11,38 +11,38 @@ internal static class PartyRolesPanel
 
     public static void Draw(PartyRolesConfig config, WorldState ws)
     {
-        var autoWidth = M3Widgets.ButtonWidth(FontAwesomeIcon.Magic, "Auto-assign");
-        var row = M3SettingRow.Begin("Auto-assign roles", "Assigns party roles from each member's job and their order in the party.", new(autoWidth, M3Widgets.ButtonHeight));
+        var autoWidth = M3Widgets.ButtonWidth(FontAwesomeIcon.Magic, Loc.Tr("Auto-assign"));
+        var row = M3SettingRow.Begin(Loc.Tr("Auto-assign roles"), Loc.Tr("Assigns party roles from each member's job and their order in the party."), new(autoWidth, M3Widgets.ButtonHeight));
         ImGui.SetCursorScreenPos(row.ControlPosition);
-        if (M3Widgets.Button("##autoassign", "Auto-assign", M3ButtonStyle.Filled, FontAwesomeIcon.Magic))
+        if (M3Widgets.Button("##autoassign", Loc.Tr("Auto-assign"), M3ButtonStyle.Filled, FontAwesomeIcon.Magic))
         {
             config.AutoAssignRoles(ws.Party);
         }
         M3SettingRow.End(row);
 
-        M3Widgets.SectionLabel("Current party");
+        M3Widgets.SectionLabel(Loc.Tr("Current party"));
         DrawPartyAssignments(config, ws);
 
-        M3Widgets.SectionLabel("Tank auto-assign priority");
-        M3Text.Draw("Drag to reorder, from highest to lowest priority.", M3TextStyle.Muted, true);
+        M3Widgets.SectionLabel(Loc.Tr("Tank auto-assign priority"));
+        M3Text.Draw(Loc.Tr("Drag to reorder, from highest to lowest priority."), M3TextStyle.Muted, true);
         using (var table = ImRaii.Table("tankpriority", 2, ImGuiTableFlags.SizingStretchSame))
         {
             if (table)
             {
                 ImGui.TableNextColumn();
-                M3Text.Draw("Main tank", M3TextStyle.Label);
+                M3Text.Draw(Loc.Tr("Main tank"), M3TextStyle.Label);
                 DrawTankPriority(config, "mt", config.MainTankPriority);
                 ImGui.TableNextColumn();
-                M3Text.Draw("Off tank", M3TextStyle.Label);
+                M3Text.Draw(Loc.Tr("Off tank"), M3TextStyle.Label);
                 DrawTankPriority(config, "ot", config.OffTankPriority);
             }
         }
 
         ImGui.Dummy(new(0f, M3.Space1));
-        var clearWidth = M3Widgets.ButtonWidth(FontAwesomeIcon.TrashAlt, "Hold to clear");
-        row = M3SettingRow.Begin("Clear all assignments", "Forgets every saved assignment, for example to shrink the config file.", new(clearWidth, M3Widgets.ButtonHeight));
+        var clearWidth = M3Widgets.ButtonWidth(FontAwesomeIcon.TrashAlt, Loc.Tr("Hold to clear"));
+        row = M3SettingRow.Begin(Loc.Tr("Clear all assignments"), Loc.Tr("Forgets every saved assignment, for example to shrink the config file."), new(clearWidth, M3Widgets.ButtonHeight));
         ImGui.SetCursorScreenPos(row.ControlPosition);
-        if (M3Widgets.HoldButton("##clearassignments", "Hold to clear", 1f, M3ButtonStyle.Danger, FontAwesomeIcon.TrashAlt, enabled: config.Assignments.Count > 0))
+        if (M3Widgets.HoldButton("##clearassignments", Loc.Tr("Hold to clear"), 1f, M3ButtonStyle.Danger, FontAwesomeIcon.TrashAlt, enabled: config.Assignments.Count > 0))
         {
             config.Assignments.Clear();
             config.Modified.Fire();
@@ -76,7 +76,7 @@ internal static class PartyRolesPanel
 
         if (party.Count == 0)
         {
-            M3Text.Draw("Roles can be assigned once you're logged in.", M3TextStyle.Muted, true);
+            M3Text.Draw(Loc.Tr("Roles can be assigned once you're logged in."), M3TextStyle.Muted, true);
             return;
         }
 
@@ -91,11 +91,11 @@ internal static class PartyRolesPanel
                 var radio = M3Widgets.RadioSize().X;
                 for (var i = 0; i < len; ++i)
                 {
-                    var name = i == (int)PartyRolesConfig.Assignment.Unassigned ? "None" : names[i];
+                    var name = i == (int)PartyRolesConfig.Assignment.Unassigned ? Loc.Tr("None") : names[i];
                     ImGui.TableSetupColumn(name, ImGuiTableColumnFlags.WidthFixed, MathF.Max(radio, ImGui.CalcTextSize(name).X));
                 }
 
-                ImGui.TableSetupColumn("Name");
+                ImGui.TableSetupColumn(Loc.Tr("Name"));
                 ImGui.TableHeadersRow();
 
                 party.Sort(static (a, b) => a.role.CompareTo(b.role));
@@ -133,11 +133,11 @@ internal static class PartyRolesPanel
         ImGui.Dummy(new(0f, M3.Space1));
         if (config.AssignmentsPerSlot(ws.Party).Length == 0)
         {
-            M3Widgets.Banner("##assignmentstatus", "Invalid assignments: there should be exactly one raid member per role.", M3Severity.Warning, FontAwesomeIcon.ExclamationTriangle);
+            M3Widgets.Banner("##assignmentstatus", Loc.Tr("Invalid assignments: there should be exactly one raid member per role."), M3Severity.Warning, FontAwesomeIcon.ExclamationTriangle);
         }
         else
         {
-            M3Widgets.Banner("##assignmentstatus", "All good! Every role is assigned exactly once.", M3Severity.Success, FontAwesomeIcon.CheckCircle);
+            M3Widgets.Banner("##assignmentstatus", Loc.Tr("All good! Every role is assigned exactly once."), M3Severity.Success, FontAwesomeIcon.CheckCircle);
         }
     }
 }

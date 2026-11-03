@@ -17,7 +17,7 @@ sealed class DebugAutorotation(RotationModuleManager autorot)
 
         new AIHintsVisualizer(autorot.Hints, autorot.Bossmods.WorldState, player, 3f, default).Draw(_tree);
 
-        if (ImGui.Button("Gaze!"))
+        if (ImGui.Button(Loc.Id("Gaze!")))
         {
             autorot.Hints.ForbiddenDirections.Add((player.Rotation, 45f.Degrees(), default));
         }

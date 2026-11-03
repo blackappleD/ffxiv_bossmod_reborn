@@ -91,6 +91,10 @@ public sealed class Plugin : IAsyncDalamudPlugin
         {
             Service.Config.Initialize();
             Service.Config.LoadFromFile(_dalamud.ConfigFile);
+            var interfaceConfig = Service.Config.Get<RebornUI.InterfaceConfig>();
+            Loc.Initialize(_dalamud.UiLanguage, interfaceConfig.Language);
+            interfaceConfig.Modified.Subscribe(() => Loc.SetConfigured(interfaceConfig.Language));
+            _dalamud.LanguageChanged += Loc.SetDalamudLanguage;
 
             _rotationDB = new(new(_dalamud.ConfigDirectory.FullName + "/autorot"),
                 new(_dalamud.AssemblyLocation.DirectoryName! + "/RebornPresets.json"),
@@ -111,7 +115,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
 
         Service.Config.Modified.Subscribe(() => Task.Run(() => Service.Config.SaveToFile(_dalamud.ConfigFile)));
 
-        CommandManager.AddHandler("/bmr", new CommandInfo(OnCommand) { HelpMessage = "Show boss mod settings UI" });
+        CommandManager.AddHandler("/bmr", new CommandInfo(OnCommand) { HelpMessage = Loc.Tr("Show boss mod settings UI") });
 
         ActionDefinitions.Instance.UnlockCheck = QuestUnlocked; // ensure action definitions are initialized and set unlock check functor (we don't really store the quest progress in clientstate, for now at least)
 
@@ -158,6 +162,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
         await Service.Framework.RunOnFrameworkThread(() =>
         {
             _dalamud.UiBuilder.Draw -= DrawUI;
+            _dalamud.LanguageChanged -= Loc.SetDalamudLanguage;
             Service.Condition.ConditionChange -= OnConditionChanged;
             Dx11ArenaRenderer.SetWorldOverlayNode(null);
             _worldOverlayNode?.Dispose();
@@ -236,6 +241,27 @@ public sealed class Plugin : IAsyncDalamudPlugin
             case "RADAR":
                 ToggleRadar(split);
                 break;
+            case "LOC":
+                HandleLocCommand(split);
+                break;
+        }
+    }
+
+    private void HandleLocCommand(string[] messageData)
+    {
+        switch (messageData.Length > 1 ? messageData[1].ToUpperInvariant() : "")
+        {
+            case "COLLECT":
+                Loc.CollectMissing = !Loc.CollectMissing;
+                Service.ChatGui.Print(Loc.CollectMissing ? "[BMR] Recording untranslated strings." : "[BMR] Stopped recording untranslated strings.");
+                break;
+            case "DUMP":
+                var path = Loc.DumpMissing(_dalamud.ConfigDirectory.FullName);
+                Service.ChatGui.Print($"[BMR] {Loc.Missing.Count} untranslated strings written to {path}");
+                break;
+            default:
+                Service.ChatGui.Print("[BMR] Usage: /bmr loc collect|dump");
+                break;
         }
     }
 
@@ -256,7 +282,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
                     _wndReplay.StopRecording();
                     break;
                 default:
-                    Service.ChatGui.Print($"[BMR] Unknown replay command: {messageData[1]}");
+                    Service.ChatGui.Print(Loc.Tr($"[BMR] Unknown replay command: {messageData[1]}"));
                     break;
             }
         }
@@ -579,7 +605,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
         }
         else
         {
-            Service.ChatGui.PrintError($"Failed to find preset '{presetName}'");
+            Service.ChatGui.PrintError(Loc.Tr($"Failed to find preset '{presetName}'"));
         }
     }
 
@@ -616,7 +642,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
                     Service.BossModWindow?.RecenterWindow();
                     break;
                 default:
-                    Service.ChatGui.Print($"[BMR] Unknown radar command: {messageData[1]}");
+                    Service.ChatGui.Print(Loc.Tr($"[BMR] Unknown radar command: {messageData[1]}"));
                     return false;
             }
         }

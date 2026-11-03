@@ -165,9 +165,9 @@ internal sealed unsafe class DebugInput : IDisposable
             ImGui.TextUnformatted($"Progress={pm.Interpolation.RotationInterpolationInProgress}");
         }
 
-        ImGui.SliderFloat("Move direction", ref _moveDir, -180, 180);
+        ImGui.SliderFloat(Loc.Id("Move direction"), ref _moveDir, -180, 180);
         ImGui.SameLine();
-        if (ImGui.Button(_wannaMove ? "Cancel move" : "Move!"))
+        if (ImGui.Button(Loc.Id(_wannaMove ? "Cancel move" : "Move!")))
         {
             _wannaMove ^= true;
             //var toTarget = _navi.NaviTargetPos.Value - curPos;
@@ -189,10 +189,10 @@ internal sealed unsafe class DebugInput : IDisposable
 
         DrawGamepad();
 
-        foreach (var n in _tree.Node("Input data"))
+        foreach (var n in _tree.Node(Loc.Id("Input data")))
         {
             var idata = GetInputData();
-            foreach (var n2 in _tree.Node($"Keybinds ({idata->KeybindCount} total)"))
+            foreach (var n2 in _tree.Node(Loc.Format("Keybinds ({0} total)", idata->KeybindCount)))
             {
                 var mapping = new VirtualKey[256];
                 foreach (var vk in Service.KeyState.GetValidVirtualKeys())
@@ -225,7 +225,7 @@ internal sealed unsafe class DebugInput : IDisposable
             }
         }
 
-        foreach (var n in _tree.Node("Virtual keys"))
+        foreach (var n in _tree.Node(Loc.Id("Virtual keys")))
         {
             _tree.LeafNodes(Service.KeyState.GetValidVirtualKeys(), vk => $"{vk} ({(int)vk}): internal code={_convertVirtualKey((int)vk)}, state={_getKeyRef((int)vk)}");
         }
@@ -296,15 +296,15 @@ internal sealed unsafe class DebugInput : IDisposable
 
     private void DrawGamepad()
     {
-        ImGui.SliderFloat("Gamepad angle", ref _gamepadAxisOverrideAngle, -180, 180);
+        ImGui.SliderFloat(Loc.Id("Gamepad angle"), ref _gamepadAxisOverrideAngle, -180, 180);
         ImGui.SameLine();
-        ImGui.Checkbox("Gamepad move", ref _gamepadAxisOverrideEnable);
+        ImGui.Checkbox(Loc.Id("Gamepad move"), ref _gamepadAxisOverrideEnable);
 
-        ImGui.SliderInt("Gamepad value", ref _gamepadButtonValue, -100, 100);
+        ImGui.SliderInt(Loc.Id("Gamepad value"), ref _gamepadButtonValue, -100, 100);
         ImGui.SameLine();
-        ImGui.InputInt("Gamepad button", ref _gamepadButtonOverride);
+        ImGui.InputInt(Loc.Id("Gamepad button"), ref _gamepadButtonOverride);
 
-        ImGui.Checkbox("Gamepad navigate", ref _gamepadNavigate);
+        ImGui.Checkbox(Loc.Id("Gamepad navigate"), ref _gamepadNavigate);
 
         //var input = _amex.InputOverride;
         //Array.Fill(input.GamepadOverrides, 0);

@@ -36,7 +36,7 @@ public sealed class ColumnEnemiesCastEvents : Timeline.ColumnGroup
 
     public void DrawConfig(UITree tree)
     {
-        if (ImGui.Button("Add new!"))
+        if (ImGui.Button(Loc.Id("Add new!")))
         {
             AddColumn();
         }

@@ -2,9 +2,13 @@ using RebornMaterial;
 
 namespace BossMod.RebornUI;
 
-[ConfigDisplay(Name = "Interface", Order = -2, Tags = ["theme", "accent", "scale", "size", "material"])]
+[ConfigDisplay(Name = "Interface", Order = -2, Tags = ["theme", "accent", "scale", "size", "material", "language", "语言"])]
 public sealed class InterfaceConfig : ConfigNode, IM3Settings
 {
+    [SectionStart("Language")]
+    [PropertyDisplay("Language", tooltip: "Language of the BossMod Reborn interface. Follow Dalamud uses Chinese when Dalamud's own language is set to Chinese.")]
+    public UILanguage Language = UILanguage.Auto;
+
     [SectionStart("Theme")]
     [PropertyDisplay("Accent color", tooltip: "Every color in the BossMod Reborn windows is generated from this one. Grey or black colors fall back to the default.")]
     public Color AccentColor = Color.FromRGBA(0x5BA7B7FF);

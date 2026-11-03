@@ -24,11 +24,11 @@ sealed partial class DebugTeleport : IDisposable
 
         ImGui.BeginGroup();
 
-        ImGui.Checkbox("No clip", ref _enableNoClip);
+        ImGui.Checkbox(Loc.Id("No clip"), ref _enableNoClip);
 
         ImGui.SameLine();
         ImGui.SetNextItemWidth(180f);
-        ImGui.InputFloat("No clip speed (yalms/s)", ref _noClipSpeed, 0.1f, 1f, "%.3f");
+        ImGui.InputFloat(Loc.Id("No clip speed (yalms/s)"), ref _noClipSpeed, 0.1f, 1f, "%.3f");
         _noClipSpeed = Math.Clamp(_noClipSpeed, 0.001f, 1000f);
 
         var localPlayer = Service.ObjectTable.LocalPlayer;
@@ -37,7 +37,7 @@ sealed partial class DebugTeleport : IDisposable
         ImGui.EndGroup();
 
         ImGui.BeginGroup();
-        ImGui.Text("Current player coordinates:");
+        ImGui.Text(Loc.Tr("Current player coordinates:"));
         ImGui.Text($"X: {pos.X:F3}");
         ImGui.Text($"Y: {pos.Y:F3}");
         ImGui.Text($"Z: {pos.Z:F3}");
@@ -46,17 +46,17 @@ sealed partial class DebugTeleport : IDisposable
         ImGui.Separator();
 
         ImGui.BeginGroup();
-        ImGui.Text("Enter target coordinates:");
-        if (ImGui.Button("Set position"))
+        ImGui.Text(Loc.Tr("Enter target coordinates:"));
+        if (ImGui.Button(Loc.Id("Set position")))
         {
             SetPlayerPosition(_inputCoordinates);
         }
         ImGui.SetNextItemWidth(150f);
-        ImGui.InputFloat("X coordinate", ref _inputCoordinates.X, 1f);
+        ImGui.InputFloat(Loc.Id("X coordinate"), ref _inputCoordinates.X, 1f);
         ImGui.SetNextItemWidth(150f);
-        ImGui.InputFloat("Y coordinate", ref _inputCoordinates.Y, 1f);
+        ImGui.InputFloat(Loc.Id("Y coordinate"), ref _inputCoordinates.Y, 1f);
         ImGui.SetNextItemWidth(150f);
-        ImGui.InputFloat("Z coordinate", ref _inputCoordinates.Z, 1f);
+        ImGui.InputFloat(Loc.Id("Z coordinate"), ref _inputCoordinates.Z, 1f);
         ImGui.EndGroup();
     }
 
