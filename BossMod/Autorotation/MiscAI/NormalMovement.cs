@@ -1,17 +1,19 @@
 using BossMod.Autorotation.xan;
 using BossMod.Pathfinding;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BossMod.Autorotation.MiscAI;
 
+[SuppressMessage("Security", "CA5394:Do not use insecure randomness", Justification = "randomness is only used to vary movement timing")]
 public sealed class NormalMovement : RotationModule
 {
-    public enum Track { Destination, Range, Cast, SpecialModes, ForbiddenZoneCushion, DelayMovement, SeparateDodgeDelay, DodgeDelayMovement }
+    public enum Track { Destination, Range, Cast, SpecialModes, ForbiddenZoneCushion, DelayMovement, SeparateDodgeDelay, DodgeDelayMovement, RandomDelayMin, RandomDelayMax, RandomCushionMin, RandomCushionMax }
     public enum DestinationStrategy { None, Pathfind, Explicit }
     public enum RangeStrategy { Any, MaxRange, GreedGCDExplicit, GreedLastMomentExplicit, GreedAutomatic, Drag }
     public enum CastStrategy { Leeway, Explicit, Greedy, FinishMove, DropMove, FinishInstants, DropInstants }
-    public enum ForbiddenZoneCushionStrategy { None, Small, Medium, Large }
+    public enum ForbiddenZoneCushionStrategy { None, Small, Medium, Large, Random }
     public enum SpecialModesStrategy { Automatic, Ignore }
-    public enum DelayMovementStrategy { None, Short, Long }
+    public enum DelayMovementStrategy { None, Short, Long, Random }
     public enum SeparateDodgeDelayStrategy { Disabled, Enabled }
 
     public const float GreedTolerance = 0.15f;
@@ -61,11 +63,13 @@ public sealed class NormalMovement : RotationModule
             .AddOption(ForbiddenZoneCushionStrategy.None, "Do not use any buffer in pathfinding")
             .AddOption(ForbiddenZoneCushionStrategy.Small, "Prefer to stay 0.5y away from forbidden zones")
             .AddOption(ForbiddenZoneCushionStrategy.Medium, "Prefer to stay 1.5y away from forbidden zones")
-            .AddOption(ForbiddenZoneCushionStrategy.Large, "Prefer to stay 3y away from forbidden zones");
+            .AddOption(ForbiddenZoneCushionStrategy.Large, "Prefer to stay 3y away from forbidden zones")
+            .AddOption(ForbiddenZoneCushionStrategy.Random, "Prefer to stay a random distance (see Random Cushion Min/Max) away from forbidden zones, rerolled after every dodge");
         res.Define(Track.DelayMovement).As<DelayMovementStrategy>("DelayMovement", "Delay Movement", 9)
             .AddOption(DelayMovementStrategy.None, "Do not delay movement")
             .AddOption(DelayMovementStrategy.Short, "Delay movement by 0.5s")
-            .AddOption(DelayMovementStrategy.Long, "Delay movement by 1s");
+            .AddOption(DelayMovementStrategy.Long, "Delay movement by 1s")
+            .AddOption(DelayMovementStrategy.Random, "Delay movement by a random amount (see Random Delay Min/Max), rerolled every time the delay restarts");
         res.Define(Track.SeparateDodgeDelay).As<SeparateDodgeDelayStrategy>("SeparateDodgeDelay", "Separate Dodge Delay", 8, renderer: typeof(DefaultOffRenderer))
             .AddOption(SeparateDodgeDelayStrategy.Disabled)
             .AddOption(SeparateDodgeDelayStrategy.Enabled);
@@ -73,7 +77,17 @@ public sealed class NormalMovement : RotationModule
             .AddOption(DelayMovementStrategy.None, "Do not delay dodge movement")
             .AddOption(DelayMovementStrategy.Short, "Delay dodge movement by 0.5s")
             .AddOption(DelayMovementStrategy.Long, "Delay dodge movement by 1s")
+            .AddOption(DelayMovementStrategy.Random, "Delay dodge movement by a random amount (see Random Delay Min/Max), rerolled for every dodge and capped to leave time to reach safety")
             .VisibleWhen(Track.SeparateDodgeDelay, (int)SeparateDodgeDelayStrategy.Enabled);
+
+        // ranges for the random options; max of 0 means default upper bound, so presets/ipc users that never touch these get the default range
+        res.DefineFloat(Track.RandomDelayMin, "Random Delay Min (s)", 0, RandomDelayLimit, 6.9f);
+        res.DefineFloat(Track.RandomDelayMax, $"Random Delay Max (s), 0 = {DefaultRandomDelayMax}s", 0, RandomDelayLimit, 6.8f);
+        res.DefineFloat(Track.RandomCushionMin, "Random Cushion Min (y)", 0, RandomCushionLimit, 24.9f);
+        res.DefineFloat(Track.RandomCushionMax, $"Random Cushion Max (y), 0 = {DefaultRandomCushionMax}y", 0, RandomCushionLimit, 24.8f);
+        res.Configs[(int)Track.RandomCushionMin].VisibleWhenTrack = res.Configs[(int)Track.RandomCushionMax].VisibleWhenTrack = (int)Track.ForbiddenZoneCushion;
+        res.Configs[(int)Track.RandomCushionMin].VisibleWhenOption = res.Configs[(int)Track.RandomCushionMax].VisibleWhenOption = (int)ForbiddenZoneCushionStrategy.Random;
+
         return res;
     }
 
@@ -89,12 +103,39 @@ public sealed class NormalMovement : RotationModule
     private DateTime? TimeToMove;
     private bool? _delayMovementIsDodge;
 
-    private static float DelaySeconds(DelayMovementStrategy strategy) => strategy switch
+    public const float DefaultRandomDelayMax = 1.0f;
+    public const float DefaultRandomCushionMax = 3.0f;
+    public const float RandomDelayLimit = 3.0f;
+    public const float RandomCushionLimit = 5.0f;
+    const float RandomDodgeDelayMargin = 0.5f; // random dodge delay never eats into the last bit of leeway
+
+    // random values are rolled per dodge, so that several bots (or the same bot on repeated mechanics) don't move in lockstep
+    private readonly Random _rng = new();
+    private float? _randomCushion;
+    // a dodge lasts until the destination is reached, not just until we leave the aoe; otherwise stepping out of the aoe while still inside the cushion
+    // would restart the movement delay and reroll the cushion, making the player stop at the aoe edge before walking the rest of the way
+    private bool _dodging;
+
+    // leeway only covers getting out of the aoe itself - cushion cells count as safe - so random delay also reserves time to walk through the cushion,
+    // otherwise the player leaves at the last moment, is still at the aoe edge when it resolves and only then walks the remaining cushion distance
+    private float DelaySeconds(DelayMovementStrategy strategy, in StrategyValues values, float leeway, float cushionSize, float speed) => strategy switch
     {
         DelayMovementStrategy.Short => 0.5f,
         DelayMovementStrategy.Long => 1.0f,
+        DelayMovementStrategy.Random => Math.Min(RollRange(values, Track.RandomDelayMin, Track.RandomDelayMax, DefaultRandomDelayMax), Math.Max(0, leeway - RandomDodgeDelayMargin - cushionSize / Math.Max(speed, 1))),
         _ => 0f
     };
+
+    private float RollRange(in StrategyValues values, Track minTrack, Track maxTrack, float defaultMax)
+    {
+        var min = values.GetFloat(minTrack);
+        var max = values.GetFloat(maxTrack);
+        if (max <= 0)
+            max = defaultMax;
+        if (min > max)
+            (min, max) = (max, min);
+        return min + _rng.NextSingle() * (max - min);
+    }
 
     private NavigationDecision GetDecision(float speed, float cushionSize)
     {
@@ -228,11 +269,12 @@ public sealed class NormalMovement : RotationModule
             ForbiddenZoneCushionStrategy.Small => 0.5f,
             ForbiddenZoneCushionStrategy.Medium => 1.5f,
             ForbiddenZoneCushionStrategy.Large => 3.0f,
+            ForbiddenZoneCushionStrategy.Random => _randomCushion ??= RollRange(strategy, Track.RandomCushionMin, Track.RandomCushionMax, DefaultRandomCushionMax),
             _ => 0f
         };
-        var movementDelay = DelaySeconds(strategy.Option(Track.DelayMovement).As<DelayMovementStrategy>());
+        var movementDelayStrategy = strategy.Option(Track.DelayMovement).As<DelayMovementStrategy>();
         var separateDodgeDelay = strategy.Option(Track.SeparateDodgeDelay).As<SeparateDodgeDelayStrategy>() == SeparateDodgeDelayStrategy.Enabled;
-        var dodgeDelay = DelaySeconds(strategy.Option(Track.DodgeDelayMovement).As<DelayMovementStrategy>());
+        var dodgeDelayStrategy = strategy.Option(Track.DodgeDelayMovement).As<DelayMovementStrategy>();
         NavigationDecision navi = default;
         var resetStats = true;
         switch (destinationStrategy)
@@ -240,19 +282,22 @@ public sealed class NormalMovement : RotationModule
             case DestinationStrategy.Pathfind:
                 navi = GetDecision(speed, cushionSize);
                 resetStats = false;
-                var isDodge = navi.LeewaySeconds < float.MaxValue;
-                var delay = separateDodgeDelay
-                    ? (isDodge ? dodgeDelay : movementDelay)
-                    : movementDelay;
+                if (navi.LeewaySeconds < float.MaxValue)
+                    _dodging = true;
+                else if (Hints.ForbiddenZones.Count == 0)
+                    EndDodge(); // aoes are gone, no need to keep walking towards an old dodge spot (eg when chasing a moving target we might never 'arrive')
+                var isDodge = _dodging;
+                var delayStrategy = separateDodgeDelay && isDodge ? dodgeDelayStrategy : movementDelayStrategy;
+                // delay is only evaluated when the timer is (re)armed, so a random delay stays fixed for the whole dodge
                 if (separateDodgeDelay && _delayMovementIsDodge != isDodge)
                 {
                     _delayMovementIsDodge = isDodge;
-                    TimeToMove = delay > 0 ? World.FutureTime(delay) : null;
+                    TimeToMove = World.FutureTime(DelaySeconds(delayStrategy, strategy, navi.LeewaySeconds, cushionSize, speed));
                 }
-                else if (delay > 0)
-                    TimeToMove ??= World.FutureTime(delay);
-                else
+                else if (delayStrategy == DelayMovementStrategy.None)
                     TimeToMove = null;
+                else
+                    TimeToMove ??= World.FutureTime(DelaySeconds(delayStrategy, strategy, navi.LeewaySeconds, cushionSize, speed));
                 break;
             case DestinationStrategy.Explicit:
                 navi = new() { Destination = ResolveTargetLocation(destinationOpt.Value), TimeToGoal = destinationOpt.Value.ExpireIn };
@@ -277,6 +322,7 @@ public sealed class NormalMovement : RotationModule
         {
             TimeToMove = null;
             _delayMovementIsDodge = null;
+            EndDodge();
             return; // nothing to do
         }
 
@@ -338,6 +384,7 @@ public sealed class NormalMovement : RotationModule
             // we're already very close to destination
             // TODO: what should we do if forced-movement is already set to something?.. not sure who could set it, some other module?..
             Hints.ForcedMovement = default;
+            EndDodge();
             return;
         }
 
@@ -407,6 +454,14 @@ public sealed class NormalMovement : RotationModule
                 Hints.ForcedMovement = dir.ToVec3();
             }
         }
+    }
+
+    // random cushion is rerolled once the dodge is over, so that the destination doesn't shift mid-dodge
+    private void EndDodge()
+    {
+        if (_dodging)
+            _randomCushion = null;
+        _dodging = false;
     }
 
     private float CalculateUnobstructedPathLength(Angle dir)
